@@ -1,0 +1,67 @@
+---
+import CardCollection from '../../../components/card-collection.astro'
+import type { Locale } from '../../../config/locale-schema.ts'
+import { site } from '../../../config/site.ts'
+import { useTranslations } from '../../../i18n/ui.ts'
+import Base from '../../../layouts/base.astro'
+import { resolveBanner } from '../../../lib/banner/build-data.ts'
+import { resolveDocumentCards } from '../../../lib/cards/build-data.ts'
+import { documentCardSurface } from '../../../lib/cards/select.ts'
+import { loadListableArticles } from '../../../lib/content/build-data.ts'
+import { orderDocuments } from '../../../lib/content/documents.ts'
+import { articleHref, localizedStaticPaths } from '../../../lib/content/routes.ts'
+import {
+	bannerPhotoId,
+	cardPhotoIds,
+	footerPromoContext,
+} from '../../../lib/portfolio/footer-promo-build.ts'
+import { buildLocaleMeta } from '../../../lib/portfolio/page-meta.ts'
+
+// as in the legacy theme, a card carries no date or author; layout and order come from config
+// (`surfaces.articlesIndex.kind`, `articles.order`)
+export function getStaticPaths() {
+	return localizedStaticPaths(site.content.locales)
+}
+
+type Props = { locale: Locale }
+
+const { locale } = Astro.props
+const t = useTranslations(locale)
+const articles = orderDocuments(
+	await loadListableArticles(site),
+	site.articles.order,
+	locale,
+	site.content.referenceLocale,
+)
+const surface = site.surfaces.articlesIndex
+const cards = await resolveDocumentCards(articles, locale, {
+	href: (slug) => articleHref(slug, locale),
+	surface: documentCardSurface(surface.kind),
+	collection: 'articles',
+	ratio: surface.ratio,
+	siteConfig: site,
+})
+const banner = await resolveBanner({ kind: 'surface', surface: 'articlesIndex' }, locale, site)
+const meta = buildLocaleMeta(Astro.url.pathname, Astro.site!.href, site.content.locales)
+const footerPromo = footerPromoContext(
+	'surface:articles-index',
+	bannerPhotoId(banner),
+	cardPhotoIds(cards),
+)
+---
+
+<Base
+	footerPromo={footerPromo}
+	title={t('nav.articles')}
+	canonical={meta.canonical}
+	alternates={meta.alternates}
+	width={surface.width}
+	heading={t('nav.articles')}
+	banner={banner}
+>
+	<CardCollection
+		kind={surface.kind}
+		cards={cards}
+		more={site.listing.moreLink === 'on' ? t('listing.more') : undefined}
+	/>
+</Base>

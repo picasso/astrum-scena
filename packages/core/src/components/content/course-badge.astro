@@ -1,0 +1,15 @@
+---
+// course status badge: archive is muted, current (enrolment open) is accented; it looks the same on a
+// card's frame corner and above the text of the course page
+import './course-badge.css'
+
+type Props = {
+	status: 'archive' | 'current'
+	label: string
+	class?: string
+}
+
+const { status, label, class: className } = Astro.props
+---
+
+<span class:list={['course-badge', `course-badge--${status}`, className]}>{label}</span>

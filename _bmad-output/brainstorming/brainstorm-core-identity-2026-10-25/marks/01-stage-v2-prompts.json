@@ -1,0 +1,16 @@
+{
+  "tool": "built-in image_gen",
+  "date": "2026-10-25",
+  "output": "01-stage-v2.png",
+  "reference": "01-stage.png",
+  "edits": [
+    {
+      "prompt": "Use case: logo-brand / precise-object-edit.\nEdit the supplied original black-and-white astrum-scena logo. Treat the supplied image as the edit target, not just loose inspiration.\nKeep the original stage-frame geometry, perspective-shaped base, side panels, overall proportions, pure white background, black-and-white palette, and generous surrounding whitespace.\nMake these specific changes only:\n1. Close the large gap at the top completely. Reconstruct a single continuous black upper horizontal beam, with a clean straight upper edge and coherent lower edge, joining the left and right sides. There must be no arbitrary gap in the top beam.\n2. Enlarge the existing four-point star by approximately 1.8 to 2 times. Keep its recognizable concave curved four-point silhouette, but give it a fuller central body so it reads as a star at small sizes rather than a thin plus sign.\n3. Raise the star so its upper ray passes through the top beam and visibly extends above its outer top edge. The star center and horizontal rays should remain just BELOW the lower edge of the upper beam, in the white stage interior. Keep the star slightly right of horizontal center as in the original.\n4. Apply precise color inversion ONLY where the star overlaps the black beam: the star is BLACK over the white background and stage interior, and WHITE inside the black upper beam. The star outline must remain one coherent continuous silhouette through all color changes. This is a flat boolean/XOR figure-ground effect, no outlines, no white halo, no drop shadows.\nKeep the bottom and sides of the original frame unchanged. No extra star, no decoration, no text or wordmark, no new colors, no mockup. Flat crisp vector-like logo study. One mark only.",
+      "status": "intermediate: hollow top ray required correction"
+    },
+    {
+      "prompt": "Use case: precise-object-edit / logo-brand.\nEdit this supplied logo image with ONE LOCAL correction only.\nThe topmost ray of the star currently extends above the upper horizontal black beam as a thin black OUTLINE with a WHITE hollow interior. This is an error. FILL THIS HOLLOW UPPER TIP SOLID BLACK.\nSpecifically, every pixel inside the star silhouette that is ABOVE the top straight edge of the horizontal frame beam must be solid black, matching the black main star. No white interior and no outline-only shape above the beam. This includes the entire small triangular / curving ray projecting upward beyond the beam.\nKeep the white part of the star that crosses INSIDE the black beam white. Keep the large black lower part of the star below the beam exactly unchanged. The intended effect is solid BLACK star on WHITE background, WHITE star where crossing BLACK beam, solid BLACK star again inside WHITE stage.\nPreserve all frame geometry, original bottom base and side panels, star size and placement, white background, canvas and margins. No other changes. No text, no shadows, no gradients, no extra marks.",
+      "status": "delivered draft"
+    }
+  ]
+}

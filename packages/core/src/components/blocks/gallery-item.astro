@@ -1,0 +1,71 @@
+---
+import '../portfolio/album-photo.css'
+
+import type { GalleryCandidate } from '../../lib/blocks/gallery/build-data.ts'
+import ResponsivePicture from '../portfolio/responsive-picture.astro'
+
+// one cell of a content gallery (docs/blocks/gallery.md); sort keys and aspect go into data
+// attributes because the browser coordinator reads them from the inert `<template>` to order the
+// sample and compute the justified layout. Active figures and template candidates share this markup,
+// only their container differs
+
+type Props = {
+	candidate: GalleryCandidate
+	showInlineCaption: boolean
+}
+
+const { candidate, showInlineCaption } = Astro.props
+const { action, model, focalPoint, caption, width, height } = candidate
+const aspect = width / height
+// a decorative image (`alt=""`) inside a link still needs an accessible name, taken from its label
+const decorativeLabel = model.alt === '' && 'label' in action ? action.label : undefined
+---
+
+<figure
+	class="gallery__item"
+	data-image-id={candidate.imageId}
+	data-favorite={candidate.favorite ? 'true' : 'false'}
+	data-published-at={candidate.publishedAt}
+	data-captured-at={candidate.capturedAt}
+	data-aspect-width={width}
+	data-aspect-height={height}
+	style={`--gallery-aspect:${aspect};--gallery-focal:${focalPoint.x}% ${focalPoint.y}%;`}
+>
+	{
+		action.kind === 'lightbox' ? (
+			<a
+				class="album-photo gallery__link"
+				href={action.href}
+				aria-label={decorativeLabel}
+				data-pswp-width={action.pswp.width}
+				data-pswp-height={action.pswp.height}
+				data-pswp-src={action.pswp.src}
+				data-pswp-srcset={action.pswp.srcset}
+				data-pswp-caption={action.pswp.caption}
+			>
+				<ResponsivePicture model={model} class="gallery__media" imgClass="gallery__img" />
+			</a>
+		) : action.kind === 'link' ? (
+			<a
+				class="gallery__link"
+				href={action.href}
+				target={action.target}
+				rel={action.rel}
+				aria-label={decorativeLabel}
+			>
+				<ResponsivePicture model={model} class="gallery__media" imgClass="gallery__img" />
+			</a>
+		) : (
+			<ResponsivePicture
+				model={model}
+				class="gallery__media gallery__link"
+				imgClass="gallery__img"
+			/>
+		)
+	}
+	{
+		showInlineCaption && caption ? (
+			<figcaption class="gallery__caption">{caption}</figcaption>
+		) : null
+	}
+</figure>

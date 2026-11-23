@@ -1,0 +1,19 @@
+{
+	"extends": "../../tsconfig.base.json",
+	"compilerOptions": {
+		"rootDir": "src",
+		"outDir": "dist",
+		"declaration": true,
+		"rewriteRelativeImportExtensions": true,
+		"types": ["node", "astro/client"]
+	},
+	// only the graph Node loads at config time, and the CLI the bin runs; Vite compiles the rest of
+	// `src/` from source
+	"files": [
+		"src/env.d.ts",
+		"src/index.ts",
+		"src/collections.ts",
+		"src/eslint.ts",
+		"src/cli/index.ts"
+	]
+}

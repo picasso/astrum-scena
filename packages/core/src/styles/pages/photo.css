@@ -1,0 +1,239 @@
+@import '../layers.css';
+
+@layer components {
+	.photo__layout {
+		display: grid;
+		gap: clamp(1.5rem, 4vw, 3rem);
+	}
+
+	@media (min-width: 1024px) {
+		.photo__layout {
+			grid-template-columns: 45fr 55fr;
+			align-items: start;
+		}
+	}
+
+	.photo__figure {
+		margin: 0;
+	}
+
+	.photo__media,
+	.photo__img {
+		display: block;
+		width: 100%;
+		height: auto;
+	}
+
+	.photo__caption {
+		margin: 0.6rem 0 0;
+		color: var(--color-foreground);
+		font-size: 15px;
+		font-style: italic;
+	}
+
+	/* The text column keeps the prose width for readability (ADR-0008), even when 55% of the gallery
+	 * container is wider. */
+	.photo__text {
+		max-width: var(--container-prose);
+	}
+
+	.photo__backlink {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.4rem;
+		margin-bottom: 1rem;
+		color: var(--color-link);
+		text-decoration: none;
+		transition: color var(--duration-base) var(--ease-out);
+	}
+
+	.photo__backlink-icon {
+		flex: none;
+		width: 0.85em;
+		height: 0.85em;
+	}
+
+	.photo__backlink:hover,
+	.photo__backlink:focus-visible {
+		color: var(--color-link-hover);
+	}
+
+	.photo__viewer .album-photo {
+		display: block;
+		cursor: zoom-in;
+	}
+
+	/* The accent tail is yellow on photo pages, matching the legacy site. */
+	.photo__title {
+		margin: 0 0 1rem;
+		color: var(--color-heading);
+		font-size: var(--text-h1);
+		font-weight: var(--font-weight-medium);
+		line-height: 1.2;
+	}
+
+	.photo__title-accent {
+		color: var(--color-accent);
+	}
+
+	@media (max-width: 767px) {
+		.photo__title {
+			font-size: var(--text-h2);
+		}
+	}
+
+	.photo__meta {
+		margin: 0 0 1.5rem;
+	}
+
+	.photo__place {
+		margin: 0 0 0.75rem;
+		color: var(--color-foreground);
+		font-size: 13px;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+	}
+
+	.photo__place-part + .photo__place-part::before {
+		content: '○';
+		margin: 0 0.5em;
+		color: var(--color-accent);
+		font-size: 0.8em;
+	}
+
+	/* Tags match the legacy chips. They are not links yet (no tag pages, owner decision), so the accent
+	 * hover fill returns with clickability. */
+	.photo__tags {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		column-gap: 10px;
+		row-gap: 8px;
+		margin: 0 0 5px;
+		padding: 0;
+		list-style: none;
+	}
+
+	.photo__tag {
+		border: 2px solid;
+		border-radius: 3px;
+		padding: 5px 10px;
+		color: var(--color-link);
+		font-size: 15px;
+		font-weight: var(--font-weight-medium);
+		letter-spacing: 1px;
+		line-height: 19px;
+		text-transform: uppercase;
+		opacity: 0.4;
+	}
+
+	[data-theme='light'] .photo__tag {
+		opacity: 0.7;
+	}
+
+	.photo__captured {
+		margin: 0 0 0.75rem;
+		color: var(--color-foreground);
+		font-size: 13px;
+		letter-spacing: 0.08em;
+	}
+
+	/* pre-line keeps the block-scalar paragraphs without splitting the markup. */
+	.photo__description {
+		color: var(--color-foreground);
+		font-size: var(--text-base);
+		line-height: var(--text-base--line-height);
+		white-space: pre-line;
+	}
+
+	.photo__related {
+		margin-top: clamp(2rem, 5vw, 3.5rem);
+	}
+
+	/* The rule under the heading extends past the text, like `.prose h2::after`. */
+	.photo__related-heading {
+		margin: 0 0 1.25rem;
+		overflow-x: clip;
+		font-size: var(--text-h2);
+		font-weight: var(--font-weight-medium);
+	}
+
+	/* inline-block, not flex, so the ::after rule spans both the icon and the text. */
+	.photo__related-link-title {
+		display: inline-block;
+		width: fit-content;
+		color: var(--color-heading);
+		text-decoration: none;
+		transition: color var(--duration-base) var(--ease-out);
+	}
+
+	.photo__related-title-text {
+		vertical-align: middle;
+	}
+
+	/* 200% of the fit-content box; the overflow is cut by `overflow-x: clip`. */
+	.photo__related-link-title::after {
+		content: '';
+		display: block;
+		width: 200%;
+		height: 1px;
+		margin-top: 12px;
+		background: color-mix(in srgb, var(--color-heading) 30%, transparent);
+	}
+
+	.photo__related-icon {
+		/* Large icon like the legacy site, scaled from the heading size. */
+		display: inline-block;
+		vertical-align: middle;
+		margin-right: 0.5rem;
+		width: 1.5em;
+		height: 1.5em;
+	}
+
+	.photo__related-link-title:hover,
+	.photo__related-link-title:focus-visible {
+		color: var(--color-link-hover);
+	}
+
+	.photo__related-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+		gap: var(--portfolio-gap, 16px);
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	.photo__related-link {
+		display: block;
+		color: var(--color-foreground);
+		text-decoration: none;
+	}
+
+	/* Ratio on <picture> to avoid clashing with the inline aspect-ratio buildPictureModel puts on <img>. */
+	.photo__related-media {
+		display: block;
+		aspect-ratio: 1 / 1;
+		overflow: hidden;
+		border-radius: 2px;
+	}
+
+	.photo__related-img {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		transition: opacity var(--duration-base) var(--ease-out);
+	}
+
+	.photo__related-link:focus-visible {
+		outline: 2px solid var(--color-accent);
+		outline-offset: 3px;
+	}
+
+	/* Real pointers only: hover sticks on touch. */
+	@media (hover: hover) {
+		.photo__related-link:hover .photo__related-img {
+			opacity: 0.7;
+		}
+	}
+}

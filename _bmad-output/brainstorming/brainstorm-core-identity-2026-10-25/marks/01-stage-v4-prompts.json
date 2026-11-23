@@ -1,0 +1,16 @@
+{
+  "tool": "built-in image_gen",
+  "date": "2026-10-25",
+  "output": "01-stage-v4.png",
+  "reference": "01-stage-v3.png",
+  "edits": [
+    {
+      "prompt": "Use case: precise-object-edit / logo-brand.\nEdit this supplied astrum-scena logo. Keep the same overall composition and proportions, the enlarged four-point concave curved star and its thick intersection with the top beam, the stage-frame shape, side walls and trapezoid floor, white background and generous margins.\nMake exactly two changes:\n1. Widen BOTH white diagonal separation channels at the two LOWER corners between the vertical side walls and the trapezoid floor, to approximately 2.2 times their current perpendicular thickness. Keep these gaps clean, straight, symmetrical and visibly robust when the icon is reduced to 24 or 32 pixels. Keep the surrounding black panels substantial; do not add any other gaps.\n2. Change the star's BLACK portions to one flat vivid scarlet RED, target #F0283C. This includes the large star body inside the white stage opening AND the solid upper ray protruding above the outside edge of the upper beam. Keep the frame and floor BLACK. Preserve the WHITE star portion that crosses the black upper beam, so the existing color-inversion interaction remains visible. Thus the coherent star silhouette is red above the beam, white inside the beam, red below the beam. No red on any part of the frame itself.\nUse strictly flat white, near-black, and vivid scarlet red, with crisp edges and no shading. Preserve the reference geometry everywhere else. Do not shrink the star. No hollow upper ray, no outlines, no gradients, no shadows, no text, no wordmark, no extra shapes. One logo symbol only.",
+      "status": "intermediate: user requested black upper protrusion"
+    },
+    {
+      "prompt": "Use case: precise-object-edit / logo-brand.\nEdit the provided astrum-scena logo image with ONE LOCAL COLOR CHANGE ONLY.\nRecolor the small SCARLET RED protrusion ABOVE the top horizontal black beam to solid BLACK, exactly matching the black frame. This is the upper pointed ray outside the stage, roughly the small shape above the top center of the frame. It must be black all the way to its solid base, not a hollow outline.\nKeep the large INNER STAR inside the stage vivid scarlet red EXACTLY AS IT IS. Keep the WHITE inverted part at the crossing through the black top beam exactly white. Thus the color arrangement from top to bottom is BLACK upper protrusion, WHITE intersection, SCARLET RED inner star.\nPreserve all shapes, sizes, positions, the existing broad white diagonal gaps at BOTH lower corners, the black side walls and trapezoidal floor, the black upper beam, the pure white background and canvas margins.\nDo not alter the internal red star or its color. No new objects, typography, gradients, outlines, shadows, or other edits.",
+      "status": "delivered draft: red internal star, black upper protrusion, wider lower gaps"
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+	"extends": "astro/tsconfigs/strict",
+	"compilerOptions": {
+		"jsx": "react-jsx",
+		"jsxImportSource": "react",
+		"noUncheckedIndexedAccess": true,
+		"types": ["node"]
+	},
+	// collection types are generated for the demo, the synthetic site the tests run against
+	// (`astro sync` there; `pnpm typecheck` runs it first)
+	"include": ["../../demo/.astro/types.d.ts", "src/**/*"]
+}

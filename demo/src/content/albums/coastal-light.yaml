@@ -1,0 +1,14 @@
+category: places
+title:
+    en: Coastal Light
+    ru: Свет побережья
+description:
+    en: Synthetic skies over the sea and the dunes of an imaginary coast, from wide to panoramic.
+    ru: Синтетическое небо над морем и дюнами вымышленного побережья, от широкого кадра до панорамы.
+layout: masonry
+status: published
+coverId: wide-tide
+photoIds:
+    - wide-tide
+    - amber-dunes
+    - long-horizon

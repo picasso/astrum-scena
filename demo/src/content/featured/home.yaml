@@ -1,0 +1,27 @@
+schemaVersion: 1
+slides:
+    - id: coastal-light-cover
+      align: left
+      target:
+          collection: albums
+          slug: coastal-light
+          linkKind: album
+      copySource: target
+      mediaSource: target
+    - id: geometry-studies-tower
+      align: right
+      target:
+          collection: albums
+          slug: geometry-studies
+          linkKind: album
+      copySource: media
+      mediaSource:
+          photoSlug: quiet-tower
+    - id: reading-the-light-cover
+      align: left
+      target:
+          collection: articles
+          slug: reading-the-light
+          linkKind: page
+      copySource: target
+      mediaSource: target

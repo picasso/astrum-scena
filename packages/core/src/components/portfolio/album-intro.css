@@ -1,0 +1,77 @@
+@import '../../styles/layers.css';
+
+@layer components {
+	/* The header is its own container: below 640px the mosaic hides. Tile size, gap, radius and columns
+	 * come inline from mosaicLayout at build time; the values below are fallbacks. Saturation is cut to 15 %
+	 * (owner decision) so the mosaic does not compete with the colored grid; the filter is CSS-only. */
+	.album-intro {
+		--mosaic-tile: 88px;
+		--mosaic-gap: 10px;
+		--mosaic-radius: 6px;
+		--mosaic-saturate: 0.15;
+		--album-intro-divider: color-mix(in srgb, var(--color-contrast) 12%, transparent);
+
+		container-type: inline-size;
+		/* Neutral, not accent (owner decision): yellow would compete with the photos and the menu. */
+		padding-bottom: 24px;
+		margin-bottom: 48px;
+		border-bottom: 1px solid var(--album-intro-divider);
+	}
+
+	.album-intro__row {
+		display: grid;
+		grid-template-columns: auto minmax(0, 1fr);
+		gap: 2rem;
+		align-items: start;
+	}
+
+	.album-intro__mosaic {
+		display: grid;
+		grid-template-columns: repeat(var(--mosaic-columns, 3), var(--mosaic-tile));
+		gap: var(--mosaic-gap);
+	}
+
+	.album-intro__tile {
+		aspect-ratio: 1;
+		overflow: hidden;
+		border-radius: var(--mosaic-radius);
+	}
+
+	.album-intro__media,
+	.album-intro__img {
+		display: block;
+		width: 100%;
+		height: 100%;
+	}
+
+	.album-intro__img {
+		object-fit: cover;
+		object-position: var(--mosaic-focal, 50% 50%);
+		filter: saturate(var(--mosaic-saturate));
+	}
+
+	/* Denser than the page text (owner calibration). */
+	.album-intro__text {
+		font-size: 1rem;
+		line-height: 1.5;
+		color: var(--color-foreground);
+	}
+
+	.album-intro__text > p {
+		margin: 0 0 1em;
+	}
+
+	.album-intro__text > p:last-child {
+		margin-bottom: 0;
+	}
+
+	@container (max-width: 639px) {
+		.album-intro__row {
+			grid-template-columns: 1fr;
+		}
+
+		.album-intro__mosaic {
+			display: none;
+		}
+	}
+}

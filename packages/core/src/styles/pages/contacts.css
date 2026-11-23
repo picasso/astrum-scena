@@ -1,0 +1,49 @@
+@import '../layers.css';
+
+@layer components {
+	.contacts {
+		display: grid;
+		gap: clamp(1.5rem, 4vw, 2.5rem);
+	}
+
+	/* In one column the image only pushed the form down and was the page's LCP; the browser skips a hidden
+	 * lazy image, so phones get the hero and the form. */
+	@media (max-width: 767px) {
+		.contacts__aside {
+			display: none;
+		}
+	}
+
+	@media (min-width: 768px) {
+		.contacts {
+			/* The page sets `--contacts-columns` from `contacts.aside.width`. */
+			grid-template-columns: var(--contacts-columns, 1fr 3fr);
+			align-items: start;
+		}
+	}
+
+	.contacts__aside-frame,
+	.contacts__aside-media,
+	.contacts__aside-img {
+		display: block;
+		width: 100%;
+		height: auto;
+	}
+
+	/* The page sets aspect-ratio on the frame; the photo covers it at focalPoint. */
+	.contacts__aside-frame--crop .contacts__aside-media,
+	.contacts__aside-frame--crop .contacts__aside-img {
+		height: 100%;
+	}
+
+	.contacts__aside-frame--crop .contacts__aside-img {
+		object-fit: cover;
+		object-position: var(--contacts-focal, 50% 50%);
+	}
+
+	/* Prose width for readability, even when the column is wider. */
+	.contacts__main {
+		min-width: 0;
+		max-width: var(--container-prose);
+	}
+}

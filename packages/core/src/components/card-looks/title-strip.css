@@ -1,0 +1,8 @@
+@import '../../styles/layers.css';
+@import './compact.css';
+
+@layer components {
+	.card--title-strip .card__body {
+		padding-inline: 16px;
+	}
+}

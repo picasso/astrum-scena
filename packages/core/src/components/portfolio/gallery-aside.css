@@ -1,0 +1,40 @@
+@import '../../styles/layers.css';
+
+@layer components {
+	/* Below the layout break the list stacks above the grid (the DOM order already is) and centers, as on
+	 * the legacy site. */
+	.gallery-aside {
+		display: grid;
+		gap: 1.5rem;
+	}
+
+	@media (min-width: 1024px) {
+		.gallery-aside {
+			grid-template-columns: 25% minmax(0, 1fr);
+			gap: 2rem;
+			align-items: start;
+		}
+
+		/* sticky replaces the legacy scroll script. The column sticks under the site's sticky menu (its height
+		 * is set by album-list.astro, 0 without JS) and never exceeds the screen, so a long list scrolls inside
+		 * it rather than the page. */
+		.gallery-aside__side {
+			position: sticky;
+			top: calc(var(--sticky-header-height, 0px) + 1.5rem - 12px);
+			max-height: calc(100vh - var(--sticky-header-height, 0px) - 3rem);
+			overflow-y: auto;
+			overscroll-behavior: contain;
+			/* The hover stripes (±10px) extend past the item: the padding keeps them inside the scroll area, the
+			 * negative margin restores the list position. */
+			margin-block: -12px;
+			padding-block: 12px;
+			scrollbar-width: thin;
+			scrollbar-color: var(--album-list-scrollbar) transparent;
+		}
+
+		/* The script sets the classes. */
+		.gallery-aside__side.is-scrollable:not(.is-at-end) {
+			mask-image: linear-gradient(to bottom, #000 calc(100% - 48px), transparent);
+		}
+	}
+}

@@ -1,0 +1,280 @@
+@import '../styles/layers.css';
+
+@layer components {
+	.contact-form__subheading-copy a {
+		color: var(--color-link);
+	}
+
+	.contact-form__subheading-copy a:hover,
+	.contact-form__subheading-copy a:focus-visible {
+		color: var(--color-link-hover);
+	}
+	/* States and dark values match the legacy form, except the focus ring and the error color (owner
+	 * decision); light adapts to the tokens because a cream field on a light page is unreadable. */
+	.contact-form {
+		/* State colors (--cf-error, --cf-ok, --cf-field-bg, --cf-field-ring, …) come from the theme. */
+		--cf-label: var(--color-foreground);
+		--cf-field-focus-bg: var(--color-paper);
+		--cf-field-text: var(--color-ink);
+		--cf-field-border: var(--color-paper);
+		--cf-error-ring: var(--cf-error); /* focus ring on an invalid field */
+		--cf-button-bg: var(--color-alt-fixed);
+		--cf-summary-bg: color-mix(in srgb, var(--color-shade) 10%, transparent);
+
+		/* Labels inherit this base size, errors and the summary are 0.875em of it; position: relative anchors
+		 * the masthead and spinner; margin-top: 0 aligns the form top with the photo. */
+		position: relative;
+		margin-top: 0;
+		max-width: var(--container-prose);
+		font-size: 18px;
+	}
+
+	/* Light: labels, field text and borders follow the page tokens, otherwise the field merges with the
+	 * light page; state colors switch in the theme. */
+	[data-theme='light'] .contact-form {
+		--cf-label: var(--color-heading);
+		--cf-field-text: var(--color-foreground);
+		--cf-field-border: var(--color-card-border);
+		--cf-summary-bg: color-mix(in srgb, var(--color-shade) 6%, transparent);
+	}
+
+	/* Status and intro share one grid cell, so the slot is as tall as the larger one. The hidden intro
+	 * keeps its space (visibility), so the fields do not jump on submit. */
+	.contact-form__masthead {
+		position: relative;
+		display: grid;
+		min-height: 2.6em;
+		margin-bottom: 0.75rem;
+	}
+
+	.contact-form__masthead > * {
+		grid-area: 1 / 1;
+	}
+
+	/* The masthead grows with a multi-line status, so it never overlaps the fields. At rest it has no
+	 * background or padding and stays invisible under the intro. */
+	.contact-form__summary {
+		align-self: start;
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		width: max-content;
+		max-width: 100%;
+		margin: 0;
+		font-size: 0.875em;
+		line-height: 1.4;
+	}
+
+	.contact-form__summary.is-error,
+	.contact-form__summary.is-success {
+		padding: 10px 14px;
+		border-radius: 3px;
+		background-color: var(--cf-summary-bg);
+	}
+
+	.contact-form__summary.is-error {
+		color: var(--cf-error);
+	}
+
+	.contact-form__summary.is-success {
+		color: var(--cf-ok);
+	}
+
+	.contact-form__summary-icon {
+		flex: none;
+		width: 24px;
+		height: 24px;
+	}
+
+	/* Styled as an info Note without a title: tint, bar and text color come from note.css. */
+	.contact-form__subheading {
+		display: flex;
+		align-items: flex-start;
+		gap: 10px;
+		margin: 0;
+		font-size: 0.875em;
+	}
+
+	.contact-form__subheading-copy > p {
+		margin: 0;
+	}
+
+	.contact-form__subheading.is-concealed {
+		visibility: hidden;
+	}
+
+	.contact-form__loader {
+		position: absolute;
+		inset: 0;
+		display: flex;
+		justify-content: center;
+		align-items: flex-start;
+	}
+
+	.contact-form__ring {
+		width: 40px;
+		height: 40px;
+		border: 3px solid color-mix(in srgb, var(--cf-error) 25%, transparent);
+		border-top-color: var(--cf-error);
+		border-radius: 50%;
+		animation: cf-spin 0.7s linear infinite;
+	}
+
+	@keyframes cf-spin {
+		to {
+			transform: rotate(360deg);
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.contact-form__ring {
+			animation: none;
+		}
+	}
+
+	.contact-form__field {
+		margin-bottom: 1rem;
+	}
+
+	.contact-form__label {
+		display: block;
+		margin-bottom: 0.4rem;
+		color: var(--cf-label);
+		font-size: 1em;
+		font-weight: 600;
+		letter-spacing: 0.5pt;
+	}
+
+	.contact-form__field.is-error .contact-form__label {
+		color: var(--cf-error-label);
+	}
+
+	/* Box model matches the legacy form: a ~40px field. */
+	.contact-form__input {
+		width: 100%;
+		padding: 0.6em;
+		border: 1px solid var(--cf-field-border);
+		border-radius: 2px;
+		background-color: var(--cf-field-bg);
+		color: var(--cf-field-text);
+		font-family: inherit;
+		font-size: 16px;
+		line-height: 1.15;
+		transition:
+			border-color var(--duration-base) var(--ease-out),
+			box-shadow var(--duration-base) var(--ease-out);
+	}
+
+	.contact-form__input::placeholder {
+		color: color-mix(in srgb, var(--color-shade) 50%, transparent);
+		font-size: 0.875em;
+		letter-spacing: 0.5pt;
+	}
+
+	.contact-form__textarea {
+		resize: vertical;
+		min-height: 8rem;
+	}
+
+	/* An opaque 3px ring (spread, not blur): a translucent ring faded to ~2.5:1 on the gray page, the solid
+	 * one gives ~5.6:1, and the darker border separates the field from the ring (owner decision). */
+	.contact-form__input:focus-visible {
+		outline: none;
+		background-color: var(--cf-field-focus-bg);
+		border-color: color-mix(in srgb, var(--cf-field-ring) 60%, var(--color-shade));
+		box-shadow: 0 0 0 3px var(--cf-field-ring);
+	}
+
+	.contact-form__field.is-error .contact-form__input,
+	.contact-form__input[aria-invalid='true'] {
+		border-color: color-mix(in srgb, var(--cf-error) 50%, transparent);
+		box-shadow: 0 0 5px var(--cf-error);
+	}
+
+	/* Red ring so both the focus and the error stay visible. */
+	.contact-form__field.is-error .contact-form__input:focus-visible,
+	.contact-form__input[aria-invalid='true']:focus-visible {
+		border-color: color-mix(in srgb, var(--cf-error-ring) 60%, var(--color-shade));
+		box-shadow: 0 0 0 3px var(--cf-error-ring);
+	}
+
+	.contact-form__error {
+		display: block;
+		margin-top: 0.35rem;
+		color: var(--cf-error);
+		font-size: 0.875em;
+		letter-spacing: 0.5pt;
+	}
+
+	/* Not display:none: some bots skip hidden fields. */
+	.contact-form__hp {
+		position: absolute;
+		left: -9999px;
+		width: 1px;
+		height: 1px;
+		overflow: hidden;
+	}
+
+	/* Empty until the widget renders (or without a site key), so the button then sits under the textarea. */
+	.contact-form__turnstile:not(:empty) {
+		margin-top: 0.75rem;
+	}
+
+	.contact-form__actions {
+		display: flex;
+		justify-content: flex-end;
+		margin-top: 0.75rem;
+	}
+
+	.contact-form__submit {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		min-width: 200px;
+		padding: 10px 20px;
+		border: 0;
+		border-radius: 3px;
+		background-color: var(--cf-button-bg);
+		color: var(--color-paper);
+		font-family: inherit;
+		font-size: 0.875em;
+		font-weight: 500;
+		text-transform: uppercase;
+		letter-spacing: 1px;
+		cursor: pointer;
+		box-shadow: 1px 1px 0 color-mix(in srgb, var(--cf-button-bg) 80%, var(--color-shade));
+		transition:
+			background-color var(--duration-base) var(--ease-out),
+			opacity var(--duration-base) var(--ease-out);
+	}
+
+	.contact-form__submit:disabled {
+		background-color: color-mix(in srgb, var(--cf-button-bg) 50%, transparent);
+		color: color-mix(in srgb, var(--color-paper) 50%, transparent);
+		box-shadow: none;
+		cursor: default;
+	}
+
+	.contact-form__submit:focus-visible {
+		outline: 2px solid var(--cf-button-bg);
+		outline-offset: 3px;
+	}
+
+	@media (hover: hover) {
+		.contact-form__submit:not(:disabled):hover {
+			background-color: color-mix(in srgb, var(--cf-button-bg) 90%, var(--color-shade));
+		}
+	}
+
+	.contact-form__req {
+		color: var(--cf-label);
+	}
+
+	.contact-form__field.is-success .contact-form__req {
+		color: var(--cf-ok);
+	}
+
+	.contact-form__field.is-error .contact-form__req {
+		color: var(--cf-error);
+	}
+}

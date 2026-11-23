@@ -1,0 +1,41 @@
+---
+import type { PictureModel } from '../../lib/images/media.ts'
+
+// thin wrapper over PictureModel (buildPictureModel): renders a responsive `<picture>` without CLS
+// (intrinsic width/height plus an aspect-ratio/dominant-color placeholder in style). The caller, which
+// owns the surface, has already put `sizes` into the model (see lib/portfolio/sizes.ts); the component
+// never guesses it. The visible copyright/credit belongs to the surface page; this only exposes
+// `data-rights-fallback` (at least one presented format lacks embedded rights) so the page can show
+// the fallback line.
+type Props = {
+	model: PictureModel
+	loading?: 'lazy' | 'eager'
+	fetchpriority?: 'high' | 'low' | 'auto'
+	class?: string
+	imgClass?: string
+}
+
+const { model, loading = 'lazy', fetchpriority, class: className, imgClass } = Astro.props
+// a priority (LCP) image gets no async decoding hint, so the browser need not defer its paint
+const decoding = fetchpriority === 'high' ? undefined : 'async'
+---
+
+<picture class={className} data-rights-fallback={model.rightsFallbackNeeded ? 'true' : undefined}>
+	{
+		model.sources.map((source) => (
+			<source type={source.type} srcset={source.srcset} sizes={model.sizes} />
+		))
+	}
+	<img
+		src={model.fallback.src}
+		width={model.width}
+		height={model.height}
+		sizes={model.sizes}
+		alt={model.alt}
+		style={model.style}
+		class={imgClass}
+		loading={loading}
+		decoding={decoding}
+		fetchpriority={fetchpriority}
+	/>
+</picture>

@@ -1,0 +1,7 @@
+interface:
+    display_name: 'Fact-check Apply'
+    short_description: 'Apply accepted fact-check findings in batch'
+    default_prompt: 'Use $factcheck-apply to apply the accepted fact-check findings.'
+
+policy:
+    allow_implicit_invocation: false

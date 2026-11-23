@@ -1,0 +1,7 @@
+interface:
+    display_name: 'Validate'
+    short_description: 'Validate manually edited site content'
+    default_prompt: 'Use $validate to check my manually edited content and prepare a confirmed build.'
+
+policy:
+    allow_implicit_invocation: false

@@ -1,0 +1,110 @@
+{
+	"callout": {
+		"icon": {
+			"required": false,
+			"values": [
+				"bookmark",
+				"calendar",
+				"home",
+				"image",
+				"mail",
+				"person",
+				"text",
+				"video"
+			]
+		},
+		"tone": {
+			"required": false,
+			"values": [
+				"accent",
+				"alt",
+				"default"
+			]
+		},
+		"transparent": {
+			"required": false
+		},
+		"variant": {
+			"required": false,
+			"values": [
+				"block",
+				"line"
+			]
+		}
+	},
+	"links": {
+		"align": {
+			"required": false,
+			"values": [
+				"center",
+				"left",
+				"right"
+			]
+		},
+		"gap": {
+			"required": false,
+			"values": [
+				"large",
+				"medium",
+				"none",
+				"small",
+				"tiny"
+			]
+		},
+		"icon": {
+			"required": false,
+			"values": [
+				"each",
+				"heading",
+				"none"
+			]
+		},
+		"notitle": {
+			"required": false
+		},
+		"size": {
+			"required": false,
+			"values": [
+				"base",
+				"lg",
+				"sm"
+			]
+		},
+		"title": {
+			"required": false
+		},
+		"width": {
+			"required": false,
+			"values": [
+				"compact",
+				"content",
+				"full"
+			]
+		}
+	},
+	"note": {
+		"claim": {
+			"required": true
+		},
+		"icon": {
+			"required": false,
+			"values": [
+				"history"
+			]
+		},
+		"notitle": {
+			"required": false
+		},
+		"title": {
+			"required": false
+		},
+		"tone": {
+			"required": false,
+			"values": [
+				"alert",
+				"info",
+				"outdated"
+			]
+		}
+	}
+}

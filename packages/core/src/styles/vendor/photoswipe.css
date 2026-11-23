@@ -1,0 +1,4 @@
+/* PhotoSwipe loads as a page chunk, possibly before global.css, so it declares the layer order itself. */
+@import '../layers.css';
+
+@import 'photoswipe/style.css' layer(vendor);

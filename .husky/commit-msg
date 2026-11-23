@@ -1,0 +1,1 @@
+node --experimental-strip-types --env-file-if-exists=.env scripts/check-commit-msg.ts "$1"

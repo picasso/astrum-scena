@@ -1,0 +1,8 @@
+@import '../../../styles/layers.css';
+@import './crop.css';
+
+@layer components {
+	.album-rect__item .album-photo {
+		aspect-ratio: 3 / 2;
+	}
+}

@@ -1,0 +1,242 @@
+{
+	"courses": {
+		"collections": {
+			"courses": {
+				"source": "src/content/courses/**/*.{md,mdx}",
+				"versions": [
+					1
+				]
+			}
+		},
+		"config": {
+			"additionalProperties": false,
+			"properties": {
+				"banner": {
+					"anyOf": [
+						{
+							"const": "off",
+							"type": "string"
+						},
+						{
+							"pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+							"type": "string"
+						}
+					],
+					"default": "off"
+				},
+				"currentFirst": {
+					"default": "on",
+					"enum": [
+						"off",
+						"on"
+					],
+					"type": "string"
+				},
+				"moreDocs": {
+					"additionalProperties": false,
+					"default": {
+						"card": "details",
+						"excerpt": "on",
+						"heading": "on",
+						"layout": "list",
+						"limit": "all",
+						"media": "on",
+						"order": "title",
+						"ratio": "vista",
+						"source": "siblings",
+						"width": "medium"
+					},
+					"properties": {
+						"card": {
+							"enum": [
+								"details",
+								"title-slide",
+								"title-strip"
+							],
+							"type": "string"
+						},
+						"columns": {
+							"exclusiveMinimum": 0,
+							"maximum": 9007199254740991,
+							"type": "integer"
+						},
+						"excerpt": {
+							"enum": [
+								"off",
+								"on"
+							],
+							"type": "string"
+						},
+						"gap": {
+							"maximum": 64,
+							"minimum": 0,
+							"type": "integer"
+						},
+						"heading": {
+							"enum": [
+								"off",
+								"on"
+							],
+							"type": "string"
+						},
+						"layout": {
+							"enum": [
+								"grid",
+								"list",
+								"masonry"
+							],
+							"type": "string"
+						},
+						"limit": {
+							"anyOf": [
+								{
+									"exclusiveMinimum": 0,
+									"maximum": 9007199254740991,
+									"type": "integer"
+								},
+								{
+									"const": "all",
+									"type": "string"
+								}
+							]
+						},
+						"media": {
+							"enum": [
+								"off",
+								"on"
+							],
+							"type": "string"
+						},
+						"order": {
+							"enum": [
+								"newest",
+								"title"
+							],
+							"type": "string"
+						},
+						"ratio": {
+							"enum": [
+								"landscape",
+								"original",
+								"pano",
+								"portrait",
+								"square",
+								"vista"
+							],
+							"type": "string"
+						},
+						"source": {
+							"enum": [
+								"off",
+								"siblings"
+							],
+							"type": "string"
+						},
+						"width": {
+							"enum": [
+								"medium",
+								"prose",
+								"wide"
+							],
+							"type": "string"
+						}
+					},
+					"required": [
+						"card",
+						"excerpt",
+						"heading",
+						"layout",
+						"media",
+						"source",
+						"width"
+					],
+					"type": "object",
+					"x-refinements": [
+						"13ae46fba004"
+					]
+				},
+				"order": {
+					"default": "title",
+					"enum": [
+						"newest",
+						"title"
+					],
+					"type": "string"
+				},
+				"surface": {
+					"additionalProperties": false,
+					"default": {},
+					"properties": {
+						"kind": {
+							"default": "list",
+							"enum": [
+								"grid",
+								"list",
+								"masonry"
+							],
+							"type": "string"
+						},
+						"ratio": {
+							"default": "vista",
+							"enum": [
+								"landscape",
+								"original",
+								"pano",
+								"portrait",
+								"square",
+								"vista"
+							],
+							"type": "string"
+						},
+						"width": {
+							"default": "standard",
+							"enum": [
+								"gallery",
+								"medium",
+								"prose",
+								"standard"
+							],
+							"type": "string"
+						}
+					},
+					"required": [
+						"kind",
+						"ratio",
+						"width"
+					],
+					"type": "object",
+					"x-refinements": [
+						"c720ba042b63"
+					]
+				}
+			},
+			"required": [
+				"banner",
+				"currentFirst",
+				"moreDocs",
+				"order",
+				"surface"
+			],
+			"type": "object",
+			"x-refinements": [
+				"1c55cc25edd1"
+			]
+		},
+		"dependsOn": [],
+		"directives": [],
+		"mdx": [],
+		"menu": [
+			"courses"
+		],
+		"moreDocsKinds": [
+			"course"
+		],
+		"namespace": "courses",
+		"segments": [
+			"courses"
+		],
+		"tokens": [
+			"--status-badge-courses"
+		]
+	}
+}

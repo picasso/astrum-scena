@@ -1,0 +1,14 @@
+---
+// album list beside the gallery; below 1024px (the header's breakpoint) the list stacks above it,
+// and since the DOM order already matches, one grid-template switches the layouts
+import './gallery-aside.css'
+---
+
+<div class="gallery-aside">
+	<div class="gallery-aside__side">
+		<slot name="aside" />
+	</div>
+	<div class="gallery-aside__main">
+		<slot />
+	</div>
+</div>

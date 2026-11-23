@@ -1,0 +1,77 @@
+---
+import AlbumGrid from '../../../components/portfolio/album-grid.astro'
+import AlbumIntro from '../../../components/portfolio/album-intro.astro'
+import AlbumList from '../../../components/portfolio/album-list.astro'
+import GalleryAside from '../../../components/portfolio/gallery-aside.astro'
+import PhotoSwipeLoader from '../../../components/portfolio/photoswipe-loader.astro'
+import type { Locale } from '../../../config/locale-schema.ts'
+import { site } from '../../../config/site.ts'
+import { siteRoot } from '../../../config/site-root.ts'
+import { useTranslations } from '../../../i18n/ui.ts'
+import Base from '../../../layouts/base.astro'
+import { resolveAlbumBanner } from '../../../lib/banner/build-data.ts'
+import { localizedStaticPaths } from '../../../lib/content/routes.ts'
+import { loadImageCatalog } from '../../../lib/images/catalog.ts'
+import { albumStaticPaths, resolvePublishedAlbum } from '../../../lib/portfolio/build-data.ts'
+import { bannerPhotoId, footerPromoContext } from '../../../lib/portfolio/footer-promo-build.ts'
+import { projectAlbumText } from '../../../lib/portfolio/locale.ts'
+import { buildLocaleMeta, unlistedRobots } from '../../../lib/portfolio/page-meta.ts'
+import { resolveAlbumCover } from '../../../lib/portfolio/publication.ts'
+
+// the album description sits in an intro above the grid by the owner's choice, where the legacy
+// theme put it below; an album without a description has no intro
+export async function getStaticPaths() {
+	return localizedStaticPaths(site.content.locales, await albumStaticPaths())
+}
+
+type Props = { locale: Locale }
+
+const { locale } = Astro.props
+const t = useTranslations(locale)
+const { album: albumId } = Astro.params
+const { album, albums, photosById } = await resolvePublishedAlbum(albumId!)
+const catalog = loadImageCatalog(siteRoot)
+const cover = resolveAlbumCover(album, photosById)
+const text = projectAlbumText(album.data, locale)
+const banner = resolveAlbumBanner(catalog, cover, locale, site)
+const meta = buildLocaleMeta(Astro.url.pathname, Astro.site!.href, site.content.locales)
+const footerPromo = footerPromoContext(
+	`album:${album.id}`,
+	bannerPhotoId(banner),
+	album.data.photoIds,
+)
+---
+
+<Base
+	footerPromo={footerPromo}
+	description={text.description}
+	excerpt={album.data.excerpt?.[locale]}
+	title={text.title}
+	canonical={meta.canonical}
+	robots={unlistedRobots(album.data.unlisted === true)}
+	alternates={meta.alternates}
+	width={site.surfaces.album.width}
+	heading={text.title}
+	banner={banner}
+>
+	<GalleryAside>
+		<AlbumList
+			slot="aside"
+			albums={albums}
+			locale={locale}
+			currentAlbumId={album.id}
+			label={t('portfolio.albums')}
+		/>
+		<article class="album">
+			<AlbumIntro
+				catalog={catalog}
+				album={album}
+				photosById={photosById}
+				description={text.description}
+				locale={locale}
+			/>
+			<AlbumGrid catalog={catalog} album={album} photosById={photosById} locale={locale} />
+		</article>
+	</GalleryAside>
+	<PhotoSwipeLoader />
+</Base>

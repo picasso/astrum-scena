@@ -1,0 +1,299 @@
+---
+import '../../styles/status.css'
+
+import { SERVICE_COPY_LOCALE } from '../../config/locale-schema.ts'
+import type { SiteStatusModel, StatusTranslationRow } from '../../lib/status/build-data.ts'
+
+// the `/status/` service page: English-only copy with no client directives, `set:html` or controls;
+// it only renders a server-built model, and all styling lives in src/styles/status.css
+
+type Props = {
+	model: SiteStatusModel
+}
+
+const { model } = Astro.props as Props
+const { translations, content, imageRelease, generatedAt, version } = model
+
+// the build time is stored in UTC but shown in Europe/Berlin time (CET/CEST), with the UTC original in
+// `title` so the conversion is visible. The string is assembled from parts by hand to stay
+// deterministic: locale formats surprise, e.g. en-GB writes "Sept" for September
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+const generatedInstant = new Date(generatedAt)
+const partsIn = (timeZone: string) => {
+	const parts = new Intl.DateTimeFormat('en-US', {
+		timeZone,
+		year: 'numeric',
+		month: '2-digit',
+		day: '2-digit',
+		hour: '2-digit',
+		minute: '2-digit',
+		hourCycle: 'h23',
+	}).formatToParts(generatedInstant)
+	const get = (type: string) => parts.find((part) => part.type === type)!.value
+	return {
+		year: get('year'),
+		month: get('month'),
+		day: get('day'),
+		hour: get('hour'),
+		minute: get('minute'),
+	}
+}
+const local = partsIn('Europe/Berlin')
+const utc = partsIn('UTC')
+// e.g. "6 Sep 2026 · 14:34"
+const generatedLabel = `${Number(local.day)} ${MONTHS[Number(local.month) - 1]} ${local.year} · ${local.hour}:${local.minute}`
+// e.g. "06/09/2026 12:34 UTC"
+const utcTitle = `${utc.day}/${utc.month}/${utc.year} ${utc.hour}:${utc.minute} UTC`
+
+// translation copy names the translated locales from the config (`EN`, `EN/DE`); a one-locale site has
+// none, so the table lists documents without the freshness column, summary or Translations metric
+const hasTranslations = translations.locales.length > 0
+const translatedCodes = translations.locales.map((locale) => locale.toUpperCase()).join('/')
+const languageNames = new Intl.DisplayNames([SERVICE_COPY_LOCALE], { type: 'language' })
+const translatedNames = translations.locales.map((locale) => languageNames.of(locale)).join('/')
+
+// row titles are in the display locale; mark them only when it is not the service-copy language
+const titleLang =
+	translations.titleLocale === SERVICE_COPY_LOCALE ? undefined : translations.titleLocale
+
+const SECTION_LABELS = { articles: 'Article', courses: 'Course', pages: 'Page' } as const
+const sectionLabel = (section: keyof typeof SECTION_LABELS): string => SECTION_LABELS[section]
+
+// publication status and translation freshness are separate axes, so an outdated translation of a
+// published document stays visible; the key goes into data-status for the CSS colors
+const publicationView = (row: StatusTranslationRow): { key: string; label: string } =>
+	row.published ? { key: 'published', label: 'Published' } : { key: 'draft', label: 'Draft' }
+const TRANSLATION_LABELS = {
+	'up-to-date': 'Up to date',
+	outdated: 'Outdated',
+	unverified: 'Unverified',
+} as const
+
+// the badge shows "month, year"; publishedAt is a calendar date, so month and year come straight from
+// the ISO string with no time-zone shift
+const MONTH_NAMES = [
+	'january',
+	'february',
+	'march',
+	'april',
+	'may',
+	'june',
+	'july',
+	'august',
+	'september',
+	'october',
+	'november',
+	'december',
+]
+const formatMonthYear = (iso: string): string =>
+	`${MONTH_NAMES[Number(iso.slice(5, 7)) - 1]}, ${iso.slice(0, 4)}`
+---
+
+<div class="site-status">
+	<p class="site-status__intro">
+		{
+			hasTranslations
+				? 'A quiet, build-time snapshot of the published content, translation freshness and the tracked image release.'
+				: 'A quiet, build-time snapshot of the published content and the tracked image release.'
+		}
+		It reflects the last static build, not live availability.
+	</p>
+
+	<div class="site-status__overview">
+		{
+			hasTranslations && (
+				<div class="site-status__metric">
+					<span class="site-status__metric-value site-status__tone-translations">
+						{translations.summary.totalPairs}
+					</span>
+					<span class="site-status__metric-label">Translations</span>
+				</div>
+			)
+		}
+		<div class="site-status__metric">
+			<span class="site-status__metric-value site-status__tone-photos">
+				{content.publishedPhotos}
+			</span>
+			<span class="site-status__metric-label">Photos</span>
+		</div>
+		<div class="site-status__metric">
+			<span class="site-status__metric-value site-status__tone-albums">
+				{content.publishedAlbums}
+			</span>
+			<span class="site-status__metric-label">Albums</span>
+		</div>
+		<div class="site-status__metric">
+			<span class="site-status__metric-value site-status__tone-assets">
+				{imageRelease.assetCount}
+			</span>
+			<span class="site-status__metric-label">Released</span>
+		</div>
+	</div>
+
+	<section class="site-status__section" aria-labelledby="site-status-translations">
+		<h2 class="site-status__section-title" id="site-status-translations">
+			{hasTranslations ? 'Translations' : 'Documents'}
+		</h2>
+		{
+			hasTranslations && (
+				<p class="site-status__summary">
+					{translations.summary.publishedPairs} published,{' '}
+					{translations.summary.needsReview} {translatedCodes} translations not up to
+					date, of {translations.summary.totalPairs} translation pairs.
+				</p>
+			)
+		}
+		<div class="site-status__table-wrap">
+			<table class="site-status__table">
+				<caption>
+					{
+						hasTranslations
+							? `${translatedNames} translation freshness for every document pair.`
+							: 'Publication status of every document.'
+					}
+				</caption>
+				<thead>
+					<tr>
+						<th scope="col">Section</th>
+						<th scope="col">Document</th>
+						<th scope="col">Status</th>
+						{hasTranslations && <th scope="col">{translatedCodes} translation</th>}
+					</tr>
+				</thead>
+				<tbody>
+					{
+						translations.rows.map((row) => (
+							<tr>
+								<td>{sectionLabel(row.section)}</td>
+								<td>
+									{row.routeHref ? (
+										<a
+											class="site-status__doc-link"
+											href={row.routeHref}
+											lang={titleLang}
+										>
+											{row.title}
+										</a>
+									) : titleLang ? (
+										<span lang={titleLang}>{row.title}</span>
+									) : (
+										row.title
+									)}
+									{row.courseStatus && (
+										<span
+											class:list={[
+												'site-status__badge site-status__badge--xs site-status__badge--gap site-status__course-badge',
+												`site-status__course-badge--${row.courseStatus}`,
+											]}
+										>
+											{row.courseStatus === 'current' ? 'Open' : 'Archive'}
+										</span>
+									)}
+									{row.publishedAt && (
+										<span class="site-status__badge site-status__badge--outline site-status__tone-muted site-status__badge--xs site-status__badge--quiet site-status__badge--gap">
+											{formatMonthYear(row.publishedAt)}
+										</span>
+									)}
+								</td>
+								<td>
+									<span
+										class="site-status__freshness"
+										data-status={publicationView(row).key}
+									>
+										{publicationView(row).label}
+									</span>
+								</td>
+								{hasTranslations && (
+									<td>
+										<span
+											class="site-status__freshness"
+											data-status={row.translation}
+										>
+											{TRANSLATION_LABELS[row.translation]}
+										</span>
+									</td>
+								)}
+							</tr>
+						))
+					}
+				</tbody>
+			</table>
+		</div>
+	</section>
+
+	<section class="site-status__section" aria-labelledby="site-status-content">
+		<h2 class="site-status__section-title" id="site-status-content">Published content</h2>
+		<dl class="site-status__facts">
+			<dt>Articles</dt>
+			<dd>
+				<span
+					class="site-status__badge site-status__badge--solid site-status__tone-articles site-status__badge--sm"
+					>{content.publishedArticlePairs}</span
+				>
+			</dd>
+			{
+				// only with the courses module; Astro prints an expression's whitespace as written, so the
+				// rows keep the layout of the static ones around them
+				// prettier-ignore
+				content.publishedCoursePairs !== undefined && (<><dt>Courses</dt>
+			<dd>
+				<span class="site-status__badge site-status__badge--solid site-status__tone-courses site-status__badge--sm">{content.publishedCoursePairs}</span>
+			</dd></>)
+			}
+			<dt>Pages</dt>
+			<dd>
+				<span
+					class="site-status__badge site-status__badge--solid site-status__tone-pages site-status__badge--sm"
+					>{content.publishedPagePairs}</span
+				>
+			</dd>
+			<dt>Photographs</dt>
+			<dd>
+				<span
+					class="site-status__badge site-status__badge--solid site-status__tone-photos site-status__badge--sm"
+					>{content.publishedPhotos}</span
+				>
+			</dd>
+			<dt>Portfolio albums</dt>
+			<dd>
+				<span
+					class="site-status__badge site-status__badge--solid site-status__tone-albums site-status__badge--sm"
+					>{content.publishedAlbums}</span
+				>
+			</dd>
+		</dl>
+	</section>
+
+	<section class="site-status__section" aria-labelledby="site-status-release">
+		<h2 class="site-status__section-title" id="site-status-release">Image release</h2>
+		<dl class="site-status__facts">
+			<dt>Status</dt>
+			<dd>
+				<span
+					class="site-status__badge site-status__badge--outline site-status__tone-active site-status__badge--sm"
+				>
+					{imageRelease.active ? 'Active' : 'Inactive'}
+				</span>
+			</dd>
+			<dt>Release assets</dt>
+			<dd>
+				<span
+					class="site-status__badge site-status__badge--solid site-status__tone-assets site-status__badge--sm"
+					>{imageRelease.assetCount}</span
+				>
+			</dd>
+		</dl>
+		<p class="site-status__summary">
+			This describes the build-time tracked descriptor only — not live R2 or CDN availability.
+		</p>
+	</section>
+
+	<p class="site-status__generated">
+		Generated during static build · <time datetime={generatedAt} title={utcTitle}
+			>{generatedLabel}</time
+		> · <span
+			class="site-status__badge site-status__badge--outline site-status__tone-accent site-status__badge--sm"
+			>v{version}</span
+		>
+	</p>
+</div>

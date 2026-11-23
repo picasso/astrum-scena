@@ -1,0 +1,92 @@
+---
+translationKey: blocks
+locale: en
+slug: blocks
+title: Blocks
+excerpt: A synthetic page that shows the Gallery and Wrap Around blocks of the core.
+status: published
+moreDocs:
+    docs:
+        - kind: course
+          slug: night-sky-workshop
+        - kind: course
+          slug: darkroom-basics
+        - kind: article
+          slug: reading-the-light
+---
+
+This page is synthetic: it puts the image blocks of the core on one page, each in another layout.
+
+<section data-testid="gallery-static">
+
+## Cropped and natural layouts
+
+<div data-testid="gallery-rect">
+    <Gallery
+        albumId="coastal-light"
+        layout="rect"
+        columns={3}
+        gap="medium"
+        frame="thick"
+        outside={20}
+        inlineCaption={true}
+    />
+</div>
+
+<div data-testid="gallery-square">
+    <Gallery
+        albumId="geometry-studies"
+        layout="square"
+        columns={2}
+        gap="tiny"
+        frame="medium"
+        frameColor="alt"
+        action="none"
+        inlineCaption={true}
+        lightboxScope="block"
+    />
+</div>
+
+<div data-testid="gallery-justified">
+    <Gallery
+        imageSetId="every-photo"
+        layout="justified"
+        columns={3}
+        gap="none"
+        frame="thin"
+        lightboxCaption={false}
+    />
+</div>
+
+</section>
+
+<section data-testid="gallery-dynamic">
+
+## A random selection
+
+<Gallery
+    imageSetId="every-photo"
+    randomCount={4}
+    layout="square"
+    columns={4}
+    gap="large"
+    frame="none"
+    mobileFirstOnly={true}
+/>
+
+</section>
+
+<section data-testid="wrap-around">
+
+## Images in the text flow
+
+<WrapAround
+    images={[{ imageId: 'wide-tide' }, { imageId: 'still-square' }]}
+    imageGap="medium"
+    action="none"
+/>
+
+Wrap Around sets the images beside the text, and this paragraph flows around them, so the block
+shows how a short text wraps an image column.
+
+</section>

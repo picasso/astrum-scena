@@ -1,0 +1,29 @@
+---
+import HeroSlider from '../../components/hero-slider.astro'
+import HomeFallback from '../../components/home-fallback.astro'
+import type { Locale } from '../../config/locale-schema.ts'
+import { site } from '../../config/site.ts'
+import { siteRoot } from '../../config/site-root.ts'
+import Fullscreen from '../../layouts/fullscreen.astro'
+import { localizedStaticPaths } from '../../lib/content/routes.ts'
+import { loadFeaturedHome } from '../../lib/featured.ts'
+
+export function getStaticPaths() {
+	return localizedStaticPaths(site.content.locales)
+}
+
+type Props = { locale: Locale }
+
+const { locale } = Astro.props
+const featured = await loadFeaturedHome(siteRoot)
+---
+
+<Fullscreen>
+	{
+		featured ? (
+			<HeroSlider slot="hero" lang={locale} featured={featured} />
+		) : (
+			<HomeFallback slot="hero" lang={locale} />
+		)
+	}
+</Fullscreen>

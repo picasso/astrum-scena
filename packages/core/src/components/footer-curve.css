@@ -1,0 +1,24 @@
+@import '../styles/layers.css';
+
+@layer components {
+	/* The SVG fill is the footer color and the band background is the page color; `.inverse` swaps them. */
+	.footer-curve {
+		color: var(--color-surface);
+		background-color: var(--color-background);
+		line-height: 0;
+		pointer-events: none;
+	}
+	.footer-curve--inverse {
+		color: var(--color-background);
+		background-color: var(--color-surface);
+	}
+	/* Overlaps the footer by 1px so no light seam shows at the joint. */
+	.footer-curve svg {
+		display: block;
+		margin-bottom: -1px;
+	}
+	.footer-curve svg path {
+		fill: currentColor;
+		stroke: transparent;
+	}
+}

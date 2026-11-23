@@ -1,0 +1,82 @@
+---
+import './album-intro.css'
+
+import { site } from '../../config/site.ts'
+import type { Locale } from '../../lib/content/schemas.ts'
+import type { ImageCatalog } from '../../lib/images/catalog.ts'
+import { buildPictureModel } from '../../lib/images/media.ts'
+import { descriptionParagraphs, mosaicLayout } from '../../lib/portfolio/album-intro.ts'
+import { resolveAlbumLayout } from '../../lib/portfolio/album-layout.ts'
+import type { AlbumEntry, PhotoEntry } from '../../lib/portfolio/publication.ts'
+import { resolveAlbumPhotos } from '../../lib/portfolio/publication.ts'
+import { albumGridSizes } from '../../lib/portfolio/sizes.ts'
+import { resolveSurfaceMedia } from '../../lib/portfolio/surface.ts'
+import ResponsivePicture from './responsive-picture.astro'
+
+// album description header: a decorative mosaic of every photo beside the text, rendered only when
+// there is a description. Tiles reuse the grid cell's srcset and sizes, so the browser picks the same
+// file from cache and the mosaic costs no new downloads; in a narrow column it is hidden and its lazy
+// images never load
+type Props = {
+	catalog: ImageCatalog
+	album: AlbumEntry
+	photosById: ReadonlyMap<string, PhotoEntry>
+	description: string | undefined
+	locale: Locale
+}
+
+const { catalog, album, photosById, description, locale } = Astro.props
+const paragraphs = descriptionParagraphs(description)
+const sizes = albumGridSizes(resolveAlbumLayout(site.album, album.data.layout))
+const tiles =
+	paragraphs.length > 0
+		? resolveAlbumPhotos(album, photosById).map((photo) => {
+				const focal = photo.data.focalPoint ?? { x: 50, y: 50 }
+				return {
+					id: photo.id,
+					style: `--mosaic-focal:${focal.x}% ${focal.y}%;`,
+					model: buildPictureModel(
+						resolveSurfaceMedia(catalog.manifest, photo.id, 'albumGrid'),
+						{
+							originBase: catalog.originBase,
+							alt: '',
+							sizes,
+						},
+					),
+				}
+			})
+		: []
+// tile size follows the text length to keep the mosaic within the text height
+const layout = mosaicLayout(tiles.length, paragraphs, locale)
+const introStyle = `--mosaic-tile:${layout.tile}px; --mosaic-gap:${layout.gap}px; --mosaic-radius:${layout.radius}px;`
+---
+
+{
+	paragraphs.length > 0 && (
+		<div class="album-intro" style={introStyle}>
+			<div class="album-intro__row">
+				<div
+					class="album-intro__mosaic"
+					aria-hidden="true"
+					style={`--mosaic-columns:${layout.columns};`}
+				>
+					{tiles.map((tile) => (
+						<div class="album-intro__tile" style={tile.style}>
+							<ResponsivePicture
+								model={tile.model}
+								class="album-intro__media"
+								imgClass="album-intro__img"
+								fetchpriority="low"
+							/>
+						</div>
+					))}
+				</div>
+				<div class="album-intro__text">
+					{paragraphs.map((paragraph) => (
+						<p>{paragraph}</p>
+					))}
+				</div>
+			</div>
+		</div>
+	)
+}

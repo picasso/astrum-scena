@@ -1,0 +1,5 @@
+/* The single cascade-layer order. Every CSS entry point imports this first, so the order holds
+ * whichever chunk the browser parses first. `properties` is Tailwind's @property fallback and must stay
+ * lowest; vendor sits above base (libraries beat preflight) and below components (our rules beat
+ * libraries by layer, not by specificity). */
+@layer properties, theme, base, vendor, components, utilities;

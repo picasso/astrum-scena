@@ -1,0 +1,91 @@
+{
+	"@picasso-ai/astrum-scena": {
+		"FooterCopyrightReplacementProps": {
+			"declaration": "{ lang: Locale; since: number; year: number; holder: string; rights: string; }",
+			"kind": "type"
+		},
+		"LogoReplacementProps": {
+			"declaration": "{ placement: 'header' | 'banner'; lang: Locale; title: string; }",
+			"kind": "type"
+		},
+		"ReplacementPointProps": {
+			"declaration": "{ logo: LogoReplacementProps; 'footer-copyright': FooterCopyrightReplacementProps; }",
+			"kind": "type"
+		},
+		"default": {
+			"declaration": "() => AstroIntegration",
+			"kind": "value"
+		}
+	},
+	"@picasso-ai/astrum-scena/collections": {
+		"CoreCollections": {
+			"declaration": "{ albums: CollectionConfig<typeof albumSchema>; articles: CollectionConfig<typeof articleSchema>; legal: CollectionConfig<typeof legalSchema>; pages: CollectionConfig<typeof pageSchema>; photos: CollectionConfig<typeof photoSchema>; }",
+			"kind": "type"
+		},
+		"ModuleCollections": {
+			"declaration": "{ courses: CollectionConfig<typeof courseSchema>; }",
+			"kind": "type"
+		},
+		"defineCoreCollections": {
+			"declaration": "() => CoreCollections & ModuleCollections",
+			"kind": "value"
+		}
+	},
+	"@picasso-ai/astrum-scena/eslint": {
+		"CoreManifest": {
+			"declaration": "{ name: string; exports: Record<string, unknown>; }",
+			"kind": "type"
+		},
+		"DeepImportRules": {
+			"declaration": "{ patterns: ImportPattern[]; syntax: SyntaxRestriction[]; }",
+			"kind": "type"
+		},
+		"FlatConfig": {
+			"declaration": "Record<string, unknown>",
+			"kind": "type"
+		},
+		"ImportPattern": {
+			"declaration": "{ regex: string; caseSensitive: true; message: string; }",
+			"kind": "type"
+		},
+		"LintConfig": {
+			"declaration": "{ files?: string[]; ignores?: string[]; linterOptions?: { noInlineConfig: true; }; plugins?: Record<string, object>; rules: Record<string, RuleEntry>; }",
+			"kind": "type"
+		},
+		"RuleEntry": {
+			"declaration": "[ 'error', ...unknown[] ]",
+			"kind": "type"
+		},
+		"SyntaxRestriction": {
+			"declaration": "{ selector: string; message: string; }",
+			"kind": "type"
+		},
+		"astrumScenaEslint": {
+			"declaration": "({ files, syntax }?: { files?: string[]; syntax?: SyntaxRestriction[]; }, manifest?: CoreManifest) => LintConfig[]",
+			"kind": "value"
+		},
+		"astrumScenaStyle": {
+			"declaration": "(importPeer?: StylePeerImport) => Promise<FlatConfig[]>",
+			"kind": "value"
+		},
+		"declaredSpecifiers": {
+			"declaration": "(manifest: CoreManifest) => string[]",
+			"kind": "value"
+		},
+		"deepImportRules": {
+			"declaration": "(manifest?: CoreManifest) => DeepImportRules",
+			"kind": "value"
+		},
+		"enumDeclaration": {
+			"declaration": "SyntaxRestriction",
+			"kind": "value"
+		},
+		"installedManifest": {
+			"declaration": "() => CoreManifest",
+			"kind": "value"
+		}
+	},
+	"@picasso-ai/astrum-scena/markdownlint.json": {},
+	"@picasso-ai/astrum-scena/prettier": {},
+	"@picasso-ai/astrum-scena/tsconfig.json": {}
+}

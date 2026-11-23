@@ -1,0 +1,28 @@
+---
+import './page-hero.css'
+
+import { site } from '../config/site.ts'
+import { splitHeading } from '../lib/split-heading.ts'
+
+// text page header: the image-less state of the hero slot that `top-section.astro` fills when the
+// page has a banner. The legacy site had its H1 only in the banner and hid it without an image; the
+// only H1 cannot be hidden (a11y, SEO), so the same header renders on a solid surface. Metrics and the
+// split accent match the photo banner, so adding an image changes only the section background
+type Props = {
+	title: string
+}
+
+const { title } = Astro.props as Props
+const heading = splitHeading(title)
+
+// the accent shares the section banner's config because this header is that banner without a photo
+const accentClass = ['page-hero__accent', `page-hero__accent--${site.topSection.accent.section}`]
+---
+
+<section class="page-hero">
+	<div class="page-hero__title">
+		<h1>
+			{heading.head}{heading.tail && <span class:list={accentClass}>{heading.tail}</span>}
+		</h1>
+	</div>
+</section>

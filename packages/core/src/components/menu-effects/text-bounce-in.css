@@ -1,0 +1,15 @@
+@import '../../styles/layers.css';
+
+@layer components {
+	/* The text grows with a bounce. */
+	nav[aria-label='Primary'].anim-text-bounce-in .top-menu-label {
+		display: inline-block;
+		transform: scale(1);
+		transition: transform var(--duration-medium) cubic-bezier(0.47, 2.02, 0.31, -0.36);
+	}
+
+	nav[aria-label='Primary'].anim-text-bounce-in .top-menu-link:hover .top-menu-label,
+	nav[aria-label='Primary'].anim-text-bounce-in .top-menu-link:focus-visible .top-menu-label {
+		transform: scale(1.08);
+	}
+}

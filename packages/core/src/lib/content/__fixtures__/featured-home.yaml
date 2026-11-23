@@ -1,0 +1,27 @@
+schemaVersion: 1
+slides:
+    - id: northland-cover
+      align: left
+      target:
+          collection: albums
+          slug: northland
+          linkKind: album
+      copySource: target
+      mediaSource: target
+    - id: sunrises-photo-copy
+      align: right
+      target:
+          collection: albums
+          slug: sunrises
+          linkKind: album
+      copySource: media
+      mediaSource:
+          photoSlug: still-symmetry
+    - id: field-notes-cover
+      align: left
+      target:
+          collection: articles
+          slug: field-notes
+          linkKind: page
+      copySource: target
+      mediaSource: target

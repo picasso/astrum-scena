@@ -1,0 +1,7 @@
+interface:
+    display_name: 'Process Images'
+    short_description: 'Build, check, publish and activate image derivatives'
+    default_prompt: 'Use $process-images to run the image derivative pipeline.'
+
+policy:
+    allow_implicit_invocation: false

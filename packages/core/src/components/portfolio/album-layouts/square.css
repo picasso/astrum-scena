@@ -1,0 +1,8 @@
+@import '../../../styles/layers.css';
+@import './crop.css';
+
+@layer components {
+	.album-square__item .album-photo {
+		aspect-ratio: 1;
+	}
+}

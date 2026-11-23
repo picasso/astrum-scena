@@ -1,0 +1,41 @@
+@import '../../../styles/layers.css';
+
+@layer components {
+	/* The minimum cell width makes `auto-fill` give min(columns, max(minColumns, floor((W + gap) /
+	 * (240 + gap)))) columns, the same formula as `sizes` (lib/portfolio/sizes.ts) and Gallery. The
+	 * viewer shows the uncropped photo. */
+	.album-square,
+	.album-rect {
+		--album-tile-max: calc(
+			(100% - (var(--album-columns) - 1) * var(--album-gap)) / var(--album-columns)
+		);
+		--album-tile-min: calc(
+			(100% - (var(--album-min-columns) - 1) * var(--album-gap)) / var(--album-min-columns)
+		);
+
+		display: grid;
+		grid-template-columns: repeat(
+			auto-fill,
+			minmax(max(var(--album-tile-max), min(240px, var(--album-tile-min))), 1fr)
+		);
+		gap: var(--album-gap, 12px);
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	/* The anchor holds the cell ratio: <img> carries the photo's inline aspect-ratio (no CLS), and with
+	 * width and height both set aspect-ratio no longer applies, so the image fills the cell height. */
+	:is(.album-square__item, .album-rect__item) .album-photo {
+		overflow: hidden;
+	}
+
+	:is(.album-square__item, .album-rect__item) :is(.album-photo__media, .album-photo__img) {
+		height: 100%;
+	}
+
+	:is(.album-square__item, .album-rect__item) .album-photo__img {
+		object-fit: cover;
+		object-position: var(--album-focal, 50% 50%);
+	}
+}

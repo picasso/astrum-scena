@@ -1,0 +1,10 @@
+---
+// the gallery coordinator script lives here, not in gallery.astro: Astro emits a component script where
+// the first instance finishes rendering, and galleries finish their async data load in varying order,
+// so the tag moved between builds and `dist` was not reproducible. Render this once per page, after
+// the galleries.
+---
+
+<script>
+	import '../../ui/gallery-coordinator.ts'
+</script>

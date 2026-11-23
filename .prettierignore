@@ -1,0 +1,32 @@
+node_modules
+dist
+build
+out
+coverage
+.cache
+playwright-report
+test-results
+.astro
+*.log
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Per-user Claude Code settings: gitignored, rewritten by the tool itself
+.claude/settings.local.json
+
+# Generated public projection: the pipeline writes it with canonicalStringifyPretty (arrays always
+# multi-line), which Prettier would collapse.
+**/src/generated/images-public.json
+
+# the config lock, written by `pnpm config:resolve` and compared byte for byte by its gate
+**/site.lock.yaml
+
+# the core's API snapshot, written by `pnpm api:snapshot` and compared byte for byte by its gate
+packages/core/api-snapshot/
+
+# BMAD: installer-managed skills and runtime (overwritten on every update), its render cache, and the
+# artifacts its workflows write
+.claude/skills/bmad-*/
+_bmad/
+_bmad-output/

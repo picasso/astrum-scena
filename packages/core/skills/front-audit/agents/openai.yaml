@@ -1,0 +1,7 @@
+interface:
+    display_name: 'Front Audit'
+    short_description: 'Audit Astro frontend changes against the site rules'
+    default_prompt: 'Use $front-audit to review the changed Astro frontend surface.'
+
+policy:
+    allow_implicit_invocation: false

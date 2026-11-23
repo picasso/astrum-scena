@@ -1,0 +1,134 @@
+---
+import './album-list.css'
+
+import { site } from '../../config/site.ts'
+import { albumHref } from '../../lib/content/routes.ts'
+import type { Locale } from '../../lib/content/schemas.ts'
+import { projectAlbumText } from '../../lib/portfolio/locale.ts'
+import type { AlbumEntry } from '../../lib/portfolio/publication.ts'
+
+// the legacy left-column album list (`page-portfolio.php` / `page-folder.php`) on the portfolio index
+// and album pages. On a narrow screen, from `albumList.collapseFrom` albums, it folds into a no-JS
+// `<details>` disclosure. The disclosure and the open list are two copies of the same links with only
+// one visible, because CSS alone cannot open a closed `<details>` on desktop; display:none also takes
+// the hidden copy out of the accessibility tree
+type Props = {
+	albums: readonly AlbumEntry[]
+	locale: Locale
+	// absent on the portfolio index
+	currentAlbumId?: string
+	label: string
+}
+
+const { albums, locale, currentAlbumId, label } = Astro.props
+const items = albums.map((album) => ({
+	id: album.id,
+	href: albumHref(album.id, locale),
+	title: projectAlbumText(album.data, locale).title,
+	current: album.id === currentAlbumId,
+}))
+const collapsible = items.length >= site.albumList.collapseFrom
+const currentTitle = items.find((item) => item.current)?.title
+---
+
+<nav class="album-list" aria-label={label} data-album-list>
+	{
+		collapsible && (
+			<details class="album-list__disclosure">
+				<summary class="album-list__summary">
+					<span class="album-list__summary-label">
+						{label} <span class="album-list__summary-count">({items.length})</span>
+					</span>
+					{currentTitle && (
+						<span class="album-list__summary-current">{currentTitle}</span>
+					)}
+					<span class="album-list__chevron" aria-hidden="true" />
+				</summary>
+				<ul class="album-list__items">
+					{items.map((item) => (
+						<li class="album-list__item">
+							<a
+								href={item.href}
+								class:list={[
+									'album-list__link',
+									{ 'album-list__link--current': item.current },
+								]}
+								aria-current={item.current ? 'page' : undefined}
+							>
+								{item.title}
+							</a>
+						</li>
+					))}
+				</ul>
+			</details>
+		)
+	}
+	<ul class:list={['album-list__items', { 'album-list__items--wide': collapsible }]}>
+		{
+			items.map((item) => (
+				<li class="album-list__item">
+					<a
+						href={item.href}
+						class:list={[
+							'album-list__link',
+							{ 'album-list__link--current': item.current },
+						]}
+						aria-current={item.current ? 'page' : undefined}
+					>
+						{item.title}
+					</a>
+				</li>
+			))
+		}
+	</ul>
+</nav>
+
+<script>
+	// on desktop (≥ 1024px) CSS pins the column under the site header and scrolls it on its own; this
+	// script only adds the real header offset, centers a current album that starts below the column's
+	// first screen, and fades the bottom edge while items remain below
+	const WIDE = matchMedia('(min-width: 1024px)')
+
+	function syncHeaderOffset() {
+		const header = document.querySelector<HTMLElement>('.site-header--sticky')
+		const height = header ? header.getBoundingClientRect().height : 0
+		document.documentElement.style.setProperty('--sticky-header-height', `${height}px`)
+	}
+
+	function syncEdges(side: HTMLElement) {
+		const scrollable = side.scrollHeight > side.clientHeight + 1
+		side.classList.toggle('is-scrollable', scrollable)
+		side.classList.toggle(
+			'is-at-end',
+			!scrollable || side.scrollTop + side.clientHeight >= side.scrollHeight - 1,
+		)
+	}
+
+	function revealCurrent(side: HTMLElement) {
+		const current = side.querySelector<HTMLElement>(
+			'.album-list > .album-list__items .album-list__link--current',
+		)
+		if (!current) return
+		const bottom = current.offsetTop + current.offsetHeight
+		if (bottom <= side.clientHeight) return
+		side.scrollTop = current.offsetTop - (side.clientHeight - current.offsetHeight) / 2
+	}
+
+	function initAlbumLists() {
+		syncHeaderOffset()
+		for (const list of document.querySelectorAll<HTMLElement>('[data-album-list]')) {
+			const side = list.closest<HTMLElement>('.gallery-aside__side')
+			if (!side || side.dataset.albumListBound) continue
+			side.dataset.albumListBound = 'true'
+			if (WIDE.matches) revealCurrent(side)
+			syncEdges(side)
+			side.addEventListener('scroll', () => syncEdges(side), { passive: true })
+			new ResizeObserver(() => {
+				syncHeaderOffset()
+				syncEdges(side)
+			}).observe(side)
+		}
+	}
+
+	document.addEventListener('astro:page-load', initAlbumLists)
+</script>

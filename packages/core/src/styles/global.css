@@ -1,0 +1,64 @@
+/* Layer order first: Tailwind's own `@layer` statement must not be the first one the browser sees. */
+@import './layers.css';
+
+/* Explicit sources: auto-detection scans the whole repo, and a class name in a doc, spec or script would
+ * land in the site CSS. These are the core's own; the integration adds the site's `src/` without its
+ * content, since articles are styled through components, never through classes in the text
+ * (astrum-scena check content rejects `class`). */
+@import 'tailwindcss' source(none);
+@source '../';
+/* Tests and fixtures stay out of the published package (`files` in package.json), so they stay out of
+ * the sources too: a class name in a test must not change the workspace CSS against an installed one. */
+@source not '../**/*.test.ts';
+@source not '../**/*.test.tsx';
+@source not '../**/__fixtures__';
+@source not '../**/test-fixtures';
+@source not '../**/test-fixtures.ts';
+@source not '../config/fixtures';
+
+/* The theme and the layout tokens are site files: a leading `/` resolves from the Vite root, which is
+ * the site root. */
+@import '/src/theme/theme.css';
+
+/* Generated from `layout.*` in site.yaml (astrum-scena layout-tokens); its check layout-tokens gate catches drift. */
+@import '/src/generated/layout-tokens.css' layer(theme);
+
+/* Prose and the blocks remark renders inside it without a component of their own; their color palettes
+ * live in the theme. */
+@import './blocks/callout.css' layer(components);
+@import './blocks/note.css' layer(components);
+@import './blocks/links.css' layer(components);
+@import './prose.css' layer(components);
+
+@layer base {
+	/* Layout primitives stay outside the theme so they survive a theme replacement. */
+	:root {
+		--container-max: 1200px;
+		--container-pad: 1rem;
+	}
+
+	*,
+	*::before,
+	*::after {
+		box-sizing: border-box;
+	}
+
+	html,
+	body {
+		margin: 0;
+		max-width: 100%;
+		/* `clip`, not `hidden`: `hidden` makes body a scroll container (overflow-y becomes auto), which breaks
+		 * scroll-driven timelines such as the parallax and position:sticky. */
+		overflow-x: clip;
+	}
+
+	body {
+		font-family: var(--font-sans);
+		font-size: var(--text-base);
+		line-height: 1.618;
+		font-weight: var(--font-weight-normal);
+		/* Without it macOS uses subpixel antialiasing and strokes render heavier than on the legacy site. */
+		-webkit-font-smoothing: antialiased;
+		-moz-osx-font-smoothing: grayscale;
+	}
+}

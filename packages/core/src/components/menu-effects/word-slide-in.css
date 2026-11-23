@@ -1,0 +1,29 @@
+@import '../../styles/layers.css';
+
+@layer components {
+	/* A copy of the word from attr(data-hover) slides in from below. */
+	nav[aria-label='Primary'].anim-word-slide-in .top-menu-link {
+		overflow: hidden;
+		height: 1.1em;
+		line-height: 1.1em;
+	}
+
+	nav[aria-label='Primary'].anim-word-slide-in .top-menu-label {
+		position: relative;
+		display: inline-block;
+		transition: transform var(--duration-base) linear;
+	}
+
+	nav[aria-label='Primary'].anim-word-slide-in .top-menu-label::before {
+		position: absolute;
+		top: 110%;
+		left: 0;
+		content: attr(data-hover);
+		font-weight: var(--font-weight-semibold);
+	}
+
+	nav[aria-label='Primary'].anim-word-slide-in .top-menu-link:hover .top-menu-label,
+	nav[aria-label='Primary'].anim-word-slide-in .top-menu-link:focus-visible .top-menu-label {
+		transform: translateY(-110%);
+	}
+}

@@ -1,0 +1,378 @@
+---
+import '../../styles/image-frame.css'
+
+import { getCollection } from 'astro:content'
+
+import { defaultLocale, site } from '../../config/site.ts'
+import { siteRoot } from '../../config/site-root.ts'
+import { useTranslations } from '../../i18n/ui.ts'
+import { contentGapVar } from '../../lib/blocks/content-gap.ts'
+import { resolveGallery } from '../../lib/blocks/gallery/build-data.ts'
+import { GALLERY_MIN_TILE_PX } from '../../lib/blocks/gallery/geometry.ts'
+import { loadImageSets } from '../../lib/blocks/gallery/image-sets.ts'
+import { parseGalleryProps } from '../../lib/blocks/gallery/schema.ts'
+import { loadTaxonomyConfig } from '../../lib/content/files.ts'
+import type { Locale } from '../../lib/content/schemas.ts'
+import { loadImageCatalog } from '../../lib/images/catalog.ts'
+import { indexById } from '../../lib/portfolio/publication.ts'
+import GalleryItem from './gallery-item.astro'
+
+// typed MDX block (docs/blocks/gallery.md): the schema and the build resolver own the data, this
+// file only renders the container in two modes. A static gallery (no randomCount) ships final HTML;
+// a dynamic one puts the whole pool into an inert `<template>` and the first randomCount items into
+// `<noscript>`, and the browser coordinator fills the live container with a per-page random sample.
+// MDX props carry no catalog or collections, so they are loaded here at build time, as on the
+// portfolio pages
+
+const props = parseGalleryProps(Astro.props)
+const locale = (Astro.currentLocale ?? defaultLocale(site)) as Locale
+
+const [photos, albums, taxonomy, imageSets] = await Promise.all([
+	getCollection('photos'),
+	getCollection('albums'),
+	loadTaxonomyConfig(siteRoot),
+	loadImageSets(siteRoot),
+])
+const catalog = loadImageCatalog(siteRoot)
+
+const vm = resolveGallery(props, {
+	catalog,
+	photos,
+	photosById: indexById(photos),
+	albums,
+	places: taxonomy.places,
+	locale,
+	imageSets,
+})
+
+if (vm.ignoredSources.length > 0) {
+	// several valid sources are a diagnostic, not an error: the top-priority one wins
+	console.warn(
+		`Gallery: multiple sources given; using the top-priority one and ignoring ${vm.ignoredSources.join(', ')}`,
+	)
+}
+
+// cropped layouts (rect/square) open with `fade` because zooming from a crop jumps; justified keeps
+// the site default. The client has no site config, so viewer options travel in a data attribute
+const t = useTranslations(locale)
+const viewerOptions = JSON.stringify(
+	vm.animation === 'fade' ? { ...site.viewer, showHideAnimationType: 'fade' } : site.viewer,
+)
+const pageGroup = vm.lightboxScope === 'page' && vm.hasLightbox ? 'page' : undefined
+
+const frameColorVar =
+	vm.frameColor === 'alt' ? 'var(--color-image-border-alt)' : 'var(--color-image-border)'
+// reserve the live container's height (CLS) so the coordinator's insertion does not shift the flow;
+// the row count is an estimate from randomCount and the columns cap, actual columns may differ
+const reserveRows = vm.dynamic && vm.randomCount ? Math.ceil(vm.randomCount / vm.columns) : 0
+const containerStyle = [
+	`--gallery-gap:${contentGapVar(vm.gap)}`,
+	`--gallery-frame:${vm.framePx}px`,
+	`--gallery-frame-color:${frameColorVar}`,
+	`--gallery-cols:${vm.columns}`,
+	`--gallery-min-tile:${GALLERY_MIN_TILE_PX}px`,
+	`--gallery-outside:${vm.outside}cqw`,
+	`--gallery-reserve-rows:${reserveRows}`,
+].join(';')
+---
+
+<div
+	class:list={[
+		'gallery',
+		`gallery--${vm.layout}`,
+		vm.outside > 0 && 'gallery--outside',
+		vm.mobileFirstOnly && 'gallery--mobile-first',
+	]}
+	style={containerStyle}
+	data-gallery
+	data-gallery-layout={vm.layout}
+	data-gallery-columns={vm.columns}
+	data-gallery-outside={vm.outside > 0 ? vm.outside : undefined}
+	data-gallery-frame={vm.framePx}
+	data-gallery-mobile-first-only={vm.mobileFirstOnly ? '' : undefined}
+	data-gallery-dynamic={vm.dynamic ? '' : undefined}
+	data-gallery-random-count={vm.dynamic ? vm.randomCount : undefined}
+	data-gallery-order={vm.dynamic ? vm.order : undefined}
+	data-gallery-priority={vm.dynamic && vm.priorityPhotoIds.length > 0
+		? vm.priorityPhotoIds.join(' ')
+		: undefined}
+	data-block-gallery={vm.hasLightbox ? '' : undefined}
+	data-block-gallery-group={pageGroup}
+	data-copyright={vm.hasLightbox ? catalog.copyright : undefined}
+	data-more-label={vm.hasLightbox ? t('viewer.moreInfo') : undefined}
+	data-fullscreen-label={vm.hasLightbox ? t('viewer.fullscreen') : undefined}
+	data-pswp-options={vm.hasLightbox ? viewerOptions : undefined}
+>
+	{
+		vm.dynamic ? (
+			<>
+				<template data-gallery-candidates>
+					{vm.candidates.map((candidate) => (
+						<GalleryItem candidate={candidate} showInlineCaption={vm.inlineCaption} />
+					))}
+				</template>
+				<noscript>
+					<div class="gallery__grid">
+						{vm.active.map((candidate) => (
+							<GalleryItem
+								candidate={candidate}
+								showInlineCaption={vm.inlineCaption}
+							/>
+						))}
+					</div>
+				</noscript>
+				<div class="gallery__grid" data-gallery-live />
+			</>
+		) : (
+			<div class="gallery__grid">
+				{vm.active.map((candidate) => (
+					<GalleryItem candidate={candidate} showInlineCaption={vm.inlineCaption} />
+				))}
+			</div>
+		)
+	}
+</div>
+
+<style is:global>
+	/* Astro may bundle this before global.css, so it declares the layer order itself. */
+	@import '../../styles/layers.css';
+
+	@layer components {
+		.gallery {
+			/* Same safe breakout as Wrap Around: `outside` applies to each side of the prose, capped by the free
+			   space up to the viewport padding. cqw resolves against the named `.prose` container. */
+			--gallery-outside-available: max(0px, calc(50vw - 50cqw - var(--container-pad)));
+			--gallery-outside-effective: min(
+				var(--gallery-outside, 0cqw),
+				var(--gallery-outside-available)
+			);
+			container-type: inline-size;
+			width: 100%;
+			margin-block: var(--content-gap-large, 16px);
+		}
+
+		/* Gallery has no direction: it stays centered and breaks out equally on both sides. Width is the real
+		   layout width, so grid and justified recompute columns and rows for the wider band. */
+		.gallery--outside {
+			width: calc(100% + var(--gallery-outside-effective) + var(--gallery-outside-effective));
+			margin-inline: calc(0px - var(--gallery-outside-effective));
+		}
+
+		.gallery__grid {
+			margin: 0;
+			padding: 0;
+		}
+
+		/* rect / square — adaptive density with one shared visual tile minimum and the `columns` cap.
+		   minmax-min = max(minimum tile, ideal column width), yielding min(columns, what fits). */
+		.gallery--rect .gallery__grid,
+		.gallery--square .gallery__grid {
+			display: grid;
+			gap: var(--gallery-gap);
+			grid-template-columns: repeat(
+				auto-fill,
+				minmax(
+					min(
+						100%,
+						max(
+							var(--gallery-min-tile),
+							calc(
+								(100% - (var(--gallery-cols) - 1) * var(--gallery-gap)) /
+									var(--gallery-cols)
+							)
+						)
+					),
+					1fr
+				)
+			);
+		}
+
+		.gallery--rect {
+			--gallery-cell-ratio: 0.6667;
+		}
+
+		.gallery--square {
+			--gallery-cell-ratio: 1;
+		}
+
+		/* The dynamic gallery's live container is empty until JS; reserving the approximate height keeps the
+		   coordinator from shifting the flow (actualColumns may shrink, so it is an estimate). */
+		.gallery--rect .gallery__grid[data-gallery-live],
+		.gallery--square .gallery__grid[data-gallery-live] {
+			min-height: calc(
+				var(--gallery-reserve-rows, 0) *
+					(
+						(100cqw - (var(--gallery-cols) - 1) * var(--gallery-gap)) /
+							var(--gallery-cols)
+					) *
+					var(--gallery-cell-ratio) + max(var(--gallery-reserve-rows, 0) - 1, 0) *
+					var(--gallery-gap)
+			);
+		}
+
+		.gallery--justified .gallery__grid[data-gallery-live] {
+			min-height: calc(
+				var(--gallery-reserve-rows, 0) * 220px +
+					max(var(--gallery-reserve-rows, 0) - 1, 0) * var(--gallery-gap)
+			);
+		}
+
+		/* Frame and ratio live on the cell, not the nested link, so justified flexbox sees the frame in the
+		   item's outer size and `a` and `picture` fill the cell the same way. */
+		.gallery__item {
+			position: relative;
+			margin: 0;
+			min-width: 0;
+			overflow: hidden;
+			border: var(--gallery-frame) solid var(--gallery-frame-color);
+		}
+
+		.gallery__link {
+			display: block;
+			width: 100%;
+		}
+
+		.gallery__media {
+			display: block;
+			width: 100%;
+		}
+
+		.gallery--rect .gallery__item {
+			aspect-ratio: 3 / 2;
+		}
+
+		.gallery--square .gallery__item {
+			aspect-ratio: 1 / 1;
+		}
+
+		.gallery--rect .gallery__link,
+		.gallery--square .gallery__link,
+		.gallery--rect .gallery__media,
+		.gallery--square .gallery__media {
+			height: 100%;
+		}
+
+		.gallery--rect .gallery__img,
+		.gallery--square .gallery__img {
+			width: 100%;
+			height: 100%;
+			object-fit: cover;
+			object-position: var(--gallery-focal, 50% 50%);
+		}
+
+		/* content-box on the cell makes the frame additive: flexbox distributes content ∝ aspect, so row
+		   heights stay equal at any frame width (border-box would drift by ~2*frame/aspect).
+		   `--gallery-row-height` is the target; the coordinator recomputes it from the real width. */
+		.gallery--justified .gallery__grid {
+			display: flex;
+			flex-wrap: wrap;
+			gap: var(--gallery-gap);
+		}
+
+		.gallery--justified .gallery__item {
+			box-sizing: content-box;
+			flex-grow: var(--gallery-aspect);
+			flex-basis: calc(var(--gallery-row-height, 220px) * var(--gallery-aspect));
+		}
+
+		/* The huge flex-grow spacer takes the slack only on an incomplete last row, so its cells do not
+		   stretch to the right edge without JS. */
+		.gallery--justified .gallery__grid::after {
+			content: '';
+			flex-grow: 1000000;
+			flex-basis: 0;
+		}
+
+		/* Once the coordinator sets exact geometry inline, a flex spacer would compete with the last tile on
+		   resize and briefly wrap it. Without JS the class never appears, so the fallback stays. */
+		.gallery--justified .gallery__grid--justified-ready::after {
+			content: none;
+		}
+
+		/* JS materializes each packed row as an independent nowrap flex row. Old inline geometry therefore
+		   cannot temporarily wrap a cell during resize; row membership changes atomically after calculation.
+		   Without JS the original flex fallback above remains in effect. */
+		.gallery--justified .gallery__grid--justified-ready {
+			display: grid;
+			gap: var(--gallery-gap);
+		}
+
+		.gallery--justified .gallery__row {
+			display: flex;
+			min-width: 0;
+			gap: var(--gallery-gap);
+			flex-wrap: nowrap;
+		}
+
+		.gallery--justified .gallery__img {
+			width: 100%;
+			height: auto;
+		}
+
+		/* An overlay, so it adds no height. */
+		.gallery__caption {
+			position: absolute;
+			inset-inline: 0;
+			inset-block-end: 0;
+			margin: 0;
+			padding: 0.5em 0.75em;
+			font-size: 0.8125rem;
+			line-height: 1.3;
+			color: var(--color-on-image);
+			background: linear-gradient(
+				to top,
+				color-mix(in srgb, var(--color-shade) 70%, transparent),
+				transparent
+			);
+			pointer-events: none;
+		}
+
+		/* `display:none` keeps the hidden lazy images from loading. The dynamic mode mirrors this in the
+		   coordinator. */
+		@container prose (max-width: 480px) {
+			/* Keyed on the prose width, not the Gallery breakout width. */
+			.gallery--outside {
+				--gallery-outside-effective: 0px;
+			}
+
+			.gallery--mobile-first .gallery__grid > .gallery__item:not(:first-child) {
+				display: none;
+			}
+
+			/* The single item spans the full width: auto-fill would otherwise leave it in a partial tile. */
+			.gallery--rect.gallery--mobile-first .gallery__grid,
+			.gallery--square.gallery--mobile-first .gallery__grid {
+				grid-template-columns: 1fr;
+			}
+
+			.gallery--justified.gallery--mobile-first .gallery__item:first-child {
+				flex-grow: 1;
+			}
+
+			.gallery--justified.gallery--mobile-first .gallery__grid::after {
+				content: none;
+			}
+
+			/* `min(reserve-rows, 1)` drops the reserve once the coordinator zeroes --gallery-reserve-rows. */
+			.gallery--mobile-first .gallery__grid[data-gallery-live] {
+				min-height: calc(
+					min(var(--gallery-reserve-rows, 0), 1) * 100cqw *
+						var(--gallery-cell-ratio, 0.6667)
+				);
+			}
+		}
+
+		/* The fade starts on the real `load` (the coordinator sets `--loaded`). It is enabled only with
+		   `scripting: enabled`, so without JS images are visible by default. */
+		@media (scripting: enabled) and (prefers-reduced-motion: no-preference) {
+			.gallery__img {
+				opacity: 0;
+				transition: opacity 0.35s ease;
+			}
+
+			.gallery__img--loaded {
+				opacity: 1;
+			}
+		}
+	}
+</style>

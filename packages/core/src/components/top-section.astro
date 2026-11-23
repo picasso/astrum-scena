@@ -1,0 +1,92 @@
+---
+import './top-section.css'
+import 'virtual:variant-css/top-pattern'
+
+import { site, type TopSectionConfig } from '../config/site.ts'
+import type { BannerModel } from '../lib/banner/select.ts'
+import { buildPictureModel } from '../lib/images/media.ts'
+import { SURFACE_SIZES } from '../lib/portfolio/sizes.ts'
+import { splitHeading } from '../lib/split-heading.ts'
+import ResponsivePicture from './portfolio/responsive-picture.astro'
+
+// page banner: a full-bleed image (role hero, surface bannerHero, sizes 100vw) with config-driven overlays
+// (shade off|mono|tint, 6 patterns, blur on|small, shadow, parallax) and a centered split-heading H1 that
+// fades in. Parallax is a scroll-driven translateY, disabled in CSS on touch, below 768px and under
+// reduced motion (top-section.css).
+//
+// Input is a BannerModel (media + alt + accent), not a PhotoEntry, so albums (cover from content) and inner
+// pages (assignment in site.yaml) share the section.
+//
+// Not implemented, kept on record: the legacy blur-onload (image sharpens on load) and blur-onhover
+// effects. If added, they stay config-driven (`topSectionSchema` + a site.yaml switch) and pure CSS.
+// The legacy `dark-onload` is replaced by a CSS-only reveal (top-section.css); a JS variant that waits for
+// `decode` is in docs/backlog/bk03-top-section-decode-reveal.md.
+type Props = {
+	banner: BannerModel
+	title: string
+	config?: TopSectionConfig
+}
+
+// without the assertion Astro.props stays Record<string, any> here, not Props; the assertion
+// restores type safety and silences the false ts(6196) "Props is declared but never used"
+const { banner, title, config = site.topSection } = Astro.props as Props
+
+const model = buildPictureModel(banner.media, {
+	originBase: banner.originBase,
+	alt: banner.alt,
+	sizes: SURFACE_SIZES.bannerHero,
+})
+
+const heading = splitHeading(title)
+
+// the legacy modifier set (parallax/no-parallax, shadow, blur[.small], pattern[.<name>], no-shade),
+// renamed to BEM
+const classes = [
+	'top-section',
+	config.parallax ? 'top-section--parallax' : 'top-section--no-parallax',
+	config.shadow && 'top-section--shadow',
+	config.blur === 'on' && 'top-section--blur',
+	config.blur === 'small' && 'top-section--blur top-section--blur-small',
+	config.pattern !== 'off' && `top-section--pattern top-section--pattern-${config.pattern}`,
+	config.shade.mode === 'off' && 'top-section--no-shade',
+]
+
+// each shade mode has its own calibrated opacity: mono is the theme's shade color, tint uses the photo's
+// dominant color, off relies on the no-shade class to drop the layer
+const shade = config.shade
+const shadeStyle =
+	shade.mode === 'off'
+		? undefined
+		: shade.mode === 'tint'
+			? `opacity:${shade.tintOpacity / 100};background-color:${banner.media.dominantColor}`
+			: `opacity:${shade.monoOpacity / 100};background-color:var(--color-shade)`
+
+// anti-flicker: the section backdrop is filled with dominantColor at once and the image fades in over it
+// (top-section.css). The color goes on the wrapper because buildPictureModel puts it on the <img>, where
+// a transparent image does not show it.
+const backgroundStyle = `background-color:${banner.media.dominantColor}`
+
+const accentClass = ['top-section__accent', `top-section__accent--${banner.accent}`]
+
+// config picks the title reveal; the delay after the image lives in CSS
+const titleClass = ['top-section__title', `top-section__title--${config.titleReveal}`]
+---
+
+<section class:list={classes}>
+	<div class="top-section__bg" style={backgroundStyle}>
+		<ResponsivePicture
+			model={model}
+			class="top-section__picture"
+			imgClass="top-section__img"
+			loading="eager"
+			fetchpriority="high"
+		/>
+	</div>
+	<div class="top-section__pattern" aria-hidden="true"></div>
+	<div class="top-section__shade" aria-hidden="true" style={shadeStyle}></div>
+	<div class:list={titleClass}>
+		<h1>
+			{heading.head}{heading.tail && <span class:list={accentClass}>{heading.tail}</span>}
+		</h1>
+	</div>
+</section>

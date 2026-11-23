@@ -1,0 +1,31 @@
+@import '../../styles/layers.css';
+
+@layer components {
+	/* A dot splits into three. */
+	nav[aria-label='Primary'].anim-bottom-dots-expand .top-menu-link {
+		padding-bottom: 5px;
+		transition: color calc(var(--duration-base) * 2) var(--ease-out);
+	}
+
+	nav[aria-label='Primary'].anim-bottom-dots-expand .top-menu-link::before {
+		content: '•';
+		position: absolute;
+		top: 100%;
+		left: 50%;
+		color: transparent;
+		font-size: 1.2em;
+		transform: translateX(-50%);
+		transition:
+			text-shadow var(--duration-base) linear,
+			color var(--duration-base) linear;
+		pointer-events: none;
+	}
+
+	nav[aria-label='Primary'].anim-bottom-dots-expand .top-menu-link:hover::before,
+	nav[aria-label='Primary'].anim-bottom-dots-expand .top-menu-link:focus-visible::before {
+		color: var(--menu-effect-color);
+		text-shadow:
+			15px 0 var(--menu-effect-color),
+			-15px 0 var(--menu-effect-color);
+	}
+}

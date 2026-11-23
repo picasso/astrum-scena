@@ -1,0 +1,17 @@
+---
+// carries the PhotoSwipe client `<script>` outside the bracket routes (`[album].astro`, `[view].astro`):
+// astro-eslint-parser exposes a bracket file's client script as a virtual file with a bracket name,
+// which check-file/filename-naming-convention rejects. Without JS the anchors stay links: to the
+// photo page in the portfolio, possibly to the image file in content blocks.
+//
+// the PhotoSwipe CSS is imported here, not in the island module: a style injected as a JS module side
+// effect is lost when ClientRouter swaps <head> and the already-run module never re-injects it, so the
+// viewer would open unstyled after a View Transitions navigation. A component import becomes a page
+// `<link>` that ClientRouter keeps across navigations
+import '../../styles/vendor/photoswipe.css'
+import './photoswipe-loader.css'
+---
+
+<script>
+	import '../../ui/photoswipe-bootstrap.ts'
+</script>

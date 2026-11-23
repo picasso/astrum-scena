@@ -1,0 +1,18 @@
+@import '../../styles/layers.css';
+
+@layer components {
+	.top-section--pattern-carbon .top-section__pattern::after {
+		background:
+			radial-gradient(
+					color-mix(in srgb, var(--color-shade) 15%, transparent) 30%,
+					transparent 40%
+				)
+				0 0,
+			radial-gradient(
+					color-mix(in srgb, var(--color-shade) 15%, transparent) 30%,
+					transparent 40%
+				)
+				3px 3px;
+		background-size: 6px 6px;
+	}
+}

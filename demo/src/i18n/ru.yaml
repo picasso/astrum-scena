@@ -1,0 +1,4 @@
+# the demo's own texts over the core dictionary; every other key keeps the core's text
+schemaVersion: 1
+footer.quote: 'Фотография — это след света: заметьте, куда он падает, дождитесь, когда он изменится, и снимок получится сам.'
+contacts.intro: Пишите о печати, лицензировании или о любом другом вопросе по фотографиям на этом сайте.

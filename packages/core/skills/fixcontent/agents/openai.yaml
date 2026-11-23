@@ -1,0 +1,7 @@
+interface:
+    display_name: 'Fix Content'
+    short_description: 'Apply one targeted correction to a document'
+    default_prompt: 'Use $fixcontent to apply one targeted correction to a document.'
+
+policy:
+    allow_implicit_invocation: false

@@ -1,0 +1,18 @@
+@import '../../styles/layers.css';
+
+@layer components {
+	.top-section--pattern-hatch .top-section__pattern::after {
+		background:
+			radial-gradient(
+					transparent 40%,
+					color-mix(in srgb, var(--color-shade) 20%, transparent) 41%
+				)
+				0 0,
+			radial-gradient(
+					transparent 40%,
+					color-mix(in srgb, var(--color-shade) 20%, transparent) 41%
+				)
+				3px 3px;
+		background-size: 6px 6px;
+	}
+}

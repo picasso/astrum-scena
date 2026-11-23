@@ -1,0 +1,95 @@
+---
+import './card.css'
+import 'virtual:variant-css/card-look'
+
+import documentPlaceholder from '../assets/icons/document-placeholder.svg?raw'
+import type { CardPresentation } from '../config/variants.ts'
+import type { CardModel } from '../lib/cards/select.ts'
+import CourseBadge from './content/course-badge.astro'
+import ResponsivePicture from './portfolio/responsive-picture.astro'
+
+// port of the legacy theme's `includes/repeaters/grid.php` + `.shadow-box`; the legacy card showed
+// no date, author or "read more" link, so `more` appears only with `listing.moreLink: on`. Callers
+// resolve href, media and texts; the thumbnail may be missing because the cover is chosen editorially
+type Props = {
+	card: CardModel
+	// "read more" link label; without it the element is not rendered
+	more?: string
+	// h2 on an index under the banner's h1, h3 inside a section with its own h2
+	titleLevel?: 2 | 3
+	// values in config/variants.ts. Compact modes omit the excerpt and `more` instead of hiding them
+	// with CSS, so the accessibility tree matches the visible card
+	presentation?: CardPresentation
+	class?: string
+}
+
+const { card, more, titleLevel = 2, presentation = 'details', class: className } = Astro.props
+const Title = `h${titleLevel}` as 'h2' | 'h3'
+const hasFrame = Boolean(card.media || card.mediaPlaceholder)
+// title-slide overlays the frame; without a frame it falls back to the strip
+const overlay = presentation === 'title-slide' && hasFrame
+const compact = presentation !== 'details'
+// the space under the title only separates it from the excerpt, so a title-only plate drops it
+const titleOnly = compact || (!card.excerpt && !more)
+---
+
+<a
+	href={card.href}
+	class:list={['card', compact && `card--${overlay ? 'title-slide' : 'title-strip'}`, className]}
+>
+	{
+		(card.media || card.mediaPlaceholder) && (
+			<div
+				class:list={[
+					'card__media-frame',
+					card.ratio && `card__media-frame--${card.ratio}`,
+					card.badge && card.media && 'card__media-frame--badged',
+				]}
+				style={card.focal ? `--card-focal:${card.focal.x}% ${card.focal.y}%;` : undefined}
+			>
+				{card.media ? (
+					// on a short mobile listing Chrome loads lazy cards at once and raises visible ones to
+					// High, competing with the hero banner (LCP); the banner must win
+					<ResponsivePicture
+						model={card.media}
+						class="card__media"
+						imgClass="card__img"
+						fetchpriority="low"
+					/>
+				) : (
+					<div class="card__media card__media--placeholder" aria-hidden="true">
+						<Fragment set:html={documentPlaceholder} />
+					</div>
+				)}
+				{card.badge && (
+					<CourseBadge
+						status={card.badge.status}
+						label={card.badge.label}
+						class="card__badge"
+					/>
+				)}
+				{overlay && (
+					<div class="card__overlay">
+						<Title class="card__title">{card.title}</Title>
+					</div>
+				)}
+			</div>
+		)
+	}
+	{
+		!overlay && (
+			<div class:list={['card__body', titleOnly && 'card__body--title-only']}>
+				{card.badge && !(card.media || card.mediaPlaceholder) && (
+					<CourseBadge
+						status={card.badge.status}
+						label={card.badge.label}
+						class="card__badge card__badge--inline"
+					/>
+				)}
+				<Title class="card__title">{card.title}</Title>
+				{!compact && card.excerpt && <p class="card__excerpt">{card.excerpt}</p>}
+				{!compact && more && <span class="card__more">{more}</span>}
+			</div>
+		)
+	}
+</a>

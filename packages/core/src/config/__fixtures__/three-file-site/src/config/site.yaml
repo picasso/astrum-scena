@@ -1,0 +1,236 @@
+# synthetic config of the demo site
+schemaVersion: 1
+origin: https://demo.example.com
+identity:
+    title:
+        en: Astrum Scena Demo
+        ru: Демо Astrum Scena
+    photoAlt:
+        en: Photograph from the Astrum Scena demo
+        ru: Фотография с демо-сайта Astrum Scena
+    copyright:
+        holder:
+            en: The Astrum Scena authors
+            ru: Авторы Astrum Scena
+        since: 2026
+content:
+    locales:
+        - en
+        - ru
+    referenceLocale: en
+factcheck:
+    ownHosts: []
+privacy:
+    controller:
+        # the schema still requires both texts here, whatever content.locales holds
+        name:
+            en: The Astrum Scena authors
+            ru: Авторы Astrum Scena
+        contact:
+            kind: internal
+            href: /{lang}/contacts/
+theme:
+    default: dark
+    toggleVisible: true
+hero:
+    galleryAccent: accent
+menu:
+    animate: word-slide-in
+    width: adaptive
+    minWidth: standard
+    lang: code
+    theme: sun
+    logoSize: 0.5
+    topLogoSize: 0.2
+    topLogoSticky: off
+    sticky: on
+    stickyFade: 0.9
+    sectionIcon: on
+    sectionIconSwap: on
+    items:
+        - segment: portfolio
+          label:
+              en: Portfolio
+              ru: Портфолио
+          icon:
+              - image
+              - grid
+        - segment: articles
+          label:
+              en: Articles
+              ru: Статьи
+          icon:
+              - bookmark
+              - text
+        - segment: courses
+          label:
+              en: Courses
+              ru: Курсы
+          icon: person
+        - segment: contacts
+          label:
+              en: Contacts
+              ru: Контакты
+          icon: mail
+slider:
+    speed: 1000
+    autoplayDelay: 15000
+    truncateBudget: 400
+social:
+    - id: contacts
+      href: /{lang}/contacts/
+      label:
+          en: Contacts
+          ru: Контакты
+      icon: contacts
+      hover: '#5b9a68'
+topSection:
+    parallax: true
+    shadow: true
+    blur: off
+    pattern: off
+    shade:
+        mode: mono
+        monoOpacity: 30
+        tintOpacity: 45
+    accent:
+        album: accent
+        section: alt
+    titleReveal: fade
+footer:
+    columns: 3
+    curve:
+        shape: downright
+        height: 100
+    quote: on
+    lang: code
+    social: on
+    recentWorks:
+        count: 6
+        favorites: 2
+        freshness: 10
+articles:
+    order: newest
+courses:
+    order: title
+    currentFirst: on
+moreDocs:
+    article:
+        source: siblings
+        layout: grid
+        width: medium
+        heading: on
+        media: on
+        excerpt: on
+        card: details
+        ratio: vista
+        columns: 3
+        gap: 16
+        order: newest
+        limit: all
+    course:
+        source: siblings
+        layout: list
+        width: medium
+        heading: on
+        media: on
+        excerpt: on
+        card: details
+        ratio: vista
+        order: title
+        limit: all
+    # only the `blocks` page lists documents, by its own `moreDocs.docs`
+    page:
+        source: off
+        layout: grid
+        width: wide
+        heading: on
+        media: on
+        excerpt: off
+        card: title-slide
+        ratio: vista
+        columns: 3
+        gap: 16
+listing:
+    excerptHiddenBelow: 768
+    moreLink: off
+layout:
+    prose: 680
+    medium: 960
+    standard: 1200
+    gallery: 1440
+surfaces:
+    portfolioIndex:
+        width: gallery
+    album:
+        width: gallery
+    articlesIndex:
+        width: standard
+        kind: masonry
+        ratio: original
+    coursesIndex:
+        width: standard
+        kind: list
+        ratio: vista
+banners:
+    surfaces:
+        portfolioIndex: off
+        articlesIndex: off
+        coursesIndex: off
+        contacts: off
+portfolio:
+    layout: masonry
+    card: details
+    excerpt: on
+    masonry:
+        minColumnWidth: 300
+        gap: 16
+        maxColumns: 5
+    grid:
+        columns: 3
+        gap: 16
+        ratio: vista
+albumList:
+    collapseFrom: 8
+album:
+    layout: justified
+    justified:
+        targetRowHeight: 160
+        gap: 12
+        tolerance: 0.25
+    masonry:
+        minColumnWidth: 300
+        gap: 12
+        maxColumns: 5
+    square:
+        columns: 4
+        gap: 12
+        minColumns: 2
+    rect:
+        columns: 4
+        gap: 12
+        minColumns: 2
+photo:
+    dominantStrip: on
+    showRelated: on
+contacts:
+    aside:
+        image: off
+        width: 34
+        ratio: original
+        frame: thick
+        frameColor: alt
+viewer:
+    showHideAnimationType: zoom
+    showAnimationDuration: 800
+    hideAnimationDuration: 800
+    zoomAnimationDuration: 800
+    loop: true
+    bgOpacity: 1
+    easing: cubic-bezier(0.4, 0, 0.22, 1)
+    counter: off
+    fullscreen: on
+    moreInfo: on
+    copyright: on
+    idle: 4000
+    slideSpring: 20

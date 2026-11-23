@@ -1,0 +1,5 @@
+schemaVersion: 1
+# the schema still requires both descriptions, whatever content.locales holds
+description:
+    en: A synthetic photography site that exercises the Astrum Scena core.
+    ru: Синтетический фотосайт для проверки ядра Astrum Scena.

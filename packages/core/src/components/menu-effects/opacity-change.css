@@ -1,0 +1,22 @@
+@import '../../styles/layers.css';
+
+@layer components {
+	/* A dimmed link turns fully opaque. */
+	nav[aria-label='Primary'].anim-opacity-change .top-menu-link {
+		opacity: 0.6;
+		transition:
+			opacity var(--duration-medium) var(--ease-cubic),
+			color var(--duration-medium) var(--ease-cubic);
+	}
+
+	nav[aria-label='Primary'].anim-opacity-change .top-menu-link:hover,
+	nav[aria-label='Primary'].anim-opacity-change .top-menu-link:focus-visible {
+		opacity: 1;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		nav[aria-label='Primary'].anim-opacity-change .top-menu-link {
+			opacity: 1;
+		}
+	}
+}

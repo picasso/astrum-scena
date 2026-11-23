@@ -1,0 +1,11 @@
+{
+	"extends": "./tsconfig.base.json",
+	"compilerOptions": {
+		"noEmit": true,
+		"allowImportingTsExtensions": true,
+		// e2e specs run callbacks in the page and read the core dictionaries
+		"lib": ["ES2024", "DOM", "DOM.Iterable"],
+		"resolveJsonModule": true
+	},
+	"include": ["scripts/**/*.ts", "e2e/**/*.ts", "vitest.config.ts", "playwright.config.ts"]
+}

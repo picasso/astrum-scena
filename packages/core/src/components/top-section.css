@@ -1,0 +1,208 @@
+@import '../styles/layers.css';
+
+@layer components {
+	/* Text over the photo uses the theme-independent tokens, as in the hero. */
+
+	.top-section {
+		/* Fluid height instead of the legacy fixed steps; 45vw stays close to them at the old breakpoints. */
+		position: relative;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 100%;
+		height: clamp(220px, 45vw, 600px);
+		overflow: hidden;
+		--top-section-reveal-delay: 300ms;
+	}
+
+	/* The inline background-color (dominantColor) fills the surface while the image is still transparent. */
+	.top-section__bg {
+		position: absolute;
+		inset: 0;
+		z-index: 0;
+	}
+
+	.top-section__picture,
+	.top-section__img {
+		display: block;
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+	}
+
+	/* A delayed fade over the dominantColor fill keeps the image from popping in. Waiting for `decode`
+	 * would need client JS; that variant is in backlog BK03. */
+	.top-section__img {
+		animation: top-section-reveal var(--duration-medium) var(--ease-out) both;
+		animation-delay: var(--top-section-reveal-delay);
+	}
+
+	@keyframes top-section-reveal {
+		from {
+			opacity: 0;
+		}
+		to {
+			opacity: 1;
+		}
+	}
+
+	.top-section--shadow .top-section__bg {
+		box-shadow: inset 0 0 3px var(--color-ink);
+	}
+
+	/* scale hides the transparent edges of the blur. */
+	.top-section--blur .top-section__img {
+		filter: blur(8px);
+		transform: scale(1.06);
+	}
+	.top-section--blur.top-section--pattern .top-section__img,
+	.top-section--blur-small .top-section__img {
+		filter: blur(3px);
+	}
+	@media (max-width: 768px) {
+		.top-section--blur .top-section__img {
+			filter: blur(20px);
+		}
+	}
+
+	.top-section__pattern {
+		position: absolute;
+		inset: 0;
+		z-index: 1;
+		pointer-events: none;
+	}
+	.top-section__pattern::after {
+		content: '';
+		position: absolute;
+		inset: 0;
+	}
+
+	/* opacity and background-color come inline from the config. */
+	.top-section__shade {
+		position: absolute;
+		inset: 0;
+		z-index: 1;
+		opacity: 0;
+		pointer-events: none;
+	}
+	.top-section--no-shade .top-section__shade {
+		display: none;
+	}
+
+	.top-section__title {
+		position: relative;
+		z-index: 2;
+		/* The title waits for the image reveal; the same delay moves its entrance past the ClientRouter
+		 * crossfade (~250 ms), so the two animations do not overlap. */
+		--top-section-title-delay: calc(var(--top-section-reveal-delay) + var(--duration-medium));
+		/* A slow banner gesture, not a UI response, so it has its own timing. The curve eases both ends:
+		 * plain `ease-out` spends most of the opacity in the first frames and reads as a pop. */
+		--top-section-title-duration: var(--duration-long);
+		--top-section-title-ease: cubic-bezier(0.4, 0, 0.2, 1);
+		padding: 0 var(--container-pad);
+		text-align: center;
+	}
+	.top-section__title h1 {
+		margin: 0;
+		color: var(--color-on-image);
+		font-size: clamp(26px, 5vw, 60px);
+		font-weight: var(--font-weight-bold);
+		letter-spacing: var(--tracking-hero);
+		line-height: 1.2;
+		text-transform: uppercase;
+		text-shadow: 0 2px 12px color-mix(in srgb, var(--color-shade) 60%, transparent);
+	}
+	/* The variant comes from `topSection.accent`, so the base class has no color. */
+	.top-section__accent--accent {
+		color: var(--color-accent-fixed);
+	}
+	.top-section__accent--alt {
+		color: var(--color-alt-fixed);
+	}
+
+	/* No frame is translucent, so subpixel antialiasing never toggles and the text does not shimmer over
+	 * the crossfade. The wrapper's block padding masks the line while it starts below. */
+	.top-section__title--slide {
+		overflow: hidden;
+		padding-block: 1rem;
+	}
+	.top-section__title--slide h1 {
+		animation: top-section-title-slide var(--top-section-title-duration)
+			var(--top-section-title-ease) var(--top-section-title-delay) both;
+	}
+	@keyframes top-section-title-slide {
+		from {
+			transform: translateY(calc(100% + 1rem));
+		}
+		to {
+			transform: none;
+		}
+	}
+
+	/* Softer on first load but shimmers during transitions (see site.yaml). */
+	.top-section__title--fade h1 {
+		animation: top-section-title-fade var(--top-section-title-duration)
+			var(--top-section-title-ease) var(--top-section-title-delay) both;
+	}
+	@keyframes top-section-title-fade {
+		from {
+			opacity: 0;
+		}
+		to {
+			opacity: 1;
+		}
+	}
+
+	/* The 1 ms visibility step only holds the shared delay; there is no translucent phase. */
+	.top-section__title--off h1 {
+		animation: top-section-title-cut 1ms step-end var(--top-section-title-delay) both;
+	}
+	@keyframes top-section-title-cut {
+		from {
+			visibility: hidden;
+		}
+		to {
+			visibility: visible;
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.top-section__img,
+		.top-section__title h1 {
+			animation: none;
+			visibility: visible;
+			opacity: 1;
+			transform: none;
+		}
+	}
+
+	/* The named view timeline sits on the section: the absolutely positioned bg extends past it, so its
+	 * own view() range degenerates and the progress freezes. @supports is required, otherwise `both`
+	 * without a duration would stick at the last frame. Touch, <768 and reduced motion are excluded, as
+	 * on the legacy site. */
+	@supports (animation-timeline: view()) {
+		@media (hover: hover) and (min-width: 768px) and (prefers-reduced-motion: no-preference) {
+			.top-section--parallax {
+				view-timeline-name: --top-section-view;
+				view-timeline-axis: block;
+			}
+			.top-section--parallax .top-section__bg {
+				/* The drift goes one way, so the overflow is only on top (120% bg instead of 140%). */
+				top: -20%;
+				bottom: 0;
+				animation: top-section-parallax linear both;
+				animation-timeline: --top-section-view;
+			}
+		}
+	}
+
+	/* 15% of the 120% bg is 18% of the section, within the 20% top overflow, so no gap appears. */
+	@keyframes top-section-parallax {
+		from {
+			transform: translateY(0);
+		}
+		to {
+			transform: translateY(15%);
+		}
+	}
+}

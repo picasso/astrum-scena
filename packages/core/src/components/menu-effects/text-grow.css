@@ -1,0 +1,15 @@
+@import '../../styles/layers.css';
+
+@layer components {
+	/* The text grows smoothly. */
+	nav[aria-label='Primary'].anim-text-grow .top-menu-label {
+		display: inline-block;
+		transform: scale(1);
+		transition: transform var(--duration-base) var(--ease-out);
+	}
+
+	nav[aria-label='Primary'].anim-text-grow .top-menu-link:hover .top-menu-label,
+	nav[aria-label='Primary'].anim-text-grow .top-menu-link:focus-visible .top-menu-label {
+		transform: scale(1.1);
+	}
+}

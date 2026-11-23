@@ -1,0 +1,38 @@
+---
+import './language-switcher.css'
+
+import { site } from '../config/site'
+import { type Lang, languageName, switchLocalePath, useTranslations } from '../i18n/ui'
+
+type Props = {
+	lang: Lang
+	// `full` shows the language name, `code` its code (EN); the aria-label always holds the full name,
+	// so screen readers and e2e locators stay stable in both modes
+	display?: 'full' | 'code'
+	// `bordered` draws the legacy top-menu lang-select frame around the link
+	variant?: 'plain' | 'bordered'
+}
+
+const { lang, display = 'full', variant = 'plain' } = Astro.props
+const t = useTranslations(lang)
+const pathname = Astro.url.pathname
+// as in the legacy closed state: one link to the OTHER language with a › chevron. A one-locale site
+// has no other language, so the switcher renders nothing there.
+const other = site.content.locales.find((code) => code !== lang)
+const otherName = other && languageName(lang, other)
+const visibleLabel = display === 'code' ? other?.toUpperCase() : otherName
+---
+
+{
+	other && (
+		<nav
+			aria-label={t('nav.language.label')}
+			class:list={['lang-switch', `lang-switch--${variant}`]}
+		>
+			<a href={switchLocalePath(pathname, other)} hreflang={other} aria-label={otherName}>
+				<span aria-hidden="true">›</span>
+				{visibleLabel}
+			</a>
+		</nav>
+	)
+}

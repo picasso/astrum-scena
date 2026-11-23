@@ -1,0 +1,236 @@
+---
+import './site-header.css'
+
+import { overrides } from 'virtual:astrum-scena/overrides'
+
+import { localizedLabel } from '../config/localized-label'
+import { resolveMenuWidth } from '../config/menu'
+import { type ContentWidth, site } from '../config/site'
+import {
+	isActive,
+	isCurrentSection,
+	type Lang,
+	languageName,
+	localizedHref,
+	resolveNavIcon,
+	switchLocalePath,
+	useTranslations,
+} from '../i18n/ui'
+import { requireIcon } from '../lib/icons'
+import LanguageSwitcher from './language-switcher.astro'
+import MenuOverlay from './menu-overlay.astro'
+import SiteLogo from './site-logo.astro'
+import SiteNav from './site-nav.astro'
+import ThemeToggle from './theme-toggle.astro'
+
+type Props = {
+	lang: Lang
+	// a language-neutral route (`/rights/`) has no other language version to switch to
+	localeNeutral?: boolean
+	// the page container width (as on `<main class="content--*">`), so the menu lines up with it
+	width?: ContentWidth
+}
+
+const { lang, localeNeutral = false, width = 'standard' } = Astro.props
+// screen spans the browser; adaptive follows the page container but never below site.menu.minWidth
+const menuWidthClass =
+	site.menu.width === 'screen'
+		? 'site-header__inner--screen'
+		: `site-header__inner--${resolveMenuWidth(width, site.menu.minWidth)}`
+const t = useTranslations(lang)
+const pathname = Astro.url.pathname
+
+// an external SVG referenced through fragment <use> keeps the themeable currentColor without
+// bloating every page's HTML. The brand belongs to the site: a leading `/` resolves from the Vite
+// root, which is the site root; a site without logos leaves the slot empty. `?no-inline` keeps a
+// small logo a file, since `<use>` refuses a data: URL.
+const brandLogos = import.meta.glob<string>('/src/assets/brand/*.svg', {
+	query: '?no-inline',
+	import: 'default',
+	eager: true,
+})
+const pickLogo = (name: string): string | undefined => brandLogos[`/src/assets/brand/${name}`]
+const menuLogoUrl = pickLogo('menu-logo.svg')
+const logoUrl = menuLogoUrl ?? pickLogo('brand-logo.svg')
+const logoVariant = menuLogoUrl ? 'menu' : 'brand'
+
+// a site's `logo` replacement takes the place of the SVG logo inside the core's link, so the slot is
+// available with it even without a brand file
+const SiteMark = overrides.logo
+const siteTitle = localizedLabel(site.identity.title, lang)
+
+// menu.logoSize 0..1 is the growth share (0 keeps 100%); CSS (.site-header__logo) applies --logo-scale
+// to the responsive base and rounds to whole px
+const logoAvailable = site.menu.logoSize !== 'off' && Boolean(SiteMark ?? logoUrl)
+const logoScale = site.menu.logoSize === 'off' ? 1 : 1 + site.menu.logoSize
+
+// menu.sectionIcon puts the current section's icon in the logo slot; segments never overlap, so at
+// most one section is current, and an exact match (isActive) picks the index icon over the nested
+// one. The icon is inlined as <svg> so it takes the accent through currentColor.
+const menuIcons = import.meta.glob<string>('../assets/icons/menu/*.svg', {
+	query: '?raw',
+	import: 'default',
+	eager: true,
+})
+const MENU_ICON_DIR = '../assets/icons/menu/'
+const navItems = site.menu.items
+// every configured icon must exist, even while sectionIcon is off, so switching it on cannot break
+navItems.forEach(({ icon }, index) => {
+	for (const name of icon === undefined ? [] : [icon].flat())
+		requireIcon(menuIcons, MENU_ICON_DIR, name, `menu.items[${index}].icon`)
+})
+const currentItem = navItems.find((item) => isCurrentSection(pathname, lang, item.segment))
+const currentIconId = currentItem
+	? resolveNavIcon(currentItem.icon, isActive(pathname, lang, currentItem.segment))
+	: undefined
+const iconSvg =
+	site.menu.sectionIcon === 'on' && currentIconId
+		? menuIcons[`${MENU_ICON_DIR}${currentIconId}.svg`]
+		: undefined
+const hasSectionIcon = Boolean(iconSvg)
+
+// the bar pins on scroll at lg and up; the fade and the icon/logo swap need to know when it is pinned,
+// which the sentinel and IntersectionObserver below detect
+const sticky = site.menu.sticky === 'on'
+// stickyFade (0..1) is the pinned bar's own opacity, passed as --sticky-opacity
+const stickyOpacity = sticky && site.menu.stickyFade !== 'off' ? site.menu.stickyFade : null
+const stickyFade = stickyOpacity !== null
+
+// the swap alternates icon and logo while the bar is pinned, so it needs the explicit key, pinning,
+// and both an icon and a logo; otherwise the icon always wins and the logo is the fallback
+const swapMode = hasSectionIcon && logoAvailable && site.menu.sectionIconSwap === 'on' && sticky
+const slotMode: 'swap' | 'icon' | 'logo' | 'none' = swapMode
+	? 'swap'
+	: hasSectionIcon
+		? 'icon'
+		: logoAvailable
+			? 'logo'
+			: 'none'
+
+const stuckDetection = sticky && (stickyFade || swapMode)
+
+const menuItems = navItems.map((item) => ({
+	href: localizedHref(lang, item.segment),
+	label: localizedLabel(item.label, lang),
+	isCurrent: isActive(pathname, lang, item.segment),
+}))
+
+const menuLocaleSwitch = localeNeutral
+	? []
+	: site.content.locales.map((code) => ({
+			code,
+			href: switchLocalePath(pathname, code),
+			label: languageName(lang, code),
+			isCurrent: code === lang,
+		}))
+---
+
+{
+	/* once the sentinel right before the bar leaves the top of the viewport, the bar is pinned */
+	stuckDetection && <div class="site-header__sentinel" aria-hidden="true" />
+}
+<header
+	class:list={['site-header', sticky && 'site-header--sticky', stickyFade && 'site-header--fade']}
+	style={stickyFade ? `--sticky-opacity:${stickyOpacity}` : undefined}
+>
+	<div
+		class:list={[
+			'site-header__inner',
+			menuWidthClass,
+			'flex items-center gap-4 px-(--container-pad) py-4',
+		]}
+	>
+		{
+			slotMode !== 'none' && (
+				<a
+					data-menu-inert
+					href={localizedHref(lang, '')}
+					aria-label={siteTitle}
+					class:list={[
+						'site-header__logo',
+						'scroll-fade-logo',
+						'inline-flex',
+						'items-center',
+						`site-header__logo--${slotMode}`,
+					]}
+					style={logoAvailable ? `--logo-scale:${logoScale}` : undefined}
+				>
+					{slotMode === 'swap' ? (
+						<>
+							<span class="site-header__icon" set:html={iconSvg ?? ''} />
+							<span class="site-header__brand">
+								{SiteMark ? (
+									<SiteMark placement="header" lang={lang} title={siteTitle} />
+								) : (
+									<SiteLogo src={logoUrl!} variant={logoVariant} />
+								)}
+							</span>
+						</>
+					) : slotMode === 'icon' ? (
+						<span class="site-header__icon" set:html={iconSvg ?? ''} />
+					) : SiteMark ? (
+						<SiteMark placement="header" lang={lang} title={siteTitle} />
+					) : (
+						<SiteLogo src={logoUrl!} variant={logoVariant} />
+					)}
+				</a>
+			)
+		}
+
+		<div class="hidden items-center gap-4 lg:flex lg:ml-auto">
+			<SiteNav lang={lang} animate={site.menu.animate} />
+			{
+				!localeNeutral && site.menu.lang !== 'off' && (
+					<LanguageSwitcher lang={lang} display={site.menu.lang} variant="bordered" />
+				)
+			}
+			{
+				site.theme.toggleVisible && site.menu.theme !== 'off' && (
+					<ThemeToggle lang={lang} variant={site.menu.theme} />
+				)
+			}
+		</div>
+	</div>
+</header>
+
+{
+	/* the overlay is a sibling of the bar, not inside it: below lg the bar is display:none, and the
+   fixed hamburger and panel would vanish with a display:none ancestor */
+}
+<MenuOverlay
+	items={menuItems}
+	localeSwitch={menuLocaleSwitch}
+	desktopNav={true}
+	showThemeToggle={site.theme.toggleVisible}
+	openLabel={t('nav.menu.open')}
+	closeLabel={t('nav.menu.close')}
+	menuLabel={t('nav.menu.label')}
+	languageLabel={t('nav.language.label')}
+	themeLabel={t('theme.toggle.label')}
+	themeToDarkLabel={t('theme.toggle.toDark')}
+	themeToLightLabel={t('theme.toggle.toLight')}
+/>
+
+{
+	/* data-stuck drives the CSS fade and logo swap; without a sentinel (neither is on) the script does
+   nothing, and astro:page-load rebinds it after each View Transitions navigation */
+}
+<script>
+	function initStickyHeader() {
+		const header = document.querySelector<HTMLElement>('.site-header')
+		const sentinel = document.querySelector('.site-header__sentinel')
+		if (!header || !sentinel || header.dataset.stickyBound) return
+		header.dataset.stickyBound = 'true'
+		const io = new IntersectionObserver(
+			(entries) => {
+				for (const entry of entries) {
+					header.toggleAttribute('data-stuck', !entry.isIntersecting)
+				}
+			},
+			{ threshold: 0 },
+		)
+		io.observe(sentinel)
+	}
+
+	document.addEventListener('astro:page-load', initStickyHeader)
+</script>

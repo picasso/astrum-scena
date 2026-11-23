@@ -1,0 +1,503 @@
+@import '../styles/layers.css';
+
+@layer components {
+	/*
+	 * The hero text, accents and arrows lie over a photo, so they use the theme-independent tokens
+	 * (`--color-on-image`, `--color-shade`, `--color-*-fixed`), never the semantic ones that flip in light.
+	 */
+
+	.hero-shell {
+		position: relative;
+	}
+
+	.hero-swiper {
+		/* Not --color-alt: it changes in the light theme. */
+		--swiper-theme-color: var(--color-on-image);
+		--swiper-navigation-size: 28px;
+		/* Image crossfade delay equals the text exit time: the text leaves first, then the image changes. */
+		--hero-fade-delay: 1s;
+		width: 100%;
+		/* Set directly, not as % of the height-less wrappers: Swiper's height:100% resolves only against a
+		   real (not min-) height, otherwise the slides collapse to 0. */
+		height: 100vh;
+		height: 100dvh;
+	}
+
+	/* Before hydration the slides stack and the last one shows; Swiper then snaps to the first, which
+	   flickers on refresh. Show only the first slide until init. */
+	.hero-swiper:not(.swiper-initialized) .swiper-slide {
+		opacity: 0;
+	}
+
+	.hero-swiper:not(.swiper-initialized) .swiper-slide:first-child {
+		opacity: 1;
+	}
+
+	/* Autoplay pause control (WCAG 2.2.2): always visible, styled like a social icon and aligned with them. */
+	.hero-autoplay-toggle {
+		position: absolute;
+		right: var(--fs-edge, 1.5rem);
+		bottom: calc(var(--fs-edge, 1.5rem) + 2.0625rem);
+		z-index: 2;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 40px;
+		height: 40px;
+		padding: 0;
+		border: 2px solid currentColor;
+		border-radius: 50%;
+		background-color: color-mix(in srgb, var(--color-on-image) 10%, transparent);
+		color: color-mix(in srgb, var(--color-on-image) 50%, transparent);
+		cursor: pointer;
+		transition:
+			color var(--duration-base) var(--ease-out),
+			background-color var(--duration-base) var(--ease-out);
+	}
+
+	.hero-autoplay-toggle:hover,
+	.hero-autoplay-toggle:focus-visible {
+		color: var(--color-on-image);
+		background-color: var(--color-alt-fixed);
+	}
+
+	.hero-autoplay-toggle svg {
+		width: 16px;
+		height: 16px;
+		display: block;
+	}
+
+	.hero-swiper .swiper-slide {
+		position: relative;
+		overflow: hidden;
+	}
+
+	.hero-media {
+		position: absolute;
+		inset: 0;
+		display: block;
+	}
+
+	.hero-media img {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		display: block;
+	}
+
+	.hero-copy {
+		position: absolute;
+		/* Full-bleed so the ::before gradient reaches the screen edge. */
+		inset: 0;
+		z-index: 1;
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		gap: 1rem;
+		/* No max-width/margin:auto: the gradient and the text column must anchor to the screen edge, not
+		   to a centered box. Width and side come from the data-align rules below. */
+		padding: 0 var(--fs-edge, 1.5rem);
+		color: var(--color-on-image);
+	}
+
+	/* The shade lives on .hero-copy because data-align does; z-index:-1 puts it above the photo but
+	   under the text, inside .hero-copy's own stacking context. */
+	.hero-copy::before {
+		content: '';
+		position: absolute;
+		inset: 0;
+		z-index: -1;
+		pointer-events: none;
+	}
+
+	.hero-copy[data-align='right']::before {
+		background: linear-gradient(
+			270deg,
+			color-mix(in srgb, var(--color-shade) 60%, transparent),
+			color-mix(in srgb, var(--color-shade) 25%, transparent) 55%,
+			transparent 85%
+		);
+	}
+
+	.hero-copy[data-align='left']::before {
+		background: linear-gradient(
+			90deg,
+			color-mix(in srgb, var(--color-shade) 60%, transparent),
+			color-mix(in srgb, var(--color-shade) 25%, transparent) 55%,
+			transparent 85%
+		);
+	}
+
+	.hero-heading {
+		margin: 0;
+		/* Full width like the legacy site; only the description is width-limited. */
+		width: 100%;
+		font-weight: var(--font-weight-bold);
+		letter-spacing: var(--tracking-hero);
+		line-height: var(--leading-hero);
+		text-transform: uppercase;
+		font-size: clamp(26px, 6vw, 60px);
+	}
+
+	.hero-heading[data-accent='alt'] .altheading {
+		color: var(--color-alt-fixed);
+	}
+
+	.hero-heading[data-accent='accent'] .altheading {
+		color: var(--color-accent-fixed);
+	}
+
+	.hero-desc {
+		margin: 0;
+		/* Width steps match the legacy site. */
+		width: 90%;
+		color: color-mix(in srgb, var(--color-on-image) 85%, transparent);
+		font-size: clamp(15px, 1.4vw, 18px);
+	}
+
+	@media (min-width: 1024px) {
+		.hero-desc {
+			width: 75%;
+		}
+	}
+
+	@media (min-width: 1280px) {
+		.hero-desc {
+			width: 50%;
+		}
+	}
+
+	@media (min-width: 1800px) {
+		.hero-desc {
+			width: 45%;
+		}
+	}
+
+	.call-button {
+		align-self: flex-start;
+		position: relative;
+		display: inline-block;
+		text-align: center;
+		text-decoration: none;
+		color: var(--color-on-image);
+		border: 1px solid var(--color-on-image);
+		border-radius: var(--radius, 3px);
+		box-shadow: 0 0 0 0 transparent;
+		line-height: 3.5em;
+		letter-spacing: 0.5pt;
+		padding-left: 2em;
+		padding-right: 2em;
+		text-transform: uppercase;
+		font-weight: 800;
+		font-size: clamp(13px, 1.1vw, 16px);
+		transition:
+			background-color 0.2s ease-in,
+			color 0.2s ease-in,
+			box-shadow 0.2s ease-in;
+	}
+
+	.call-button:hover,
+	.call-button:focus-visible {
+		color: var(--color-on-image);
+		background-color: color-mix(in srgb, var(--color-on-image) 50%, transparent);
+		box-shadow: 0 0 30px 0 color-mix(in srgb, var(--color-on-image) 50%, transparent);
+		transition:
+			background-color 0.2s ease-out,
+			color 0.2s ease-out,
+			box-shadow 0.2s ease-out;
+	}
+
+	.call-button::before {
+		content: '';
+		display: block;
+		width: 0;
+		height: 86%;
+		position: absolute;
+		top: 7%;
+		left: 0;
+		opacity: 0;
+		background: var(--color-on-image);
+		transform: skewX(-20deg);
+		/* No permanent box-shadow, even at opacity 0: during the CTA entrance transform the compositor
+		   briefly paints it as a thin white line. */
+	}
+
+	@media (prefers-reduced-motion: no-preference) {
+		.call-button:hover::before {
+			box-shadow: 0 0 15px 3px var(--color-on-image);
+			animation: shine 0.8s linear 0s;
+		}
+
+		@keyframes shine {
+			from {
+				opacity: 0;
+				left: 0%;
+			}
+			50% {
+				opacity: 1;
+			}
+			to {
+				opacity: 0;
+				left: 100%;
+			}
+		}
+	}
+
+	/* Round arrows are the owner's choice. They sit in the lower third, clear of the social icons and
+	   the autoplay toggle in the bottom row. */
+	/* Swiper's defaults sit in the vendor layer, so these win by layer order even after a View
+	   Transition re-inserts the Swiper stylesheet. */
+	.hero-swiper .swiper-button-prev,
+	.hero-swiper .swiper-button-next {
+		top: auto;
+		bottom: 20%;
+		width: 44px;
+		height: 44px;
+		margin-top: 0;
+		background-color: transparent;
+		background-repeat: no-repeat;
+		background-position: center;
+		background-size: 44px 44px;
+		opacity: 0;
+		transition:
+			opacity var(--duration-base) var(--ease-out),
+			transform var(--duration-base) var(--ease-out);
+	}
+
+	/* Swiper injects its own icon into the button; it would double our background chevron. */
+	.hero-swiper .swiper-button-prev .swiper-navigation-icon,
+	.hero-swiper .swiper-button-next .swiper-navigation-icon {
+		display: none;
+	}
+
+	.hero-swiper .swiper-button-prev {
+		left: var(--fs-edge, 1.5rem);
+		right: auto;
+		transform: translateX(-40px);
+		background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='15 5 8 12 15 19'/%3E%3C/svg%3E");
+	}
+
+	.hero-swiper .swiper-button-next {
+		right: var(--fs-edge, 1.5rem);
+		left: auto;
+		transform: translateX(40px);
+		background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='9 5 16 12 9 19'/%3E%3C/svg%3E");
+	}
+
+	.hero-swiper .swiper-button-prev::after,
+	.hero-swiper .swiper-button-next::after {
+		content: '';
+	}
+
+	/* Hover is keyed on the whole fullscreen screen: the social icons and controls float above the
+	   slider, and hovering them must not hide the arrows. Touch is excluded so a pagination tap does not
+	   emulate hover. */
+	@media (min-width: 1024px) and (hover: hover) and (pointer: fine) {
+		.hero-fullscreen:hover .hero-swiper .swiper-button-prev,
+		.hero-fullscreen:hover .hero-swiper .swiper-button-next {
+			opacity: 0.55;
+			transform: translateX(0);
+		}
+
+		/* Scoped like the reveal above, so the hovered arrow outranks the 0.55 of the whole screen. */
+		.hero-fullscreen:hover .hero-swiper .swiper-button-prev:hover,
+		.hero-fullscreen:hover .hero-swiper .swiper-button-next:hover {
+			opacity: 1;
+		}
+	}
+
+	/* Keyboard focus reveals only the focused arrow. */
+	.hero-swiper .swiper-button-prev:focus-visible,
+	.hero-swiper .swiper-button-next:focus-visible {
+		opacity: 1;
+		transform: translateX(0);
+	}
+
+	/* Pagination sits opposite the text; this is the default side, mirrored per slide below. */
+	.hero-swiper .swiper-pagination {
+		top: 50%;
+		bottom: auto;
+		left: var(--fs-edge, 1.5rem);
+		right: auto;
+		width: auto;
+		transform: translateY(-50%);
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 12px;
+	}
+
+	.hero-swiper .swiper-pagination-bullet {
+		/* Fixed box, sized by scale: changing width/height of the active bullet would resize the
+		   translateY(-50%) column and make it jump. */
+		width: 15px;
+		height: 15px;
+		/* inline margins are Swiper's bullet gap */
+		margin-block: 0;
+		background: color-mix(in srgb, var(--color-on-image) 50%, transparent);
+		opacity: 1;
+		transform: scale(0.66);
+		transition:
+			transform var(--duration-base) var(--ease-out),
+			background-color var(--duration-base) var(--ease-out);
+	}
+
+	.hero-swiper .swiper-pagination-bullet-active {
+		transform: scale(1);
+		background: color-mix(in srgb, var(--color-on-image) 90%, transparent);
+	}
+
+	@media (min-width: 1024px) {
+		.hero-copy[data-align='right'] {
+			align-items: flex-end;
+			text-align: right;
+		}
+
+		.hero-copy[data-align='left'] {
+			align-items: flex-start;
+			text-align: left;
+		}
+
+		.hero-copy[data-align='right'] .call-button {
+			align-self: flex-end;
+		}
+
+		.hero-copy[data-align='left'] .call-button {
+			align-self: flex-start;
+		}
+
+		/* data-active-align is set by the island (src/ui/hero-slider.tsx); left-aligned text moves the
+		   bullets right so they do not overlap it. */
+		.hero-shell[data-active-align='left'] .hero-swiper .swiper-pagination {
+			left: auto;
+			right: var(--fs-edge, 1.5rem);
+		}
+
+		/* The island restarts .hero-pagination-shift on a side change and swaps data-active-align
+		   during the hidden 45–55% window, so the bullets crossfade instead of sliding. */
+		@media (prefers-reduced-motion: no-preference) {
+			.hero-swiper .swiper-pagination.hero-pagination-shift {
+				animation: hero-pagination-crossfade 1.9s var(--ease-out);
+			}
+		}
+	}
+
+	@keyframes hero-pagination-crossfade {
+		0% {
+			opacity: 1;
+		}
+		45% {
+			opacity: 0;
+		}
+		55% {
+			opacity: 0;
+		}
+		100% {
+			opacity: 1;
+		}
+	}
+
+	@media (max-width: 1023px) {
+		.hero-swiper .swiper-pagination {
+			top: auto;
+			bottom: calc(var(--fs-edge, 1.5rem) + 7rem);
+			left: 0;
+			right: 0;
+			transform: none;
+			flex-direction: row;
+			justify-content: center;
+		}
+
+		.hero-autoplay-toggle {
+			bottom: calc(var(--fs-edge, 1.5rem) + 1.75rem);
+		}
+	}
+
+	@media (max-width: 479px) {
+		.hero-desc {
+			display: none;
+		}
+	}
+
+	/* Text exit and entrance match the legacy slider: title+CTA and description leave at once in
+	   opposite directions; the image crossfades after --hero-fade-delay, and the new text enters with
+	   the same delay so it plays as the image appears. */
+	@media (prefers-reduced-motion: no-preference) {
+		/* Until the first slide change the server-rendered text is already painted; an entrance fade
+		   here would hide the visible H1 and push LCP to hydration. The island sets .hero-navigated on
+		   the first change. */
+		.hero-swiper.swiper-initialized:not(.hero-navigated) .swiper-slide-active .hero-heading,
+		.hero-swiper.swiper-initialized:not(.hero-navigated) .swiper-slide-active .hero-cta,
+		.hero-swiper.swiper-initialized:not(.hero-navigated) .swiper-slide-active .hero-desc {
+			opacity: 1;
+			transform: none;
+		}
+
+		.hero-swiper.swiper-initialized.hero-navigated .hero-heading,
+		.hero-swiper.swiper-initialized.hero-navigated .hero-cta {
+			opacity: 0;
+			transform: translateX(-50px);
+		}
+		.hero-swiper.swiper-initialized.hero-navigated .hero-desc {
+			opacity: 0;
+			transform: translateX(100px);
+		}
+
+		.hero-swiper.swiper-initialized.hero-navigated .hero-heading,
+		.hero-swiper.swiper-initialized.hero-navigated .hero-desc {
+			transition:
+				opacity 0.9s var(--ease-out),
+				transform 1.2s var(--ease-cubic);
+		}
+		/* The button's hover transitions join this list with no delay, or hover would lag. */
+		.hero-swiper.swiper-initialized.hero-navigated .hero-cta {
+			transition:
+				opacity 0.9s var(--ease-out),
+				transform 1.2s var(--ease-cubic),
+				background-color 0.2s var(--ease-out),
+				color 0.2s var(--ease-out),
+				box-shadow 0.2s var(--ease-out);
+		}
+
+		.hero-swiper.swiper-initialized.hero-navigated .swiper-slide-active .hero-heading,
+		.hero-swiper.swiper-initialized.hero-navigated .swiper-slide-active .hero-cta,
+		.hero-swiper.swiper-initialized.hero-navigated .swiper-slide-active .hero-desc {
+			opacity: 1;
+			transform: translateX(0);
+		}
+		.hero-swiper.swiper-initialized.hero-navigated .swiper-slide-active .hero-heading,
+		.hero-swiper.swiper-initialized.hero-navigated .swiper-slide-active .hero-desc {
+			transition:
+				opacity 0.9s var(--ease-out) var(--hero-fade-delay),
+				transform 1.2s var(--ease-cubic) var(--hero-fade-delay);
+		}
+		.hero-swiper.swiper-initialized.hero-navigated .swiper-slide-active .hero-cta {
+			transition:
+				opacity 0.9s var(--ease-out) var(--hero-fade-delay),
+				transform 1.2s var(--ease-cubic) var(--hero-fade-delay),
+				background-color 0.2s var(--ease-out),
+				color 0.2s var(--ease-out),
+				box-shadow 0.2s var(--ease-out);
+		}
+
+		/* Scoped to .hero-navigated so the first image paint is not delayed. */
+		.hero-swiper.hero-navigated .swiper-slide {
+			transition-delay: var(--hero-fade-delay) !important;
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.swiper-slide .hero-heading,
+		.swiper-slide .hero-cta,
+		.swiper-slide .hero-desc {
+			animation: none !important;
+			transition: none !important;
+			transform: none !important;
+			opacity: 1 !important;
+		}
+
+		.hero-swiper .swiper-slide {
+			transition-delay: 0s !important;
+		}
+	}
+}

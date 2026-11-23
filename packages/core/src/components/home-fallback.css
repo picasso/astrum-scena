@@ -1,0 +1,63 @@
+@import '../styles/layers.css';
+
+@layer components {
+	/* Stands in for the slider photo, so it keeps the theme-independent tokens of text over images. */
+	.home-fallback {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		/* `safe` keeps the top reachable when the content is taller than a short or zoomed screen. */
+		justify-content: safe center;
+		gap: 2rem;
+		height: 100dvh;
+		overflow-y: auto;
+		/* Clears the fixed controls: the menu toggle on top, the social icons and copyright below. */
+		padding: 5rem var(--fs-edge, 1.5rem) 8rem;
+		background: radial-gradient(
+			ellipse at center,
+			var(--color-surface-fixed),
+			color-mix(in srgb, var(--color-shade) 90%, var(--color-surface-fixed))
+		);
+		color: var(--color-on-image);
+		text-align: center;
+		overflow-wrap: anywhere;
+	}
+
+	.home-fallback > * {
+		max-width: 100%;
+	}
+
+	.home-fallback__title {
+		margin: 0;
+		font-weight: var(--font-weight-bold);
+		letter-spacing: var(--tracking-hero);
+		line-height: var(--leading-hero);
+		text-transform: uppercase;
+		font-size: clamp(26px, 6vw, 60px);
+	}
+
+	.home-fallback__sections {
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: center;
+		gap: 0.75rem 2rem;
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	.home-fallback__sections li {
+		max-width: 100%;
+	}
+
+	.home-fallback__link {
+		color: color-mix(in srgb, var(--color-on-image) 70%, transparent);
+		text-decoration: none;
+		transition: color var(--duration-base) var(--ease-out);
+	}
+
+	.home-fallback__link:hover,
+	.home-fallback__link:focus-visible {
+		color: var(--color-on-image);
+	}
+}

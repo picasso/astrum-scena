@@ -1,0 +1,68 @@
+# synthetic image pipeline config of the demo site: `pnpm demo:images` cuts the procedural masters
+# into public/media/ and writes src/generated/images-*.json; rerun it after any change here
+schemaVersion: 2
+publicPath: /media
+formats:
+    - avif
+    - webp
+archive:
+    ignoreDirs: []
+rights:
+    copyright: © The Astrum Scena authors. CC0 1.0.
+    credit: The Astrum Scena authors
+    licensor: The Astrum Scena authors
+    source: demo.example.com
+    webStatement: https://demo.example.com/rights/
+    imageId: astrum-scena-demo
+privacy:
+    deniedFields:
+        - GPSLatitude
+        - GPSLongitude
+        - GPSPosition
+        - GPSAltitude
+        - SerialNumber
+        - SerialNumberFormat
+        - OwnerName
+        - CameraOwnerName
+        - LensSerialNumber
+        - InternalSerialNumber
+        - PreservedFileName
+        - RawFileName
+        - OriginalRawFileName
+        - DocumentAncestors
+        - History
+        - Instructions
+        - SpecialInstructions
+        - UserComment
+        - XPComment
+watermark:
+    aboveWidth: 800
+    assets:
+        - id: astrum-scena-mark
+          file: src/assets/images/watermarks/astrum-scena-mark.png
+          sha256: 3c20009eba427f50b87157de6f5916243e9332095a425bee3ce346cd3ed08642
+    profile:
+        id: watermark
+        assetId: astrum-scena-mark
+        scale: 0.17
+        minPx: 96
+        maxPx: 384
+        position: bottom-right
+        inset: 24
+        opacity: 0.8
+ladder:
+    widths:
+        - 200
+        - 400
+        - 800
+        - 1200
+        - 1600
+    native:
+        enabled: true
+        maxLongSide: 2000
+    quality:
+        - upTo: 800
+          avif: 50
+          webp: 72
+        - avif: 55
+          webp: 78

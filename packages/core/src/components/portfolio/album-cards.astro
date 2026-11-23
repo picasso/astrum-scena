@@ -1,0 +1,112 @@
+---
+import { site } from '../../config/site.ts'
+import type { CardPresentation } from '../../config/variants.ts'
+import type { CardModel } from '../../lib/cards/select.ts'
+import { deriveAlbumExcerpt } from '../../lib/content/excerpt.ts'
+import { albumHref } from '../../lib/content/routes.ts'
+import type { Locale } from '../../lib/content/schemas.ts'
+import type { ImageCatalog } from '../../lib/images/catalog.ts'
+import { buildPictureModel } from '../../lib/images/media.ts'
+import { projectAlbumText } from '../../lib/portfolio/locale.ts'
+import { resolvePortfolioLayout } from '../../lib/portfolio/portfolio-layout.ts'
+import type { AlbumEntry, PhotoEntry } from '../../lib/portfolio/publication.ts'
+import { resolveAlbumCover } from '../../lib/portfolio/publication.ts'
+import {
+	cardGridColumns,
+	galleryAsideColumnSizes,
+	masonryColumns,
+} from '../../lib/portfolio/sizes.ts'
+import { resolveSurfaceMedia } from '../../lib/portfolio/surface.ts'
+import CardGrid from '../card-grid.astro'
+import CardMasonry from '../card-masonry.astro'
+
+// album cards on the portfolio index reuse the card layouts of articles and moreDocs: masonry keeps
+// covers in natural proportions, grid crops them to `ratio` around the cover's focalPoint. Only
+// `details` cards get an excerpt or `more`; `sizes` is the exact cell width per viewport range inside
+// `.gallery-aside` (sizes.ts)
+type Props = {
+	catalog: ImageCatalog
+	albums: readonly AlbumEntry[]
+	photosById: ReadonlyMap<string, PhotoEntry>
+	locale: Locale
+	more?: string
+	presentation: CardPresentation
+	// defaults to `portfolio.excerpt`
+	excerpt?: 'on' | 'off'
+}
+
+const {
+	catalog,
+	albums,
+	photosById,
+	locale,
+	more,
+	presentation,
+	excerpt: excerptMode = site.portfolio.excerpt,
+} = Astro.props
+const resolved = resolvePortfolioLayout(site.portfolio)
+const details = presentation === 'details'
+
+let sizes: string
+switch (resolved.layout) {
+	case 'masonry': {
+		const settings = resolved.settings
+		sizes = galleryAsideColumnSizes({
+			columns: (width) => masonryColumns(width, settings),
+			gap: settings.gap,
+		})
+		break
+	}
+	case 'grid': {
+		const settings = resolved.settings
+		sizes = galleryAsideColumnSizes({
+			columns: (width) => cardGridColumns(width, settings),
+			gap: settings.gap,
+		})
+		break
+	}
+	default: {
+		const unreachable: never = resolved
+		throw new Error(`portfolio layout "${String(unreachable)}" has no renderer`)
+	}
+}
+
+// a missing cover, a draft cover of a published album or a cover without the surface role fails the
+// build
+const cards: CardModel[] = albums.map((album) => {
+	const cover = resolveAlbumCover(album, photosById)
+	const text = projectAlbumText(album.data, locale)
+	const media = resolveSurfaceMedia(catalog.manifest, cover.id, 'portfolioCard')
+	const excerpt =
+		details && excerptMode === 'on'
+			? deriveAlbumExcerpt(album.data.excerpt?.[locale], text.description)
+			: undefined
+	return {
+		href: albumHref(album.id, locale),
+		title: text.title,
+		...(excerpt ? { excerpt } : {}),
+		media: buildPictureModel(media, { originBase: catalog.originBase, alt: text.title, sizes }),
+		...(resolved.layout === 'grid' ? { ratio: resolved.settings.ratio } : {}),
+		...(cover.data.focalPoint ? { focal: cover.data.focalPoint } : {}),
+	}
+})
+---
+
+{
+	resolved.layout === 'grid' ? (
+		<CardGrid
+			cards={cards}
+			columns={resolved.settings.columns}
+			gap={resolved.settings.gap}
+			more={details ? more : undefined}
+			presentation={presentation}
+		/>
+	) : (
+		<CardMasonry
+			cards={cards}
+			config={resolved.settings}
+			more={details ? more : undefined}
+			presentation={presentation}
+		/>
+	)
+}

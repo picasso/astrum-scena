@@ -1,0 +1,77 @@
+---
+import './album-photo.css'
+
+import type { AlbumLayout } from '../../config/variants.ts'
+import { photoHref } from '../../lib/content/routes.ts'
+import type { Locale } from '../../lib/content/schemas.ts'
+import type { ImageCatalog } from '../../lib/images/catalog.ts'
+import { buildPictureModel } from '../../lib/images/media.ts'
+import { isCropLayout } from '../../lib/portfolio/album-layout.ts'
+import { projectPhotoText, resolvePhotoAlt } from '../../lib/portfolio/locale.ts'
+import type { PhotoEntry } from '../../lib/portfolio/publication.ts'
+import { resolveSurfaceMedia } from '../../lib/portfolio/surface.ts'
+import { buildViewerData } from '../../lib/portfolio/viewer-data.ts'
+import ResponsivePicture from './responsive-picture.astro'
+
+// album grid cells select preview derivatives through albumGrid and full viewer data through
+// photoswipeSlide. The anchor remains a no-JS photo page; the island intercepts after init.
+// Layout geometry and HTML `sizes` come from the selected album grid mode.
+type Props = {
+	catalog: ImageCatalog
+	albumId: string
+	photo: PhotoEntry
+	locale: Locale
+	layout: AlbumLayout
+	sizes: string
+}
+
+const { catalog, albumId, photo, locale, layout, sizes } = Astro.props
+
+const alt = resolvePhotoAlt(photo.data, locale)
+const gridMedia = resolveSurfaceMedia(catalog.manifest, photo.id, 'albumGrid')
+const model = buildPictureModel(gridMedia, {
+	originBase: catalog.originBase,
+	alt,
+	sizes,
+})
+
+// the build fails if the photo has no viewer-role derivative
+const viewerMedia = resolveSurfaceMedia(catalog.manifest, photo.id, 'photoswipeSlide')
+const viewer = buildViewerData(viewerMedia, catalog.originBase)
+
+const href = photoHref(albumId, photo.id, locale)
+const aspectRatio = gridMedia.width / gridMedia.height
+// webp is the most compatible srcset to start PhotoSwipe with
+const pswpSrcset = viewer.srcsetByFormat.webp ?? viewer.srcsetByFormat.avif
+// every slide has a caption: the localized caption, else the title, as plain text without EXIF or
+// filename
+const viewerText = projectPhotoText(photo.data, locale)
+const pswpCaption = viewerText.caption ?? viewerText.title
+// crop layouts center on the photo's editorial focalPoint (docs/blocks/gallery.md)
+const focal = photo.data.focalPoint ?? { x: 50, y: 50 }
+const itemStyle =
+	layout === 'justified'
+		? `flex-grow:${aspectRatio}; flex-basis:calc(var(--justified-row-height) * ${aspectRatio});`
+		: isCropLayout(layout)
+			? `--album-focal:${focal.x}% ${focal.y}%;`
+			: undefined
+---
+
+<li class={`album-${layout}__item`} style={itemStyle}>
+	<a
+		href={href}
+		class="album-photo"
+		data-pswp-width={viewer.width}
+		data-pswp-height={viewer.height}
+		data-pswp-src={viewer.src}
+		data-pswp-srcset={pswpSrcset}
+		data-pswp-caption={pswpCaption}
+	>
+		<ResponsivePicture
+			model={model}
+			class="album-photo__media"
+			imgClass="album-photo__img"
+			fetchpriority="low"
+		/>
+	</a>
+</li>

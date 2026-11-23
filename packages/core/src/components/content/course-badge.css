@@ -1,0 +1,34 @@
+@import '../../styles/layers.css';
+
+@layer components {
+	/* Pill style is the owner's choice. */
+	.course-badge {
+		display: inline-flex;
+		align-items: center;
+		height: 22px;
+		padding: 0 10px;
+		border-radius: 11px;
+		font-size: 11px;
+		font-weight: var(--font-weight-semibold);
+		line-height: 1;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		white-space: nowrap;
+	}
+
+	.course-badge--archive {
+		/* A fixed dark plate in both themes: a translucent page text tone was too weak on photos and on the
+		 * page background (owner). */
+		background: color-mix(in srgb, var(--color-scrim) 60%, transparent);
+		color: color-mix(in srgb, var(--color-on-image) 90%, transparent);
+	}
+
+	.course-badge--current {
+		background: var(--color-accent);
+		color: var(--color-ink);
+	}
+
+	.course-badge--page {
+		margin-bottom: 1.5rem;
+	}
+}

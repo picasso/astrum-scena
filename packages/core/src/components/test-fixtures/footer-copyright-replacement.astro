@@ -1,0 +1,9 @@
+---
+import type { FooterCopyrightReplacementProps } from '../../overrides/points.ts'
+
+type Props = FooterCopyrightReplacementProps
+
+const { lang, since, year, holder, rights } = Astro.props
+---
+
+<em data-replacement="footer-copyright">{`${lang}: ${since}–${year} ${holder} / ${rights}`}</em>

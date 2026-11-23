@@ -1,0 +1,50 @@
+@import '../../styles/layers.css';
+
+@layer components {
+	.more-documents {
+		margin-top: 3rem;
+	}
+
+	.more-documents--medium,
+	.more-documents--wide {
+		width: 100vw;
+		margin-inline: calc(50% - 50vw);
+		padding-inline: var(--container-pad);
+	}
+
+	.more-documents--medium .more-documents__inner {
+		width: min(100%, var(--container-medium));
+		margin-inline: auto;
+	}
+
+	.more-documents--wide .more-documents__inner {
+		width: min(100%, 1200px);
+		margin-inline: auto;
+	}
+
+	/* The heading underline measures `100cqw` against this block, not the page. */
+	.more-documents__inner {
+		container-type: inline-size;
+	}
+
+	.more-documents__heading {
+		display: inline-block;
+		position: relative;
+		margin: 0 0 2rem;
+		padding-bottom: 1rem;
+		color: var(--color-heading);
+		font-size: 26px;
+		font-weight: var(--font-weight-medium);
+		line-height: 1;
+	}
+
+	.more-documents__heading::after {
+		position: absolute;
+		bottom: 0;
+		left: 0;
+		width: min(200%, 100cqw);
+		height: 1px;
+		background-color: color-mix(in srgb, var(--color-heading) 30%, transparent);
+		content: '';
+	}
+}

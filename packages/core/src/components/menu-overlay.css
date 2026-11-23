@@ -1,0 +1,216 @@
+/* --fs-edge lives with the hamburger: the banner logo and the home controls align to it too. */
+@import '../styles/layers.css';
+
+@layer components {
+	.menu-overlay-root {
+		display: contents;
+	}
+
+	/* Sits above the panel so it stays clickable when open. */
+	.menu-overlay-toggle {
+		position: fixed;
+		top: var(--fs-edge, 1.5rem);
+		right: var(--fs-edge, 1.5rem);
+		z-index: 50;
+		display: inline-flex;
+		flex-direction: column;
+		justify-content: center;
+		gap: 5px;
+		width: 35px;
+		height: 25px;
+		padding: 0;
+		border: 0;
+		background: transparent;
+		cursor: pointer;
+		opacity: 0.7;
+		transition: opacity var(--duration-base) var(--ease-out);
+	}
+
+	.menu-overlay-toggle:hover,
+	.menu-overlay-toggle:focus-visible,
+	.menu-overlay-toggle[data-open] {
+		opacity: 1;
+	}
+
+	/* The inner-page hamburger shows only below the menu breakpoint, where the inline navbar takes over;
+	 * the home toggle lacks this class and always shows. */
+	@media (min-width: 1024px) {
+		.menu-overlay-toggle--collapsible {
+			display: none;
+		}
+	}
+
+	.menu-overlay-toggle .bar {
+		display: block;
+		width: 35px;
+		height: 5px;
+		border-radius: 2px;
+		background-color: var(--color-on-image);
+		box-shadow: 0 1px 5px color-mix(in srgb, var(--color-shade) 40%, transparent);
+		transition:
+			transform var(--duration-base) var(--ease-out),
+			opacity var(--duration-base) var(--ease-out),
+			background-color var(--duration-base) var(--ease-out);
+	}
+
+	[data-theme='light'] .menu-overlay-toggle .bar {
+		background-color: var(--color-surface);
+	}
+
+	/* Container center is 12.5px, outer bar centers 2.5/22.5px, hence ±10px. */
+	.menu-overlay-toggle[data-open] .bar-top {
+		transform: translateY(10px) rotate(45deg);
+		box-shadow: none;
+	}
+
+	.menu-overlay-toggle[data-open] .bar-middle {
+		opacity: 0;
+	}
+
+	.menu-overlay-toggle[data-open] .bar-bottom {
+		transform: translateY(-10px) rotate(-45deg);
+		box-shadow: none;
+	}
+
+	/* visibility removes the closed panel from the tab order and AT; it is delayed until the scale
+	   animation ends. */
+	.menu-overlay-panel {
+		position: fixed;
+		inset: 0;
+		z-index: 40;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		transform: scale(0);
+		opacity: 0; /* Zoom and fade together, like the legacy menu: opacity hides the small state. */
+		visibility: hidden;
+		background: linear-gradient(
+			120deg,
+			var(--color-menu-overlay) 0%,
+			var(--color-alt-fixed) 100%
+		);
+		transition:
+			transform var(--duration-base) var(--ease-out),
+			opacity var(--duration-base) var(--ease-out),
+			visibility 0s var(--duration-base);
+	}
+
+	.menu-overlay-panel[data-open] {
+		transform: scale(1);
+		opacity: 1;
+		visibility: visible;
+		transition:
+			transform var(--duration-base) var(--ease-out),
+			opacity var(--duration-base) var(--ease-out),
+			visibility 0s;
+	}
+
+	.menu-overlay-inner {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 1.5rem;
+		text-align: center;
+	}
+
+	.menu-overlay-panel nav ul {
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	.menu-overlay-panel nav[aria-label]:first-of-type li {
+		padding: 0.6em 0.4em;
+	}
+
+	.menu-overlay-panel nav a {
+		color: var(--color-on-image);
+		text-decoration: none;
+		font-size: clamp(1.5rem, 6vw, 3rem);
+		line-height: 1.2;
+		transition: color var(--duration-base) var(--ease-out);
+	}
+
+	.menu-overlay-panel nav a[aria-current]:hover,
+	.menu-overlay-panel nav a:hover,
+	.menu-overlay-panel nav a:focus-visible {
+		color: var(--color-accent);
+	}
+
+	.menu-overlay-panel nav[aria-label] + nav[aria-label] ul {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 1rem;
+	}
+
+	.menu-overlay-panel nav[aria-label] + nav[aria-label] a {
+		font-size: clamp(1rem, 3vw, 1.25rem);
+		text-transform: uppercase;
+		letter-spacing: 0.5px;
+		color: color-mix(in srgb, var(--color-on-image) 70%, transparent);
+		padding: 0.3em 0.7em;
+		border: 1px solid transparent;
+		border-radius: var(--radius, 3px);
+	}
+
+	.menu-overlay-panel nav[aria-label] + nav[aria-label] a[aria-current='true'] {
+		color: var(--color-on-image);
+		border-color: color-mix(in srgb, var(--color-on-image) 50%, transparent);
+	}
+
+	/* An inline SVG matching the arrows, not a font glyph. */
+	.menu-overlay-panel nav[aria-label] + nav[aria-label] a[aria-current='true']::before {
+		content: '';
+		display: inline-block;
+		width: 0.8em;
+		height: 0.8em;
+		margin-right: 0.45em;
+		vertical-align: -0.05em;
+		background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'/%3E%3C/svg%3E")
+			no-repeat center / contain;
+	}
+
+	.menu-overlay-theme {
+		margin-top: 0.5rem;
+		padding: 0.5rem 1rem;
+		border: 1px solid color-mix(in srgb, var(--color-on-image) 30%, transparent);
+		border-radius: var(--radius, 4px);
+		background: transparent;
+		color: var(--color-on-image);
+		font: inherit;
+		cursor: pointer;
+		transition:
+			color var(--duration-base) var(--ease-out),
+			border-color var(--duration-base) var(--ease-out);
+	}
+
+	.menu-overlay-theme:hover,
+	.menu-overlay-theme:focus-visible {
+		color: var(--color-accent);
+		border-color: var(--color-accent);
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.menu-overlay-panel,
+		.menu-overlay-panel[data-open] {
+			transform: none;
+			transition: visibility 0s;
+		}
+
+		.menu-overlay-toggle .bar {
+			transition: none;
+		}
+	}
+
+	/* One edge offset for every edge control and the hero text. */
+	:root {
+		--fs-edge: 2.5rem;
+	}
+
+	@media (max-width: 767px) {
+		:root {
+			--fs-edge: 1.25rem;
+		}
+	}
+}

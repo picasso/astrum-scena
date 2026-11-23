@@ -1,0 +1,28 @@
+---
+import './card-list.css'
+
+import { site } from '../config/site.ts'
+import { type CardModel, excerptHiddenClass } from '../lib/cards/select.ts'
+import Card from './card.astro'
+
+// the legacy list layout (`kind: list`, `image_text`) of the course index: image left, title and
+// excerpt right in 45/55 columns; same card model as masonry, only the arrangement differs
+type Props = {
+	cards: readonly CardModel[]
+	// "read more" link label, passed only when `listing.moreLink: on`
+	more?: string
+	titleLevel?: 2 | 3
+}
+
+const { cards, more, titleLevel } = Astro.props
+---
+
+<ul class:list={['card-list', excerptHiddenClass(site.listing.excerptHiddenBelow)]}>
+	{
+		cards.map((card) => (
+			<li class="card-list__item">
+				<Card card={card} more={more} titleLevel={titleLevel} class="card--row" />
+			</li>
+		))
+	}
+</ul>

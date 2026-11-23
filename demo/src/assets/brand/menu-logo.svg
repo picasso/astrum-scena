@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 144">
+	<g id="menu-photography" fill="currentColor" transform="translate(120 0) scale(0.16744) translate(-196 -169)">
+		<path d="M258 407H620C642 363 659 307 668 263C677 308 693 363 715 407H996V885L898 813V487H725C700 456 681 419 667 379C653 419 634 456 608 487H357V813L258 885Z" />
+		<path d="M378 836H877L1007 934H247Z" />
+	</g>
+	<g id="menu-signature" fill="#EE112D" transform="translate(120 0) scale(0.16744) translate(-196 -169)">
+		<path d="M666 473C704 548 750 579 882 595C718 613 682 648 659 802C643 651 609 618 428 595C577 578 629 547 666 473Z" />
+	</g>
+</svg>

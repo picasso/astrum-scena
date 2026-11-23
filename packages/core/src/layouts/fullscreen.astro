@@ -1,0 +1,78 @@
+---
+import './fullscreen.css'
+
+import LanguageSwitcher from '../components/language-switcher.astro'
+import MenuOverlay from '../components/menu-overlay.astro'
+import SocialIcons from '../components/social-icons.astro'
+import { type Locale } from '../config/locale-schema.ts'
+import { localizedLabel } from '../config/localized-label.ts'
+import { defaultLocale, site } from '../config/site.ts'
+import {
+	isActive,
+	languageName,
+	localizedHref,
+	switchLocalePath,
+	useTranslations,
+} from '../i18n/ui'
+import { buildLocaleMeta } from '../lib/portfolio/page-meta.ts'
+import HtmlShell from './html-shell.astro'
+
+// the home page has no SiteHeader or SiteFooter; its controls (MenuOverlay hamburger, language
+// switcher, social icons, copyright) sit over the slider
+const lang = (Astro.currentLocale ?? defaultLocale(site)) as Locale
+const t = useTranslations(lang)
+const pathname = Astro.url.pathname
+const meta = buildLocaleMeta(pathname, site.origin, site.content.locales)
+
+const overlayItems = site.menu.items.map((item) => ({
+	href: localizedHref(lang, item.segment),
+	label: localizedLabel(item.label, lang),
+	isCurrent: isActive(pathname, lang, item.segment),
+}))
+
+const localeSwitch = site.content.locales.map((code) => ({
+	code,
+	href: switchLocalePath(pathname, code),
+	label: languageName(lang, code),
+	isCurrent: code === lang,
+}))
+
+const year = new Date().getFullYear()
+const { copyright } = site.identity
+const copyrightHolder = localizedLabel(copyright.holder, lang)
+---
+
+<HtmlShell
+	lang={lang}
+	canonical={meta.canonical}
+	alternates={meta.alternates}
+	forceDark
+	bodyClass="hero-fullscreen"
+>
+	<div data-menu-inert class="fs-slider"><slot name="hero" /></div>
+
+	<div data-menu-inert class="fs-controls-tr"><LanguageSwitcher lang={lang} /></div>
+
+	<div data-menu-inert class="fs-social">
+		<SocialIcons lang={lang} variant="over" />
+		<p class="fs-copyright">
+			<span>Copyright © {copyright.since}-{year} {copyrightHolder}.</span>{' '}
+			<span>{t('home.copyright.rights')}</span>
+		</p>
+	</div>
+
+	{/* outside data-menu-inert, so the toggle stays clickable and the panel is not made inert */}
+	<MenuOverlay
+		items={overlayItems}
+		localeSwitch={localeSwitch}
+		desktopNav={false}
+		showThemeToggle={false}
+		openLabel={t('nav.menu.open')}
+		closeLabel={t('nav.menu.close')}
+		menuLabel={t('nav.menu.label')}
+		languageLabel={t('nav.language.label')}
+		themeLabel={t('theme.toggle.label')}
+		themeToDarkLabel={t('theme.toggle.toDark')}
+		themeToLightLabel={t('theme.toggle.toLight')}
+	/>
+</HtmlShell>

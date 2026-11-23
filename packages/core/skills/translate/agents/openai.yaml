@@ -1,0 +1,7 @@
+interface:
+    display_name: 'Translate'
+    short_description: 'Translate one document with independent reviews'
+    default_prompt: 'Use $translate to translate one document into another locale of the site.'
+
+policy:
+    allow_implicit_invocation: false

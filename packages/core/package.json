@@ -1,0 +1,127 @@
+{
+	"name": "@picasso-ai/astrum-scena",
+	"version": "0.6.9",
+	"description": "Astrum Scena: an Astro integration for photography sites",
+	"license": "MIT",
+	"type": "module",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/picasso/astrum-scena.git",
+		"directory": "packages/core"
+	},
+	"keywords": [
+		"astro",
+		"astro-integration",
+		"withastro"
+	],
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"default": "./dist/index.js"
+		},
+		"./collections": {
+			"types": "./dist/collections.d.ts",
+			"default": "./dist/collections.js"
+		},
+		"./eslint": {
+			"types": "./dist/eslint.d.ts",
+			"default": "./dist/eslint.js"
+		},
+		"./prettier": "./presets/prettier.mjs",
+		"./tsconfig.json": "./presets/tsconfig.json",
+		"./markdownlint.json": "./presets/markdownlint.json"
+	},
+	"bin": {
+		"astrum-scena": "./bin/astrum-scena.js"
+	},
+	"files": [
+		"agents",
+		"api-snapshot/tokens.json",
+		"bin",
+		"dist",
+		"presets",
+		"skills",
+		"src",
+		"THIRD_PARTY_NOTICES.md",
+		"!src/**/*.test.ts",
+		"!src/**/*.test.tsx",
+		"!src/**/__fixtures__",
+		"!src/**/test-fixtures",
+		"!src/**/test-fixtures.ts",
+		"!src/config/fixtures"
+	],
+	"publishConfig": {
+		"access": "public"
+	},
+	"engines": {
+		"node": ">=24"
+	},
+	"scripts": {
+		"build": "rm -rf dist && tsc -p tsconfig.build.json",
+		"typecheck": "astro check"
+	},
+	"dependencies": {
+		"@astrojs/markdown-satteri": "0.3.4",
+		"@astrojs/mdx": "^7.0.3",
+		"@astrojs/sitemap": "^3.7.3",
+		"@tailwindcss/vite": "^4.3.3",
+		"esbuild": "^0.28.1",
+		"exiftool-vendored": "37.0.0",
+		"mdast-util-directive": "^3.1.0",
+		"mdast-util-from-markdown": "2.0.3",
+		"mdast-util-mdx": "^3.0.0",
+		"micromark-extension-directive": "^3.0.2",
+		"micromark-extension-mdxjs": "^3.0.0",
+		"parse5": "8.0.1",
+		"photoswipe": "^5.4.4",
+		"postcss": "^8.5.19",
+		"sharp": "0.35.5",
+		"swiper": "14.0.6",
+		"tailwindcss": "^4.3.3",
+		"yaml": "^2.9.0"
+	},
+	"peerDependencies": {
+		"@astrojs/react": "^6.0.1",
+		"@aws-sdk/client-s3": "^3.1169.0",
+		"astro": "^7.1.1",
+		"eslint-plugin-simple-import-sort": "^14.0.0",
+		"prettier": "^3.9.5",
+		"prettier-plugin-astro": "^0.14.1",
+		"react": "^19.2.7",
+		"react-dom": "^19.2.7",
+		"typescript-eslint": "^8.72.0"
+	},
+	"peerDependenciesMeta": {
+		"@aws-sdk/client-s3": {
+			"optional": true
+		},
+		"eslint-plugin-simple-import-sort": {
+			"optional": true
+		},
+		"prettier": {
+			"optional": true
+		},
+		"prettier-plugin-astro": {
+			"optional": true
+		},
+		"typescript-eslint": {
+			"optional": true
+		}
+	},
+	"devDependencies": {
+		"@astrojs/check": "^0.9.12",
+		"@astrojs/react": "^6.0.1",
+		"@tailwindcss/node": "4.3.3",
+		"@tailwindcss/oxide": "4.3.3",
+		"@testing-library/dom": "^10.4.1",
+		"@testing-library/react": "^16.3.2",
+		"@testing-library/user-event": "^14.6.3",
+		"@types/react": "^19.2.17",
+		"@types/react-dom": "^19.2.3",
+		"astro": "^7.1.1",
+		"jsdom": "^30.0.1",
+		"react": "^19.2.7",
+		"react-dom": "^19.2.7",
+		"typescript": "^6.0.3"
+	}
+}

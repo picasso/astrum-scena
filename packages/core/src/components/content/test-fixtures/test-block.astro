@@ -1,0 +1,11 @@
+---
+// render-path test block: proves MDX gets the component from the registry, not from an import in
+// the document
+type Props = {
+	label: string
+}
+
+const { label } = Astro.props
+---
+
+<p data-test-block>{label}</p>

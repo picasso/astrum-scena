@@ -1,0 +1,37 @@
+---
+import './home-fallback.css'
+
+import { localizedLabel } from '../config/localized-label'
+import { site } from '../config/site'
+import { type Lang, localizedHref, useTranslations } from '../i18n/ui'
+
+// the home page of a site without `featured/home.yaml`: the slider has nothing to show, so the site
+// title and its sections stand in for it under the same fullscreen controls
+type Props = {
+	lang: Lang
+}
+
+const { lang } = Astro.props
+const t = useTranslations(lang)
+const sections = site.menu.items.map((item) => ({
+	href: localizedHref(lang, item.segment),
+	label: localizedLabel(item.label, lang),
+}))
+---
+
+<section class="home-fallback">
+	<h1 class="home-fallback__title">{localizedLabel(site.identity.title, lang)}</h1>
+	<nav aria-label={t('nav.menu.label')}>
+		<ul class="home-fallback__sections">
+			{
+				sections.map((section) => (
+					<li>
+						<a class="home-fallback__link" href={section.href}>
+							{section.label}
+						</a>
+					</li>
+				))
+			}
+		</ul>
+	</nav>
+</section>

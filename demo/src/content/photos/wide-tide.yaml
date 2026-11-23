@@ -1,0 +1,19 @@
+title:
+    en: Wide Tide
+    ru: Широкий прилив
+description:
+    en: A synthetic sea at the last light, generated from a gradient and a disc.
+    ru: Синтетическое море в последнем свете, построенное из градиента и диска.
+caption:
+    en: A procedural sea under a dusk sky.
+    ru: Процедурное море под сумеречным небом.
+alt:
+    en: A dark blue sky with a pale sun above a teal sea.
+    ru: Тёмно-синее небо с бледным солнцем над бирюзовым морем.
+status: published
+publishedAt: 2026-10-22
+placeId: coastland
+capturedAt: '2026'
+colorMode: color
+tags:
+    - dusk

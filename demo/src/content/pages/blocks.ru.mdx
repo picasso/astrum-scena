@@ -1,0 +1,94 @@
+---
+translationKey: blocks
+locale: ru
+slug: blocks
+title: Блоки
+excerpt: Синтетическая страница с блоками Gallery и Wrap Around ядра.
+status: published
+moreDocs:
+    docs:
+        - kind: course
+          slug: night-sky-workshop
+        - kind: course
+          slug: darkroom-basics
+        - kind: article
+          slug: reading-the-light
+translatedFromDigest: 239988af323086be11be619800e504580952567e7b5f607e6b428140f1c24d53
+---
+
+Эта страница синтетическая: она собирает блоки изображений ядра на одной странице, каждый в своей
+раскладке.
+
+<section data-testid="gallery-static">
+
+## Обрезанные и естественные раскладки
+
+<div data-testid="gallery-rect">
+    <Gallery
+        albumId="coastal-light"
+        layout="rect"
+        columns={3}
+        gap="medium"
+        frame="thick"
+        outside={20}
+        inlineCaption={true}
+    />
+</div>
+
+<div data-testid="gallery-square">
+    <Gallery
+        albumId="geometry-studies"
+        layout="square"
+        columns={2}
+        gap="tiny"
+        frame="medium"
+        frameColor="alt"
+        action="none"
+        inlineCaption={true}
+        lightboxScope="block"
+    />
+</div>
+
+<div data-testid="gallery-justified">
+    <Gallery
+        imageSetId="every-photo"
+        layout="justified"
+        columns={3}
+        gap="none"
+        frame="thin"
+        lightboxCaption={false}
+    />
+</div>
+
+</section>
+
+<section data-testid="gallery-dynamic">
+
+## Случайная выборка
+
+<Gallery
+    imageSetId="every-photo"
+    randomCount={4}
+    layout="square"
+    columns={4}
+    gap="large"
+    frame="none"
+    mobileFirstOnly={true}
+/>
+
+</section>
+
+<section data-testid="wrap-around">
+
+## Изображения в потоке текста
+
+<WrapAround
+    images={[{ imageId: 'wide-tide' }, { imageId: 'still-square' }]}
+    imageGap="medium"
+    action="none"
+/>
+
+Wrap Around ставит изображения рядом с текстом, и этот абзац обтекает их: блок показывает, как
+короткий текст обходит колонку изображений.
+
+</section>

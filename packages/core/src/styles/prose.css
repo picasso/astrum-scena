@@ -1,0 +1,125 @@
+/* The page title lives in the hero slot (`.page-hero`); an H1 here comes only from an imported body. */
+
+.prose h1,
+.prose h2,
+.prose h3,
+.prose h4 {
+	color: var(--color-heading);
+	font-weight: var(--font-weight-medium);
+	line-height: 1em;
+}
+
+/* Without it the text sticks to the heading rule. */
+.prose h1,
+.prose h2,
+.prose h3,
+.prose h4 {
+	margin: 0 0 0.809em;
+}
+
+/* H1 equals H2 in the body, as on the legacy site. `width: fit-content` sizes the rule below to the
+ * text but, unlike `inline-block`, keeps block flow, so two headings never share a line. */
+.prose h1,
+.prose h2 {
+	font-size: var(--text-h2);
+	width: fit-content;
+	margin-top: 1em;
+}
+
+.prose h3 {
+	font-size: var(--text-h3);
+}
+
+.prose h4 {
+	font-size: var(--text-h4);
+}
+
+/* The legacy theme sized the rule by script (about twice the text, capped at the column). Without JS,
+ * percentages on the block `::after` resolve against the fit-content box, which equals the text width.
+ * The query container caps the rule at the column without clipping outside media. */
+.prose {
+	container: prose / inline-size;
+}
+
+.prose h1::after,
+.prose h2::after {
+	content: '';
+	display: block;
+	width: min(200%, 100cqw);
+	height: 1px;
+	margin: 15px 0 0;
+	background: color-mix(in srgb, var(--color-heading) 30%, transparent);
+}
+
+@media (max-width: 480px) {
+	.prose h1::after,
+	.prose h2::after {
+		display: none;
+	}
+}
+
+.prose p {
+	margin: 0 0 28px;
+}
+
+.prose ul,
+.prose ol {
+	margin: 0 0 28px;
+	padding: 0;
+	margin-inline-start: 40px;
+}
+
+.prose ul {
+	list-style: disc;
+}
+
+.prose ol {
+	list-style: decimal;
+}
+
+.prose blockquote {
+	position: relative;
+	margin: 40px;
+}
+
+.prose blockquote::before {
+	content: '\201C';
+	position: absolute;
+	right: 100%;
+	top: 0;
+	padding-right: 8px;
+	font-size: 30px;
+	line-height: 1;
+	color: var(--color-heading);
+}
+
+.prose hr {
+	border: 0;
+	border-top: 1px solid var(--color-accent);
+	margin: 28px 0;
+}
+
+.prose figcaption {
+	font-size: 14px;
+	font-weight: var(--font-weight-bold);
+	text-align: center;
+}
+
+.prose a {
+	color: var(--color-link);
+	text-decoration: underline dotted;
+	text-underline-offset: 4px;
+	transition: color var(--duration-base) var(--ease-out);
+}
+
+.prose a:hover,
+.prose a:focus-visible {
+	color: var(--color-link-hover);
+}
+
+.prose img,
+.prose video,
+.prose iframe {
+	max-width: 100%;
+	height: auto;
+}

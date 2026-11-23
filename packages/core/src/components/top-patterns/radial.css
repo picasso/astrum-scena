@@ -1,0 +1,13 @@
+@import '../../styles/layers.css';
+
+@layer components {
+	.top-section--pattern-radial .top-section__pattern::after {
+		background: repeating-radial-gradient(
+			circle,
+			color-mix(in srgb, var(--color-shade) 10%, transparent),
+			color-mix(in srgb, var(--color-shade) 10%, transparent) 2px,
+			transparent 2px,
+			transparent 5px
+		);
+	}
+}

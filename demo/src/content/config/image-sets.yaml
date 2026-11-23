@@ -1,0 +1,11 @@
+# named image pools of the Gallery block: the dynamic Gallery of the `blocks` page draws from every
+# demo photo
+schemaVersion: 1
+every-photo:
+    photoIds:
+        - wide-tide
+        - amber-dunes
+        - long-horizon
+        - still-square
+        - quiet-tower
+        - graphite-lines

@@ -1,0 +1,233 @@
+/*
+ * Callout keeps the visual metrics of the legacy Quote block while rendering semantic Markdown
+ * and using a flex item instead of an absolutely positioned icon.
+ */
+
+/* Tone palette values live in the theme (src/theme/theme.css). */
+:root {
+	--callout-radius: 3px;
+
+	--callout-accent-line: var(--color-accent);
+	--callout-accent-icon: var(--color-accent);
+
+	--callout-alt-line: var(--color-alt);
+	--callout-alt-icon: var(--callout-alt-fill);
+}
+
+.callout--default {
+	--callout-fill: var(--callout-default-fill);
+	--callout-text: var(--callout-default-text);
+	--callout-line: var(--callout-default-line);
+	--callout-icon-color: var(--callout-default-icon);
+}
+
+.callout--accent {
+	--callout-fill: var(--callout-accent-fill);
+	--callout-text: var(--callout-accent-text);
+	--callout-line: var(--callout-accent-line);
+	--callout-icon-color: var(--callout-accent-icon);
+}
+
+.callout--alt {
+	--callout-fill: var(--callout-alt-fill);
+	--callout-text: var(--callout-alt-text);
+	--callout-line: var(--callout-alt-line);
+	--callout-icon-color: var(--callout-alt-icon);
+}
+
+.callout {
+	position: relative;
+	display: flex;
+	align-items: flex-start;
+	width: 100%;
+	min-height: 130px;
+	margin: 0 0 28px;
+	padding: 40px 20px 40px 40px;
+	border: 2px solid transparent;
+	border-radius: var(--callout-radius);
+	font-size: 1.1em;
+	font-weight: var(--font-weight-medium);
+	letter-spacing: 0.5px;
+}
+
+.callout__content {
+	flex: 1 1 auto;
+	min-width: 0;
+}
+
+/* The live shortcode body was inline. Its measured 25px baseline rhythm at 19.8px maps to 1.25. */
+.prose .callout__content > p {
+	line-height: 1.25;
+}
+
+.prose .callout__content > :first-child {
+	margin-top: -0.5em;
+}
+
+/* A filled line exposes its padding box, so keep the full legacy 10px inset above the text. */
+.prose .callout--line:not(.callout--transparent) .callout__content > :first-child {
+	margin-top: 0;
+}
+
+.prose .callout__content > :last-child {
+	margin-bottom: 0;
+}
+
+/* Keep the project's accessible link treatment. Higher specificity prevents the surrounding prose
+ * link color from turning an accent-callout link light. */
+.prose .callout a {
+	color: inherit;
+	text-decoration-line: underline;
+	text-decoration-style: solid;
+	text-decoration-thickness: 1px;
+	text-underline-offset: 2px;
+}
+
+.prose .callout--block.callout--accent a {
+	color: var(--callout-text);
+}
+
+.callout--block {
+	--callout-block-padding-right: clamp(20px, calc(10% - 20px), 40px);
+
+	padding-right: var(--callout-block-padding-right);
+	background: var(--callout-fill);
+	color: var(--callout-text);
+}
+
+/* The flex icon begins at the legacy x=28px and the content begins at x=110px:
+ * 28px + 48px icon + 34px gap. */
+.callout--block:has(> .callout__icon) {
+	column-gap: 34px;
+	padding-left: 28px;
+}
+
+.callout--block.callout--default:not(.callout--transparent) {
+	text-shadow: 0 1px 3px color-mix(in srgb, var(--color-shade) 30%, transparent);
+}
+
+.callout--line {
+	min-height: initial;
+	padding: 10px 20px 20px;
+	background: var(--callout-fill);
+	border-left: 10px solid var(--callout-line);
+	border-top-width: 0;
+	border-right-width: 0;
+	border-bottom-width: 0;
+	border-radius: 0 var(--callout-radius) var(--callout-radius) 0;
+	color: inherit;
+	font-style: italic;
+	font-weight: var(--font-weight-normal);
+}
+
+.callout--line:not(.callout--transparent) {
+	padding-top: 14px;
+}
+
+.callout--line.callout--accent,
+.callout--line.callout--alt {
+	background: color-mix(in srgb, var(--callout-line) 10%, transparent);
+}
+
+.callout--line.callout--default:not(.callout--transparent) {
+	color: var(--callout-default-line-text);
+}
+
+.callout--line:has(> .callout__icon) {
+	min-height: 78px;
+	column-gap: 10px;
+	padding-right: 10px;
+}
+
+.callout--line .callout__content {
+	order: 0;
+}
+
+.callout--line .callout__icon {
+	order: 1;
+	margin-top: 5px;
+	margin-left: auto;
+}
+
+.callout--line:not(.callout--transparent) .callout__icon {
+	margin-top: 1px;
+}
+
+.callout--transparent {
+	color: inherit;
+}
+
+.callout--block.callout--transparent {
+	background: transparent;
+	border-color: var(--callout-line);
+}
+
+.callout--line.callout--transparent {
+	background: transparent;
+}
+
+.callout--transparent .callout__icon {
+	border-color: var(--callout-line);
+}
+
+.callout__icon {
+	flex: 0 0 48px;
+	display: block;
+	width: 48px;
+	height: 48px;
+	padding: 5px 8px 8px 5px;
+	border: 3px solid currentColor;
+	border-radius: 50%;
+	background: var(--color-paper);
+	color: var(--callout-icon-color);
+	line-height: 1;
+	text-shadow: none;
+}
+
+.callout--block:not(.callout--transparent) .callout__icon,
+.callout--line.callout--accent:not(.callout--transparent) .callout__icon,
+.callout--line.callout--alt:not(.callout--transparent) .callout__icon {
+	border-color: var(--color-paper);
+}
+
+.callout__icon svg {
+	display: block;
+	width: 32px;
+	height: 32px;
+}
+
+@media (max-width: 768px) {
+	.callout {
+		margin-top: 30px;
+		padding-right: 30px;
+		padding-left: 30px;
+		font-size: 1em;
+	}
+
+	.callout:has(> .callout__icon) {
+		flex-wrap: wrap;
+		column-gap: 0;
+	}
+
+	.callout.callout--block:has(> .callout__icon) {
+		padding-left: 30px;
+	}
+
+	.callout.callout--block {
+		padding-right: var(--callout-block-padding-right);
+	}
+
+	.callout:has(> .callout__icon) .callout__content {
+		flex-basis: 100%;
+	}
+
+	/* The icon remains a 48px flex item. Its zero-height first flex line keeps text flow intact while
+	 * transform moves the circle from the 40px padding edge to the legacy top=-21px position. */
+	.callout:has(> .callout__icon) .callout__icon {
+		order: -1;
+		margin-top: 0;
+		margin-bottom: -48px;
+		margin-left: auto;
+		transform: translateY(-63px);
+	}
+}

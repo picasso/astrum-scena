@@ -1,0 +1,252 @@
+@import '../styles/layers.css';
+
+@layer components {
+	/* Client positioning never changes DOM, focus or viewer order: the markup order is album.photoIds. */
+
+	.card__img {
+		display: block;
+		width: 100%;
+		height: auto;
+	}
+
+	.card {
+		display: block;
+		overflow: hidden;
+		border: 1px solid var(--color-card-border);
+		border-radius: var(--radius-card);
+		background-color: var(--color-card);
+		box-shadow: var(--shadow-card);
+		color: var(--color-foreground);
+		font-size: 15px;
+		line-height: 1.5;
+		text-decoration: none;
+		transition: box-shadow var(--duration-base) var(--ease-out);
+	}
+
+	.card:hover,
+	.card:focus-visible {
+		box-shadow: var(--shadow-card-hover);
+	}
+
+	.card__img {
+		transition: opacity var(--duration-base) var(--ease-out);
+	}
+
+	.card__media-frame,
+	.card__media,
+	.card__img {
+		display: block;
+		width: 100%;
+	}
+
+	.card__media-frame--landscape {
+		aspect-ratio: 3 / 2;
+	}
+
+	.card__media-frame--pano {
+		aspect-ratio: 5 / 2;
+	}
+
+	.card__media-frame--vista {
+		aspect-ratio: 17 / 8;
+	}
+
+	.card__media-frame--square {
+		aspect-ratio: 1;
+	}
+
+	.card__media-frame--portrait {
+		aspect-ratio: 2 / 3;
+	}
+
+	.card__media-frame:not(.card__media-frame--original) .card__media,
+	.card__media-frame:not(.card__media-frame--original) .card__img,
+	.card__media--placeholder {
+		height: 100%;
+	}
+
+	.card__media-frame:not(.card__media-frame--original) .card__img {
+		object-fit: cover;
+		object-position: var(--card-focal, 50% 50%);
+	}
+
+	.card__media--placeholder {
+		display: grid;
+		place-items: center;
+		padding-block: 1.5rem;
+		background-color: color-mix(in srgb, var(--color-surface) 80%, transparent);
+		color: var(--color-accent);
+	}
+
+	.card__media--placeholder svg {
+		width: auto;
+		height: 100%;
+		max-width: 240px;
+		max-height: 240px;
+		fill: var(--color-accent);
+		opacity: 0.4;
+	}
+
+	.card__media--placeholder svg path {
+		fill: currentColor;
+	}
+
+	.card:hover .card__img,
+	.card:focus-visible .card__img {
+		opacity: 0.7;
+	}
+
+	.card__media-frame {
+		position: relative;
+	}
+
+	.card__badge {
+		position: absolute;
+		top: 10px;
+		left: 10px;
+		z-index: 2;
+	}
+
+	/* The blur keeps photo detail from competing with the text. */
+	.card__badge:not(.card__badge--inline) {
+		/* Safari before 18 supports only the prefixed property. */
+		-webkit-backdrop-filter: blur(4px);
+		backdrop-filter: blur(4px);
+	}
+
+	/* A very light photo would swallow the badge (owner decision). Real photos only: on a flat placeholder
+	 * the shade killed the contrast of the dark Archive badge. */
+	.card__media-frame--badged::after {
+		content: '';
+		position: absolute;
+		inset: 0;
+		z-index: 1;
+		pointer-events: none;
+		background: radial-gradient(
+			ellipse 60% 70% at 0 0,
+			color-mix(in srgb, var(--color-shade) 45%, transparent),
+			transparent 70%
+		);
+	}
+
+	.card__badge--inline {
+		position: static;
+		margin-bottom: 8px;
+	}
+
+	.card__body {
+		border-top: 1px solid var(--color-card-divider);
+		background-color: var(--color-card-body);
+		padding: 10px 20px 20px;
+	}
+
+	.card__title {
+		margin: 0 0 0.5em;
+		color: var(--color-heading);
+		font-size: 24px;
+		font-weight: var(--font-weight-medium);
+		line-height: 1.3;
+		transition: color var(--duration-base) var(--ease-out);
+	}
+
+	@media (max-width: 767px) {
+		.card__title {
+			font-size: 20px;
+		}
+	}
+
+	/* Without an excerpt the title margin is empty space; equal padding centers the title. */
+	.card__body--title-only {
+		padding-bottom: 10px;
+	}
+
+	.card__body--title-only .card__title {
+		margin-bottom: 0;
+	}
+
+	@media (max-width: 479px) {
+		.card__title {
+			font-size: 18px;
+		}
+	}
+
+	.card:hover .card__title,
+	.card:focus-visible .card__title {
+		color: var(--color-link-hover);
+	}
+
+	.card__excerpt {
+		margin: 0;
+		color: var(--color-foreground);
+		letter-spacing: 0.5px;
+	}
+
+	.card__more {
+		display: inline-block;
+		margin-top: 0.5rem;
+		color: var(--color-link);
+		font-size: 13px;
+		text-transform: uppercase;
+		letter-spacing: 0.06em;
+	}
+
+	/* A media query cannot read a custom property, so each `listing.excerptHiddenBelow` threshold is its
+	 * own rule and the config picks the class. A body left with only the title gets the title-only
+	 * geometry; list rows (`.card--row`) are unaffected. */
+	@media (max-width: 479px) {
+		.cards--excerpt-hidden-480 .card__excerpt {
+			display: none;
+		}
+
+		.cards--excerpt-hidden-480
+			.card:not(.card--row)
+			> .card__body:has(.card__excerpt):not(:has(.card__more)) {
+			padding-bottom: 10px;
+		}
+
+		.cards--excerpt-hidden-480
+			.card:not(.card--row)
+			> .card__body:has(.card__excerpt):not(:has(.card__more))
+			.card__title {
+			margin-bottom: 0;
+		}
+	}
+
+	@media (max-width: 767px) {
+		.cards--excerpt-hidden-768 .card__excerpt {
+			display: none;
+		}
+
+		.cards--excerpt-hidden-768
+			.card:not(.card--row)
+			> .card__body:has(.card__excerpt):not(:has(.card__more)) {
+			padding-bottom: 10px;
+		}
+
+		.cards--excerpt-hidden-768
+			.card:not(.card--row)
+			> .card__body:has(.card__excerpt):not(:has(.card__more))
+			.card__title {
+			margin-bottom: 0;
+		}
+	}
+
+	@media (max-width: 1023px) {
+		.cards--excerpt-hidden-1024 .card__excerpt {
+			display: none;
+		}
+
+		.cards--excerpt-hidden-1024
+			.card:not(.card--row)
+			> .card__body:has(.card__excerpt):not(:has(.card__more)) {
+			padding-bottom: 10px;
+		}
+
+		.cards--excerpt-hidden-1024
+			.card:not(.card--row)
+			> .card__body:has(.card__excerpt):not(:has(.card__more))
+			.card__title {
+			margin-bottom: 0;
+		}
+	}
+}

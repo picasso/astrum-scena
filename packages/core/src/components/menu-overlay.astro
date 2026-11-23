@@ -1,0 +1,297 @@
+---
+import './menu-overlay.css'
+
+type NavLink = {
+	href: string
+	label: string
+	isCurrent: boolean
+}
+
+type LocaleLink = {
+	code: string
+} & NavLink
+
+type Props = {
+	items: NavLink[]
+	localeSwitch: LocaleLink[]
+	openLabel: string
+	closeLabel: string
+	menuLabel: string
+	languageLabel: string
+	themeLabel: string
+	themeToDarkLabel: string
+	themeToLightLabel: string
+	showThemeToggle?: boolean // false on home, which is always dark
+	desktopNav?: boolean // inner pages hide the hamburger on desktop; home always shows it
+}
+
+const {
+	items,
+	localeSwitch,
+	openLabel,
+	closeLabel,
+	menuLabel,
+	languageLabel,
+	themeLabel,
+	themeToDarkLabel,
+	themeToLightLabel,
+	showThemeToggle = true,
+	desktopNav = false,
+} = Astro.props
+---
+
+{
+	/* a vanilla menu (ADR-0006): the markup is rendered closed and in the dark theme; the script below
+    opens it and syncs the theme button to the actual data-theme */
+}
+<div class="menu-overlay-root">
+	<button
+		type="button"
+		class:list={['menu-overlay-toggle', { 'menu-overlay-toggle--collapsible': desktopNav }]}
+		aria-expanded="false"
+		aria-controls="site-menu-overlay"
+		aria-haspopup="dialog"
+		aria-label={openLabel}
+		data-label-open={openLabel}
+		data-label-close={closeLabel}
+	>
+		{/* three bars → X; bar color lives in menu-overlay.css */}
+		<span class="bar bar-top" aria-hidden="true"></span>
+		<span class="bar bar-middle" aria-hidden="true"></span>
+		<span class="bar bar-bottom" aria-hidden="true"></span>
+	</button>
+
+	<div
+		id="site-menu-overlay"
+		class="menu-overlay-panel"
+		role="dialog"
+		aria-modal="true"
+		aria-label={menuLabel}
+	>
+		<div class="menu-overlay-inner">
+			<nav aria-label={menuLabel}>
+				<ul>
+					{
+						items.map((item) => (
+							<li>
+								<a
+									href={item.href}
+									aria-current={item.isCurrent ? 'page' : undefined}
+									set:text={item.label}
+								/>
+							</li>
+						))
+					}
+				</ul>
+			</nav>
+
+			{
+				localeSwitch.length > 0 && (
+					<nav aria-label={languageLabel}>
+						<ul>
+							{localeSwitch.map((locale) => (
+								<li>
+									<a
+										href={locale.href}
+										hreflang={locale.code}
+										aria-current={locale.isCurrent ? 'true' : undefined}
+										set:text={locale.label}
+									/>
+								</li>
+							))}
+						</ul>
+					</nav>
+				)
+			}
+
+			{
+				showThemeToggle && (
+					<button
+						type="button"
+						class="menu-overlay-theme"
+						aria-label={themeLabel}
+						aria-pressed="true"
+						data-label-to-dark={themeToDarkLabel}
+						data-label-to-light={themeToLightLabel}
+						set:text={themeToLightLabel}
+					/>
+				)
+			}
+		</div>
+	</div>
+</div>
+
+<script>
+	import { navigate } from 'astro:transitions/client'
+
+	import { getCurrentTheme, toggleTheme } from '../lib/theme'
+
+	const DESKTOP_QUERY = '(min-width: 1024px)'
+	// the view transition starts after the close animation; running both at once flickers
+	const CLOSE_ANIMATION_MS = 320
+
+	function getFocusable(root: HTMLElement): HTMLElement[] {
+		return Array.from(
+			root.querySelectorAll<HTMLElement>(
+				'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])',
+			),
+		)
+	}
+
+	function syncThemeButton(button: HTMLButtonElement) {
+		const theme = getCurrentTheme()
+		button.setAttribute('aria-pressed', String(theme === 'dark'))
+		const label = theme === 'dark' ? button.dataset.labelToLight : button.dataset.labelToDark
+		if (label) button.textContent = label
+	}
+
+	// the effects of an open panel; the returned function undoes them
+	function holdOpen(panel: HTMLElement, toggle: HTMLButtonElement, close: () => void) {
+		// only regions marked data-menu-inert, never an ancestor of the panel itself
+		const background = Array.from(document.querySelectorAll<HTMLElement>('[data-menu-inert]'))
+		for (const el of background) el.inert = true
+
+		// fixed-body scroll lock, the variant that also holds on iOS
+		const scrollY = window.scrollY
+		const body = document.body
+		body.style.position = 'fixed'
+		body.style.top = `-${scrollY}px`
+		body.style.width = '100%'
+
+		getFocusable(panel)[0]?.focus()
+
+		const onKeyDown = (event: KeyboardEvent) => {
+			if (event.key === 'Escape') {
+				event.preventDefault()
+				close()
+				return
+			}
+			if (event.key !== 'Tab') return
+
+			const focusItems = getFocusable(panel)
+			if (focusItems.length === 0) return
+			const first = focusItems[0]!
+			const last = focusItems[focusItems.length - 1]!
+			const activeEl = document.activeElement
+
+			if (event.shiftKey) {
+				if (activeEl === first || !panel.contains(activeEl)) {
+					event.preventDefault()
+					last.focus()
+				}
+			} else if (activeEl === last || !panel.contains(activeEl)) {
+				event.preventDefault()
+				first.focus()
+			}
+		}
+		document.addEventListener('keydown', onKeyDown)
+
+		return () => {
+			document.removeEventListener('keydown', onKeyDown)
+			for (const el of background) el.inert = false
+			body.style.position = ''
+			body.style.top = ''
+			body.style.width = ''
+			window.scrollTo(0, scrollY)
+			// without preventScroll, focusing the toggle in a non-sticky header scrolls to the top and
+			// undoes the scrollY restore above
+			toggle.focus({ preventScroll: true })
+		}
+	}
+
+	// undoes the bound menu of the current page before ClientRouter swaps it out
+	let teardown: (() => void) | null = null
+
+	function initMenu() {
+		const root = document.querySelector<HTMLElement>('.menu-overlay-root')
+		if (!root || root.dataset.bound) return
+		const toggle = root.querySelector<HTMLButtonElement>('.menu-overlay-toggle')
+		const panel = root.querySelector<HTMLElement>('.menu-overlay-panel')
+		if (!toggle || !panel) return
+		root.dataset.bound = 'true'
+		const themeButton = panel.querySelector<HTMLButtonElement>('.menu-overlay-theme')
+
+		let release: (() => void) | null = null
+
+		// the <html> flag lets the hero slider catch up if it hydrates later; the events fire only on
+		// a real toggle
+		const announce = (open: boolean) => {
+			document.documentElement.dataset.menuOpen = open ? 'true' : 'false'
+			window.dispatchEvent(new CustomEvent(open ? 'menu:open' : 'menu:close'))
+		}
+
+		const setOpen = (open: boolean) => {
+			if (open === (release !== null)) return
+			for (const el of [toggle, panel]) {
+				if (open) el.setAttribute('data-open', 'true')
+				else el.removeAttribute('data-open')
+			}
+			toggle.setAttribute('aria-expanded', String(open))
+			const label = open ? toggle.dataset.labelClose : toggle.dataset.labelOpen
+			if (label) toggle.setAttribute('aria-label', label)
+			if (open) {
+				// the header toggle may have changed the theme while the menu was closed
+				if (themeButton) syncThemeButton(themeButton)
+				announce(true)
+				release = holdOpen(panel, toggle, () => setOpen(false))
+			} else {
+				const undo = release
+				release = null
+				undo?.()
+				announce(false)
+			}
+		}
+
+		document.documentElement.dataset.menuOpen = 'false'
+		toggle.addEventListener('click', () => setOpen(release === null))
+
+		// modified and non-primary clicks keep their browser meaning (new tab and so on)
+		for (const link of panel.querySelectorAll<HTMLAnchorElement>('a[href]')) {
+			link.addEventListener('click', (event) => {
+				if (
+					event.metaKey ||
+					event.ctrlKey ||
+					event.shiftKey ||
+					event.altKey ||
+					event.button !== 0
+				)
+					return
+				event.preventDefault()
+				setOpen(false)
+				const href = link.getAttribute('href')!
+				window.setTimeout(() => navigate(href), CLOSE_ANIMATION_MS)
+			})
+		}
+
+		if (themeButton) {
+			// the inline theme script may have set another theme than the SSR default
+			syncThemeButton(themeButton)
+			themeButton.addEventListener('click', () => {
+				toggleTheme()
+				syncThemeButton(themeButton)
+			})
+		}
+
+		// on desktop the collapsible toggle is hidden by CSS, which would otherwise leave an open panel
+		// with its effects active and no way to close it
+		const mql = window.matchMedia(DESKTOP_QUERY)
+		const onBreakpoint = (event: MediaQueryListEvent) => {
+			if (event.matches) setOpen(false)
+		}
+		mql.addEventListener('change', onBreakpoint)
+
+		teardown = () => {
+			mql.removeEventListener('change', onBreakpoint)
+			setOpen(false)
+		}
+	}
+
+	// astro:page-load fires on the first load and after every View Transitions swap, which recreates
+	// the menu; data-bound prevents double binding. A navigation that leaves the menu open (browser
+	// Back) must not carry its keydown listener, inert regions or scroll lock onto the next page.
+	document.addEventListener('astro:page-load', initMenu)
+	document.addEventListener('astro:before-swap', () => {
+		teardown?.()
+		teardown = null
+	})
+</script>

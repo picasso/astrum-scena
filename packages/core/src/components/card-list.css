@@ -1,0 +1,65 @@
+@import '../styles/layers.css';
+
+@layer components {
+	/* Matches the legacy list: 45/55 columns, no plate or shadow, and a rule above the text column on
+	 * every item, including the first. Below the layout break the row stacks and the rule goes. */
+	.card-list {
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	.card--row {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr);
+		gap: 1rem;
+		align-items: start;
+		border: 0;
+		border-radius: 0;
+		background-color: transparent;
+		box-shadow: none;
+		padding: 0 0 3rem;
+	}
+
+	.card--row:hover,
+	.card--row:focus-visible {
+		box-shadow: none;
+	}
+
+	.card--row .card__body {
+		border-top: 0 none;
+		background-color: transparent;
+		padding: 0;
+	}
+
+	.card--row .card__media-frame {
+		border-radius: 6px;
+		overflow: hidden;
+	}
+
+	.card--row .card__excerpt {
+		line-height: 1.6;
+		letter-spacing: normal;
+	}
+
+	@media (min-width: 1024px) {
+		.card--row {
+			grid-template-columns: 45% minmax(0, 55%);
+			column-gap: 2rem;
+		}
+
+		/* An empty media column would look broken. */
+		.card--row:not(:has(.card__media)) {
+			grid-template-columns: minmax(0, 1fr);
+		}
+
+		.card--row .card__body {
+			border-top: 1px solid var(--color-card-divider);
+			padding-top: 20px;
+		}
+
+		.card--row .card__excerpt {
+			width: 80%;
+		}
+	}
+}

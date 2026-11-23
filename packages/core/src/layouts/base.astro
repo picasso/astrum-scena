@@ -1,0 +1,184 @@
+---
+import './base.css'
+
+import { overrides } from 'virtual:astrum-scena/overrides'
+
+import PageHero from '../components/page-hero.astro'
+import SiteFooter from '../components/site-footer.astro'
+import SiteHeader from '../components/site-header.astro'
+import SiteLogo from '../components/site-logo.astro'
+import TopSection from '../components/top-section.astro'
+import type { Locale } from '../config/locale-schema.ts'
+import { localizedLabel } from '../config/localized-label.ts'
+import { type ContentWidth, defaultLocale, site } from '../config/site.ts'
+import { type Lang, localizedHref } from '../i18n/ui'
+import type { BannerModel } from '../lib/banner/select.ts'
+import type { FooterPromoContext } from '../lib/portfolio/footer-promo.ts'
+import HtmlShell, { type AlternateLink } from './html-shell.astro'
+
+type Props = {
+	title?: string
+	description?: string
+	excerpt?: string
+	body?: string
+	canonical?: string
+	alternates?: AlternateLink[]
+	// a language-neutral page (`/rights/`) has no second language version, so a language switcher
+	// would lead to a missing /{lang}/… route
+	localeNeutral?: boolean
+	// a service page may hide the privacy policy links of the shared footer
+	hidePrivacyLinks?: boolean
+	// `standard` is the legacy 1200 width, kept for pages that have no width assigned
+	width?: ContentWidth
+	// the H1 lives in the page hero, not in the content: in the legacy theme the H1 was only in the
+	// banner and the document body started with H2
+	heading?: string
+	// the surface's assigned banner (src/lib/banner); without it the hero falls back to text
+	banner?: BannerModel
+	// hex colour strip above the menu (the photo's dominantColor) in place of the empty legacy
+	// `.empty` banner; only for the photo page, which has neither a heading nor a banner
+	dominantStrip?: string
+	// opt-in robots meta passed to HtmlShell: only `/status/` and unlisted documents, albums and photos
+	// (ADR-0010) send `noindex,follow`; otherwise none is rendered
+	robots?: 'noindex,follow'
+	// the page's stable key and the photos it already shows; required, so a new page cannot forget it
+	// and silently repeat those photos in the footer
+	footerPromo: FooterPromoContext
+	// language of the heading and `<main>` when it differs from the page locale (`/status/` copy is
+	// always English); the header, footer and `<html lang>` stay on the page locale, since their links
+	// are built from it
+	contentLang?: Locale
+}
+
+const lang = (Astro.currentLocale ?? defaultLocale(site)) as Lang
+const {
+	title,
+	description,
+	excerpt,
+	body,
+	canonical,
+	alternates,
+	localeNeutral = false,
+	hidePrivacyLinks = false,
+	width = 'standard',
+	heading,
+	banner,
+	dominantStrip,
+	robots,
+	footerPromo,
+	contentLang,
+} = Astro.props as Props
+
+// the legacy theme rendered the banner before the header, so the navigation bar sits below it; here
+// the header is in normal flow and the markup order sets this.
+// Both hero states (photo banner and text hero) are chosen here from data, not from a filled slot,
+// so the page's single H1 has exactly one source. A surface without a heading (the photo page) gets
+// no hero at all; its H1 lives in the content.
+if (banner && !heading)
+	throw new Error('Base: a banner requires a heading (the banner draws the H1)')
+
+// below the menu breakpoint a hero shows the shared brand logo (brand-logo.svg); an external SVG
+// referenced through fragment <use> keeps the themeable currentColor without bloating the HTML. The
+// brand belongs to the site: a leading `/` resolves from the Vite root, which is the site root, and
+// `?no-inline` keeps a small logo a file, since `<use>` refuses a data: URL.
+const brandLogos = import.meta.glob<string>('/src/assets/brand/*.svg', {
+	query: '?no-inline',
+	import: 'default',
+	eager: true,
+})
+const brandLogoUrl = brandLogos['/src/assets/brand/brand-logo.svg']
+// the site's `logo` replacement draws the mark here too, inside the same core link
+const SiteMark = overrides.logo
+const siteTitle = localizedLabel(site.identity.title, lang)
+const showBannerLogo =
+	Boolean(heading) && site.menu.topLogoSize !== 'off' && Boolean(SiteMark ?? brandLogoUrl)
+
+// fluid banner logo height from 40px at 375px up to 80px × (1 + topLogoSize) at the 1024px menu
+// breakpoint, rounded to whole px like menu.logoSize. The clamp slope depends on the upper bound and
+// CSS calc cannot multiply two lengths, so the finished clamp is computed here and passed inline.
+const TOP_LOGO_MIN = 40
+const TOP_LOGO_BASE = 80
+const TOP_LOGO_WIDE = 1024
+const TOP_LOGO_NARROW = 375
+const topLogoScale = site.menu.topLogoSize === 'off' ? 0 : site.menu.topLogoSize
+const topLogoMax = Math.round(TOP_LOGO_BASE * (1 + topLogoScale))
+const topLogoSlopeVw = ((topLogoMax - TOP_LOGO_MIN) / (TOP_LOGO_WIDE - TOP_LOGO_NARROW)) * 100
+const topLogoIntercept = topLogoMax - (topLogoSlopeVw / 100) * TOP_LOGO_WIDE
+const bannerLogoHeight = `clamp(${TOP_LOGO_MIN}px, calc(${topLogoSlopeVw.toFixed(3)}vw + ${topLogoIntercept.toFixed(2)}px), ${topLogoMax}px)`
+---
+
+{/* inner pages only; the home page uses the fullscreen layout */}
+<HtmlShell
+	lang={lang}
+	title={title}
+	description={description}
+	excerpt={excerpt}
+	body={body}
+	canonical={canonical}
+	alternates={alternates}
+	robots={robots}
+	bodyClass="bg-background text-foreground page-shell"
+>
+	{
+		heading && (
+			<div data-menu-inert lang={contentLang}>
+				{banner ? (
+					<TopSection banner={banner} title={heading} />
+				) : (
+					<PageHero title={heading} />
+				)}
+			</div>
+		)
+	}
+
+	{
+		/* decorative, hidden from assistive tech; the inline style is unavoidable since the colour
+		is per photo */
+		!heading && dominantStrip && (
+			<div
+				class="dominant-strip"
+				data-menu-inert
+				aria-hidden="true"
+				style={`background-color:${dominantStrip}`}
+			/>
+		)
+	}
+
+	{
+		showBannerLogo && (
+			<a
+				data-menu-inert
+				href={localizedHref(lang, '')}
+				aria-label={siteTitle}
+				class:list={[
+					'banner-logo',
+					banner ? 'banner-logo--over-photo' : 'banner-logo--on-surface',
+					// on pins the logo to the corner; off lets it scroll away with the section
+					site.menu.topLogoSticky === 'on' && 'banner-logo--sticky',
+				]}
+				style={`--banner-logo-height:${bannerLogoHeight}`}
+			>
+				{SiteMark ? (
+					<SiteMark placement="banner" lang={lang} title={siteTitle} />
+				) : (
+					<SiteLogo src={brandLogoUrl!} variant="brand" />
+				)}
+			</a>
+		)
+	}
+
+	<SiteHeader lang={lang} localeNeutral={localeNeutral} width={width} />
+
+	<main data-menu-inert lang={contentLang} class:list={['content', `content--${width}`]}>
+		<slot />
+	</main>
+
+	<div data-menu-inert>
+		<SiteFooter
+			lang={lang}
+			localeNeutral={localeNeutral}
+			hidePrivacyLinks={hidePrivacyLinks}
+			promo={footerPromo}
+		/>
+	</div>
+</HtmlShell>

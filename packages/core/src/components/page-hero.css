@@ -1,0 +1,40 @@
+@import '../styles/layers.css';
+
+@layer components {
+	/* Same metrics as the photo banner title, but the text sits on the theme, so colors come from tokens
+	 * and flip in light. No banner height: vertical padding is enough for text. */
+
+	.page-hero {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 100%;
+		padding-block: clamp(2rem, 6vw, 4.5rem);
+		background: color-mix(in srgb, var(--color-surface) 70%, var(--color-shade));
+	}
+
+	.page-hero__title {
+		padding-inline: var(--container-pad);
+		text-align: center;
+	}
+
+	.page-hero__title h1 {
+		margin: 0;
+		color: var(--color-heading);
+		font-size: clamp(26px, 5vw, 60px);
+		font-weight: var(--font-weight-bold);
+		letter-spacing: var(--tracking-hero);
+		line-height: var(--leading-hero);
+		text-transform: uppercase;
+	}
+
+	/* The text header is a state of the section banner, so the variant comes from
+	 * `topSection.accent.section`; theme tokens because the text sits on the theme. */
+	.page-hero__accent--accent {
+		color: var(--color-accent);
+	}
+
+	.page-hero__accent--alt {
+		color: var(--color-alt);
+	}
+}

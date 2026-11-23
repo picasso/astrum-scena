@@ -1,0 +1,70 @@
+{
+	"configDigest": "abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789",
+	"photos": {
+		"morning-ridge": {
+			"derivatives": [
+				{
+					"byteSize": 204800,
+					"format": "avif",
+					"height": 1067,
+					"objectKey": "morning-ridge/1600w-1111aaaa2222bbbb3333cccc4444dddd5555eeee6666ffff7777aaaa8888bbbb.avif",
+					"privacyChecked": true,
+					"rightsEmbedded": true,
+					"sha256": "1111aaaa2222bbbb3333cccc4444dddd5555eeee6666ffff7777aaaa8888bbbb",
+					"watermarkProfile": "watermark",
+					"width": 1600
+				},
+				{
+					"byteSize": 262144,
+					"format": "webp",
+					"height": 1067,
+					"objectKey": "morning-ridge/1600w-2222aaaa3333bbbb4444cccc5555dddd6666eeee7777ffff8888aaaa9999bbbb.webp",
+					"privacyChecked": true,
+					"rightsEmbedded": true,
+					"sha256": "2222aaaa3333bbbb4444cccc5555dddd6666eeee7777ffff8888aaaa9999bbbb",
+					"watermarkProfile": "watermark",
+					"width": 1600
+				}
+			],
+			"dominantColor": "#161a20",
+			"masterSha256": "aaaa1111bbbb2222cccc3333dddd4444eeee5555ffff6666aaaa7777bbbb8888",
+			"orientation": 1,
+			"rightsId": "demo-rights",
+			"sourceHeight": 1067,
+			"sourceWidth": 1600
+		},
+		"still-symmetry": {
+			"derivatives": [
+				{
+					"byteSize": 210000,
+					"format": "avif",
+					"height": 868,
+					"objectKey": "still-symmetry/1600w-3333aaaa4444bbbb5555cccc6666dddd7777eeee8888ffff9999aaaa0000bbbb.avif",
+					"privacyChecked": true,
+					"rightsEmbedded": true,
+					"sha256": "3333aaaa4444bbbb5555cccc6666dddd7777eeee8888ffff9999aaaa0000bbbb",
+					"watermarkProfile": "watermark",
+					"width": 1600
+				},
+				{
+					"byteSize": 270000,
+					"format": "webp",
+					"height": 868,
+					"objectKey": "still-symmetry/1600w-4444aaaa5555bbbb6666cccc7777dddd8888eeee9999ffff0000aaaa1111bbbb.webp",
+					"privacyChecked": true,
+					"rightsEmbedded": true,
+					"sha256": "4444aaaa5555bbbb6666cccc7777dddd8888eeee9999ffff0000aaaa1111bbbb",
+					"watermarkProfile": "watermark",
+					"width": 1600
+				}
+			],
+			"dominantColor": "#404968",
+			"masterSha256": "cccc1111dddd2222eeee3333ffff4444aaaa5555bbbb6666cccc7777dddd8888",
+			"orientation": 1,
+			"rightsId": "demo-rights",
+			"sourceHeight": 1041,
+			"sourceWidth": 1920
+		}
+	},
+	"schemaVersion": 3
+}

@@ -1,0 +1,18 @@
+@import '../../../styles/layers.css';
+
+@layer components {
+	/* Photos run top to bottom by column; DOM, keyboard and viewer order stay the album order. */
+	.album-masonry {
+		column-width: var(--album-col-width, 300px);
+		column-count: var(--album-max-columns, 5);
+		column-gap: var(--album-gap, 12px);
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	.album-masonry__item {
+		break-inside: avoid;
+		margin-bottom: var(--album-gap, 12px);
+	}
+}

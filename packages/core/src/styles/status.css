@@ -1,0 +1,329 @@
+/*
+ * The only styling point of the `/status/` page: everything sits under `.site-status`, using its BEM
+ * subclasses, local `--status-*` properties mapped to existing tokens, and `data-status`. No shared site
+ * selectors and no second theme; structure lives in `src/components/status/`.
+ */
+@import './layers.css';
+
+@layer components {
+	.site-status {
+		--status-fg: var(--color-foreground);
+		--status-heading: var(--color-heading);
+		--status-muted: color-mix(in srgb, var(--color-foreground) 60%, transparent);
+		--status-note: color-mix(in srgb, var(--color-foreground) 45%, transparent);
+		--status-border: var(--color-border);
+		--status-link: var(--color-link);
+		--status-link-hover: var(--color-link-hover);
+		/* Every mark sits next to a text label, so color never carries the meaning alone. */
+		--status-current-mark: color-mix(in srgb, var(--color-foreground) 42%, transparent);
+		--status-review-mark: var(--color-accent);
+		--status-freshness-active: var(--color-blue-400);
+		--status-freshness-published: var(--color-emerald-500);
+		--status-freshness-review: var(--color-accent);
+		/* The owner wants the EN translation column distinct from the green of the Status column. */
+		--status-translation-up-to-date: var(--status-badge-assets);
+		--status-translation-outdated: var(--color-red-500);
+		--status-translation-unverified: var(--color-orange-500);
+		--status-mono: ui-monospace, 'SFMono-Regular', 'SF Mono', Menlo, Consolas, monospace;
+
+		/* One color per entity, shared by the overview and the Published content section. */
+		--status-badge-translations: var(--color-rose-500);
+		--status-badge-articles: var(--color-blue-500);
+		--status-badge-pages: var(--color-violet-500);
+		--status-badge-courses: var(--color-lime-500);
+		--status-badge-photos: var(--color-emerald-500);
+		--status-badge-albums: var(--color-amber-500);
+		--status-badge-assets: var(--color-cyan-500);
+		--status-badge-fg: var(--color-white);
+		--status-badge-fg-dark: var(--color-zinc-900);
+
+		color: var(--status-fg);
+		font-family: var(--font-sans);
+	}
+
+	.site-status__intro {
+		margin: 0 0 2rem;
+		max-width: 42rem;
+		font-size: 0.8rem;
+		color: var(--tone, var(--status-note));
+	}
+
+	/* overview: compact text metrics in one row, one equal column each (a one-locale site has no
+	   Translations metric) — thin dividers, a large number, a short label; not cards or a KPI dashboard */
+	.site-status__overview {
+		display: grid;
+		grid-auto-columns: minmax(0, 1fr);
+		grid-auto-flow: column;
+		gap: 0;
+		margin: 0 0 2.5rem;
+		border-top: 1px solid var(--status-border);
+		border-bottom: 1px solid var(--status-border);
+	}
+
+	.site-status__metric {
+		display: flex;
+		flex-direction: column;
+		gap: 0.25rem;
+		align-items: center;
+		text-align: center;
+		padding: 1rem 1.25rem;
+	}
+
+	.site-status__metric + .site-status__metric {
+		border-left: 1px solid var(--status-border);
+	}
+
+	/* Composable utilities: `tone-*` sets --tone (and --on for text on a fill), which both text and badge
+	   variants read, so any color × variant × size combination works without compound modifiers. */
+	.site-status__tone-muted {
+		--tone: var(--status-muted);
+	}
+	.site-status__tone-accent {
+		--tone: var(--color-accent);
+	}
+	.site-status__tone-translations {
+		--tone: var(--status-badge-translations);
+	}
+	.site-status__tone-articles {
+		--tone: var(--status-badge-articles);
+	}
+	.site-status__tone-pages {
+		--tone: var(--status-badge-pages);
+	}
+	.site-status__tone-courses {
+		--tone: var(--status-badge-courses);
+		--on: var(--status-badge-fg-dark);
+	}
+	.site-status__tone-photos {
+		--tone: var(--status-badge-photos);
+	}
+	.site-status__tone-albums {
+		--tone: var(--status-badge-albums);
+		--on: var(--status-badge-fg-dark);
+	}
+	.site-status__tone-assets {
+		--tone: var(--status-badge-assets);
+	}
+	.site-status__tone-active {
+		--tone: var(--status-freshness-active);
+	}
+
+	.site-status__metric-value {
+		font-size: 1.9rem;
+		line-height: 1.1;
+		font-weight: var(--font-weight-semibold);
+		color: var(--tone, var(--status-heading));
+		font-variant-numeric: tabular-nums;
+	}
+
+	.site-status__metric-label {
+		font-size: 0.8rem;
+		color: var(--tone, var(--status-muted));
+	}
+
+	.site-status__badge {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		min-width: 1.7em;
+		padding: 0.15em 0.5em;
+		border-radius: 999px;
+		background: var(--badge-bg, transparent);
+		color: var(--badge-fg, inherit);
+		border: var(--badge-border, 0);
+		font-weight: var(--font-weight-semibold);
+		font-variant-numeric: tabular-nums;
+		line-height: 1.25;
+	}
+	.site-status__badge--solid {
+		--badge-bg: var(--tone);
+		--badge-fg: var(--on, var(--status-badge-fg));
+	}
+	.site-status__badge--outline {
+		padding: 0.2em 0.8em 0.05em;
+		letter-spacing: 0.08em;
+		--badge-fg: var(--tone);
+		--badge-border: 1px solid color-mix(in srgb, var(--tone) 50%, transparent);
+	}
+	.site-status__badge--sm {
+		font-size: 0.8rem;
+	}
+	.site-status__badge--xs {
+		font-size: 0.72rem;
+	}
+	.site-status__badge--quiet {
+		font-weight: var(--font-weight-normal);
+	}
+
+	/* Course status uses the site's course-badge colors (course-badge.css `.course-badge`): Archive on a
+	 * dark plate, Open in the accent. Own class: status.css does not use shared site selectors. */
+	.site-status__course-badge {
+		font-weight: var(--font-weight-semibold);
+		letter-spacing: 0.06em;
+		text-transform: uppercase;
+	}
+	.site-status__course-badge--archive {
+		background: color-mix(in srgb, var(--color-scrim) 60%, transparent);
+		color: color-mix(in srgb, var(--color-on-image) 90%, transparent);
+	}
+	.site-status__course-badge--current {
+		background: var(--color-accent);
+		color: var(--color-ink);
+	}
+
+	.site-status__section {
+		padding-top: 1.75rem;
+		margin-top: 1.75rem;
+		border-top: 1px solid var(--status-border);
+	}
+
+	.site-status__section:first-of-type {
+		border-top: 0;
+		margin-top: 0;
+		padding-top: 0;
+	}
+
+	.site-status__section-title {
+		margin: 0 0 0.35rem;
+		font-size: 1.05rem;
+		font-weight: var(--font-weight-semibold);
+		color: var(--tone, var(--status-heading));
+	}
+
+	.site-status__summary {
+		margin: 0 0 1rem;
+		font-size: 0.8rem;
+		color: var(--tone, var(--status-note));
+	}
+
+	.site-status__facts + .site-status__summary {
+		margin-top: 1rem;
+	}
+
+	/* On narrow screens the table scrolls inside its wrapper, never the page body. */
+	.site-status__table-wrap {
+		overflow-x: auto;
+	}
+
+	.site-status__table {
+		width: 100%;
+		border-collapse: collapse;
+		font-size: 0.9rem;
+	}
+
+	.site-status__table caption {
+		text-align: left;
+		color: var(--tone, var(--status-muted));
+		font-size: 0.8rem;
+		margin-bottom: 0.5rem;
+	}
+
+	.site-status__table th,
+	.site-status__table td {
+		text-align: left;
+		padding: 0.5rem 0.75rem 0.5rem 0;
+		border-bottom: 1px solid var(--status-border);
+		vertical-align: baseline;
+	}
+
+	.site-status__table th {
+		font-weight: var(--font-weight-semibold);
+		color: var(--tone, var(--status-heading));
+	}
+
+	/* The next section draws its own divider; a bottom border here would double it. */
+	.site-status__table tbody tr:last-child td {
+		border-bottom: none;
+	}
+
+	.site-status__doc-link {
+		color: var(--status-link);
+		text-decoration: underline;
+		text-underline-offset: 0.15em;
+	}
+
+	.site-status__doc-link:hover {
+		color: var(--status-link-hover);
+	}
+
+	.site-status__badge--gap {
+		margin-left: 0.8em;
+	}
+
+	/* The dot is decorative; the meaning is always in the text. */
+	.site-status__freshness {
+		display: inline-flex;
+		align-items: baseline;
+		gap: 0.5rem;
+		white-space: nowrap;
+		color: var(--tone, var(--status-fg));
+	}
+
+	.site-status__freshness::before {
+		content: '';
+		flex: 0 0 auto;
+		width: 0.5rem;
+		height: 0.5rem;
+		border-radius: 50%;
+		transform: translateY(0.05em);
+		background: var(--tone, var(--status-current-mark));
+	}
+
+	.site-status__freshness[data-status='draft'] {
+		--tone: var(--status-freshness-active);
+	}
+	.site-status__freshness[data-status='published'] {
+		--tone: var(--status-freshness-published);
+	}
+	.site-status__freshness[data-status='up-to-date'] {
+		--tone: var(--status-translation-up-to-date);
+	}
+	.site-status__freshness[data-status='outdated'] {
+		--tone: var(--status-translation-outdated);
+	}
+	.site-status__freshness[data-status='unverified'] {
+		--tone: var(--status-translation-unverified);
+	}
+
+	.site-status__facts {
+		margin: 0;
+		display: grid;
+		grid-template-columns: max-content 1fr;
+		align-items: center;
+		gap: 0.55rem 1.25rem;
+	}
+
+	.site-status__facts dt {
+		color: var(--tone, var(--status-muted));
+	}
+
+	.site-status__facts dd {
+		margin: 0;
+		color: var(--tone, var(--status-fg));
+		font-variant-numeric: tabular-nums;
+	}
+
+	.site-status__generated {
+		margin: 2.5rem 0 0;
+		font-family: var(--status-mono);
+		font-size: 0.78rem;
+		color: var(--tone, var(--status-muted));
+	}
+
+	/* mobile: the metrics stack into one column */
+	@media (max-width: 40rem) {
+		.site-status__overview {
+			grid-auto-flow: row;
+		}
+
+		.site-status__metric {
+			padding: 0.9rem 0;
+		}
+
+		.site-status__metric + .site-status__metric {
+			padding-left: 0;
+			border-left: 0;
+			border-top: 1px solid var(--status-border);
+		}
+	}
+}

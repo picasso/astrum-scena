@@ -1,0 +1,38 @@
+@import '../styles/layers.css';
+
+@layer components {
+	.lang-switch a {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.5em;
+		font-size: 14px;
+		letter-spacing: 0.5px;
+		text-decoration: none;
+		text-transform: uppercase;
+	}
+
+	/* The › glyph sits below the optical center. */
+	.lang-switch a span {
+		font-size: 1.7em;
+		line-height: 1;
+		transform: translateY(-0.08em);
+	}
+
+	/* currentColor makes the border follow the theme. Header menu only; the footer and home overlay
+	 * stay borderless. */
+	.lang-switch--bordered a {
+		padding: 3px 8px;
+		border: 1px solid color-mix(in srgb, currentColor 30%, transparent);
+		border-radius: 3px;
+		transition:
+			color var(--duration-base) var(--ease-out),
+			border-color var(--duration-base) var(--ease-out);
+	}
+
+	/* currentColor is already the brighter hover color, so 60% of it reads clearly stronger than the base 30%. */
+	.lang-switch--bordered a:hover,
+	.lang-switch--bordered a:focus-visible {
+		color: var(--color-menulink-hover);
+		border-color: color-mix(in srgb, currentColor 60%, transparent);
+	}
+}

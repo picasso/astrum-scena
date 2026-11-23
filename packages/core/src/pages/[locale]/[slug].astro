@@ -1,0 +1,77 @@
+---
+import DocumentBody from '../../components/content/document-body.astro'
+import MoreDocuments from '../../components/content/more-documents.astro'
+import type { Locale } from '../../config/locale-schema.ts'
+import { site } from '../../config/site.ts'
+import { useTranslations } from '../../i18n/ui.ts'
+import Base from '../../layouts/base.astro'
+import { resolveBanner } from '../../lib/banner/build-data.ts'
+import {
+	isUnlistedDocument,
+	pageStaticPaths,
+	resolvePublishedPage,
+} from '../../lib/content/build-data.ts'
+import { resolveMoreDocuments } from '../../lib/content/more-docs/resolve.ts'
+import { localizedStaticPaths } from '../../lib/content/routes.ts'
+import {
+	bannerPhotoId,
+	cardPhotoIds,
+	documentBlockPhotoIds,
+	footerPromoContext,
+} from '../../lib/portfolio/footer-promo-build.ts'
+import { buildLocaleMeta, unlistedRobots } from '../../lib/portfolio/page-meta.ts'
+
+// published generic page (`about` included — it has no dedicated route, this dynamic path serves it).
+// Courses use a separate nested route; `contacts` keeps its own dedicated route (custom form
+// layout, not a content page); `home` is the index route.
+export async function getStaticPaths() {
+	return localizedStaticPaths(site.content.locales, await pageStaticPaths(site))
+}
+
+type Props = { locale: Locale }
+
+const { locale } = Astro.props
+const t = useTranslations(locale)
+const { slug } = Astro.params
+const entry = await resolvePublishedPage(slug!, locale, site)
+const banner = await resolveBanner(
+	{ kind: 'document', collection: 'pages', translationKey: entry.data.translationKey },
+	locale,
+	site,
+)
+const more = await resolveMoreDocuments({
+	kind: 'page',
+	translationKey: entry.data.translationKey,
+	slug: entry.data.slug,
+	locale,
+	frontmatter: entry.data.moreDocs,
+	t,
+	siteConfig: site,
+})
+const meta = buildLocaleMeta(Astro.url.pathname, Astro.site!.href, site.content.locales)
+const robots = unlistedRobots(await isUnlistedDocument('page', slug!, site))
+const footerPromo = footerPromoContext(
+	`page:${entry.data.translationKey}`,
+	bannerPhotoId(banner),
+	await documentBlockPhotoIds(entry),
+	cardPhotoIds(more?.cards),
+)
+---
+
+<Base
+	footerPromo={footerPromo}
+	excerpt={entry.data.excerpt}
+	body={entry.body}
+	title={entry.data.title}
+	canonical={meta.canonical}
+	robots={robots}
+	alternates={meta.alternates}
+	width="prose"
+	heading={entry.data.title}
+	banner={banner}
+>
+	<article class="prose">
+		<DocumentBody entry={entry} />
+	</article>
+	<MoreDocuments more={more} />
+</Base>

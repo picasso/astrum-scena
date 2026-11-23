@@ -1,0 +1,7 @@
+interface:
+    display_name: 'Add Album'
+    short_description: 'Create a new album with owner checkpoints'
+    default_prompt: 'Use $add-album to create a new album from my local master images.'
+
+policy:
+    allow_implicit_invocation: false

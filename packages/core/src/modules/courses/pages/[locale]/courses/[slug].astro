@@ -1,0 +1,88 @@
+---
+import CourseBadge from '../../../../../components/content/course-badge.astro'
+import DocumentBody from '../../../../../components/content/document-body.astro'
+import MoreDocuments from '../../../../../components/content/more-documents.astro'
+import type { Locale } from '../../../../../config/locale-schema.ts'
+import { site } from '../../../../../config/site.ts'
+import { useTranslations } from '../../../../../i18n/ui.ts'
+import Base from '../../../../../layouts/base.astro'
+import { resolveBanner } from '../../../../../lib/banner/build-data.ts'
+import { documentUnlisted } from '../../../../../lib/content/documents.ts'
+import { resolveMoreDocuments } from '../../../../../lib/content/more-docs/resolve.ts'
+import { localizedStaticPaths } from '../../../../../lib/content/routes.ts'
+import {
+	bannerPhotoId,
+	cardPhotoIds,
+	documentBlockPhotoIds,
+	footerPromoContext,
+} from '../../../../../lib/portfolio/footer-promo-build.ts'
+import { buildLocaleMeta, unlistedRobots } from '../../../../../lib/portfolio/page-meta.ts'
+import {
+	courseStaticPaths,
+	resolvePublishedCourse,
+	resolvePublishedCourseStatus,
+} from '../../../build-data.ts'
+import { COURSES_COLLECTION } from '../../../manifest.ts'
+
+// the status badge (archive or open) sits above the text; there are no dates, prices or booking.
+// getStaticPaths emits only published course pairs, so a draft never lands here.
+export async function getStaticPaths() {
+	return localizedStaticPaths(site.content.locales, await courseStaticPaths(site))
+}
+
+type Props = { locale: Locale }
+
+const { locale } = Astro.props
+const t = useTranslations(locale)
+const { slug } = Astro.params
+const entry = await resolvePublishedCourse(slug!, locale, site)
+const courseStatus = await resolvePublishedCourseStatus(slug!, site)
+const banner = await resolveBanner(
+	{ kind: 'document', collection: COURSES_COLLECTION, translationKey: entry.data.translationKey },
+	locale,
+	site,
+)
+const more = await resolveMoreDocuments({
+	kind: 'course',
+	translationKey: entry.data.translationKey,
+	slug: entry.data.slug,
+	locale,
+	frontmatter: entry.data.moreDocs,
+	t,
+	siteConfig: site,
+})
+const meta = buildLocaleMeta(Astro.url.pathname, Astro.site!.href, site.content.locales)
+// `unlisted` is a reference-locale field (ADR-0010/0013): every locale of an unlisted course keeps
+// its route but opts out of indexing
+const reference = await resolvePublishedCourse(slug!, site.content.referenceLocale, site)
+const robots = unlistedRobots(documentUnlisted(reference.data))
+const footerPromo = footerPromoContext(
+	`course:${entry.data.translationKey}`,
+	bannerPhotoId(banner),
+	await documentBlockPhotoIds(entry),
+	cardPhotoIds(more?.cards),
+)
+---
+
+<Base
+	footerPromo={footerPromo}
+	excerpt={entry.data.excerpt}
+	body={entry.body}
+	title={entry.data.title}
+	canonical={meta.canonical}
+	robots={robots}
+	alternates={meta.alternates}
+	width="prose"
+	heading={entry.data.title}
+	banner={banner}
+>
+	<article class="prose">
+		<CourseBadge
+			status={courseStatus}
+			label={t(`courses.status.${courseStatus}`)}
+			class="course-badge--page"
+		/>
+		<DocumentBody entry={entry} />
+	</article>
+	<MoreDocuments more={more} />
+</Base>

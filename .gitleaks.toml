@@ -1,0 +1,18 @@
+# gitleaks config of `pnpm check:publication-tree`: the default rules, with a narrow allowlist for
+# vendored BMAD files whose matches are known not to be secrets.
+
+[extend]
+useDefault = true
+
+# the generated BMAD manifest lists a sha256 hash per installed file
+[[allowlists]]
+description = "BMAD files manifest hashes"
+paths = ['''^_bmad/_config/files-manifest\.csv$''']
+
+# the BMAD TEA knowledge base shows an expired sample JWT in an API test example
+[[allowlists]]
+description = "BMAD TEA sample expired token"
+condition = "AND"
+paths = ['''^\.claude/skills/bmad-[a-z-]+/resources/knowledge/api-testing-patterns\.md$''']
+regexTarget = "line"
+regexes = ['''const expiredToken = '[^']*';''']

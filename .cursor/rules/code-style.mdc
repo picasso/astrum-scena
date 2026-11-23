@@ -1,0 +1,72 @@
+---
+name: Code Style Guide
+description: Code conventions for this Astro project.
+alwaysApply: true
+---
+
+# Code Implementation Guidelines
+
+Adapted from neuro-hub for an Astro + React-islands project. Docs prose is Russian; code is English.
+
+Two source trees: the core engine in `packages/core/src/` and the site's files under the site root
+(`demo/` in this repo): `site.yaml` at the root and the `src/...` layout (`src/theme/theme.css`,
+`src/content/**`, `src/generated/**`).
+
+- Write concise, technical TypeScript with accurate examples.
+- Use TypeScript everywhere.
+- Functional, declarative patterns; avoid classes.
+- Prefer iteration and modularization over duplication.
+- Descriptive names with auxiliary verbs (`isLoading`, `hasError`).
+- Event handlers prefixed with `on` (`onClick`, `onKeyDown`).
+- Early returns for readability.
+- Accessibility on interactive elements (`tabindex`, `aria-*`, keyboard handlers).
+- Use `//` comments; `/* */` only where syntax requires it (JSX `{/* */}`, CSS).
+- Comments are lowercase English and carry no planning ids (`AD-*`, `EH-*`, milestones).
+
+## Astro-specific
+
+- `.astro` components render at build (server) and ship zero JS by default — treat them like server components.
+- Add client JS only via React islands with `client:*` directives (`client:load` / `client:visible` / `client:idle`); choose the laziest that works.
+- No app-wide client state; state lives inside a single island. React hooks only inside islands.
+- Own `sharp` pipeline for photos; `astro:assets` only for small UI images.
+- No test files under `src/pages/` of the core or the site: every file there becomes a route.
+
+## Current dependency APIs
+
+- Import Zod as `import { z } from 'astro/zod'`; never use deprecated `astro:schema` or the `z` export from `astro:content`.
+- Use Zod 4 top-level string formats such as `z.url()` instead of deprecated methods such as `z.string().url()`.
+- Use `z.looseObject({...})` when unknown object keys must pass through; do not use deprecated `.passthrough()`.
+- Pass ExifTool read arguments in the options object, for example `readRaw(file, { readArgs })`; do not use deprecated positional argument overloads.
+
+## File naming
+
+- Code files and folders: kebab-case (ESLint checks `packages/core/src/` and the site's `src/`; elsewhere by convention)
+- Root-level canonical docs: SCREAMING-KEBAB (`README.md`, `CHANGELOG.md`, `AGENTS.md`)
+- `docs/` planning files keep their numbered scheme (`00-roadmap.md`)
+
+## Naming
+
+- Components: PascalCase
+- Hooks: camelCase with `use` prefix (islands only)
+- Utilities: camelCase
+- Types: PascalCase with descriptive suffix (`AlbumMeta`, `PhotoInput`)
+- Constants: SCREAMING_SNAKE_CASE
+
+## Tailwind CSS
+
+- Tailwind v4 utility classes; tokens live in the site's `src/theme/theme.css` via `@theme`; no color literals in the core's CSS or anywhere else outside the theme and the generated layout tokens (`pnpm check:color-literals`).
+- Every rule sits in a cascade layer and every entry stylesheet starts with `@import` of the core's `styles/layers.css` (`pnpm check:css-layers`).
+- Use semantic tokens (`bg-background`, `text-foreground`, `text-accent`); no raw hex.
+- Use a `cn()` merge helper for conditional classes; avoid inline `style` objects.
+- Design-system primitives wrapped in `packages/core/src/ui/`; no raw shadcn imports outside it.
+
+## What the gates check
+
+`pnpm check` enforces part of this guide; the rest is review-only.
+
+- `pnpm lint` (ESLint, `noInlineConfig`, so nothing can be suppressed): kebab-case names, sorted imports and exports, no JSDoc, `type` over `interface`, no `enum`, no default exports outside tool configs and the integration entry, no `@ts-ignore` or undescribed `@ts-expect-error`, no `any`, `prefer-const`, lowercase comments, no hardcoded locale outside the config layer and tests, and the import boundaries of the core (no `scripts/`; `lib` free of components, the config singleton and the loader; `config` free of `lib`; computations free of IO and adapters).
+- `pnpm check:color-literals`, `pnpm check:css-layers`, `pnpm check:layout-tokens` (the site's generated tokens match `layout.*` in its `site.yaml`; regenerate with `pnpm layout:tokens`).
+- `pnpm check:code-comments`: English comments without planning ids in every tracked code file except the site's content, `docs/` and agent tooling.
+- `pnpm check:pages`: no test files under `src/pages/`.
+- `pnpm check:taxonomy-readers`: `categories.yaml`, `places.yaml` and `tags.yaml` are named only by their loaders in the core's `lib/content/files.ts` (`loadCategoriesConfig`, `loadPlacesConfig`, `loadTagsConfig`); the core's sources and `scripts/` read them through those, tests and fixtures excepted.
+- Not checked by any gate: functional style, naming of identifiers and handlers, early returns, accessibility, islands and client directives, Zod and ExifTool API choices, semantic tokens over utility colors, `cn()` and inline styles, `/* */` outside JSDoc.

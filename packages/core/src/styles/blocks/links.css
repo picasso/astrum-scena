@@ -1,0 +1,156 @@
+/*
+ * Own numeric tokens are only `size` and `width-compact`; they mirror src/lib/blocks/links/tokens.ts
+ * (drift is caught by tokens.test.ts). Gaps use the shared `--content-gap-*` scale.
+ *
+ * The list stays block layout: `display:flex` blockifies `<li>` and drops `::marker`, which the
+ * `icon=heading|none` bullets need, so the gap is a margin on `li + li`, not flex `gap`.
+ */
+
+:root {
+	--links-size-sm: 0.85em;
+	--links-size-base: 1em;
+	--links-size-lg: 1.15em;
+	--links-width-compact: 60%;
+}
+
+/* Collapses with the neighbor's margin, so it still gives ≥28px after a note with a small bottom margin. */
+.links {
+	margin: 28px 0 8px;
+}
+
+/* size applies to the list only; the title keeps the prose size. */
+.links--sm .links__list {
+	font-size: var(--links-size-sm);
+}
+
+.links--base .links__list {
+	font-size: var(--links-size-base);
+}
+
+.links--lg .links__list {
+	font-size: var(--links-size-lg);
+}
+
+/* Scoped under `.prose` to beat `.prose ul` by specificity: (0,2,0) > (0,1,1). */
+.prose .links__list {
+	margin: 0;
+	margin-inline-start: 1em;
+	padding: 0;
+	list-style: none;
+}
+
+/* With icon=each the leading ↗ is the marker, so bullets show only for heading|none. */
+.prose .links--icon-heading .links__list,
+.prose .links--icon-none .links__list {
+	list-style: circle;
+	padding-inline-start: 1.4em;
+}
+
+.links--gap-none .links__list > li + li {
+	margin-block-start: var(--content-gap-none);
+}
+
+.links--gap-tiny .links__list > li + li {
+	margin-block-start: var(--content-gap-tiny);
+}
+
+.links--gap-small .links__list > li + li {
+	margin-block-start: var(--content-gap-small);
+}
+
+.links--gap-medium .links__list > li + li {
+	margin-block-start: var(--content-gap-medium);
+}
+
+.links--gap-large .links__list > li + li {
+	margin-block-start: var(--content-gap-large);
+}
+
+/* max-width:100% and wrapping long URL labels keep one long link from pushing fit-content past the
+ * container. */
+.links--w-content {
+	width: fit-content;
+	max-width: 100%;
+}
+
+.links--w-compact {
+	width: var(--links-width-compact);
+	max-width: 100%;
+}
+
+.links--w-full {
+	width: 100%;
+}
+
+.links--left {
+	margin-inline-end: auto;
+}
+
+.links--center {
+	margin-inline: auto;
+}
+
+.links--right {
+	margin-inline-start: auto;
+}
+
+/* align is silently ignored at full: same specificity, later in source, so it resets their margins. */
+.links--w-full {
+	width: 100%;
+	margin-inline: 0;
+}
+
+/* Labels are often full URLs. */
+.prose .links__list a {
+	overflow-wrap: anywhere;
+	word-break: break-word;
+}
+
+/* The whole block is links, so no underline at rest; a dotted one shows on hover and keyboard focus. */
+.prose .links a {
+	text-decoration: none;
+}
+
+.prose .links a:hover,
+.prose .links a:focus-visible {
+	text-decoration-line: underline;
+	text-decoration-style: dashed;
+	text-decoration-thickness: 1px;
+	text-underline-offset: 2px;
+}
+
+/* Scoped under `.prose` to beat `.prose p` by specificity: (0,2,0) > (0,1,1). */
+.prose .links__title {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin: 0 0 8px;
+	font-weight: var(--font-weight-medium);
+}
+
+.links__icon {
+	flex: 0 0 auto;
+	display: inline-flex;
+	width: 1em;
+	height: 1em;
+}
+
+.links__icon svg {
+	display: block;
+	width: 1em;
+	height: 1em;
+}
+
+.links__ext {
+	display: inline-flex;
+	width: 0.85em;
+	height: 0.85em;
+	margin-inline-end: 0.25em;
+	vertical-align: baseline;
+}
+
+.links__ext svg {
+	display: block;
+	width: 0.85em;
+	height: 0.85em;
+}

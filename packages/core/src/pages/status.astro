@@ -1,0 +1,38 @@
+---
+import SiteStatus from '../components/status/site-status.astro'
+import { SERVICE_COPY_LOCALE } from '../config/locale-schema.ts'
+import { site } from '../config/site.ts'
+import { siteRoot } from '../config/site-root.ts'
+import Base from '../layouts/base.astro'
+import { STATUS_PATH } from '../lib/content/routes.ts'
+import { footerPromoContext } from '../lib/portfolio/footer-promo-build.ts'
+import { loadSiteStatus } from '../lib/status/build-data.ts'
+
+// public by direct URL but outside navigation: no UI links, left out of the sitemap and marked
+// `noindex,follow`. Like `/rights/` it is one self-canonical URL with no locale prefix, redirect or
+// language switcher. Service copy is always English: the heading and `<main>` carry
+// SERVICE_COPY_LOCALE, while `<html lang>`, the header and the footer stay on the default locale,
+// whose links they are; no hreflang alternates.
+//
+// the generation time is injected here, at the static build boundary, and only marks the snapshot
+// moment; any schema or invariant error in the model still fails the build (loadSiteStatus throws)
+const model = await loadSiteStatus(new Date(), site, siteRoot)
+// absolute self-canonical from the configured origin: the same value as build-time `Astro.site`, but
+// independent of the render context
+const canonical = new URL(STATUS_PATH, site.origin).href
+const footerPromo = footerPromoContext('surface:status')
+---
+
+<Base
+	footerPromo={footerPromo}
+	title="Site status"
+	canonical={canonical}
+	robots="noindex,follow"
+	localeNeutral
+	hidePrivacyLinks
+	width="prose"
+	heading="Site status"
+	contentLang={SERVICE_COPY_LOCALE}
+>
+	<SiteStatus model={model} />
+</Base>

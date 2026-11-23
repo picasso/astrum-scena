@@ -1,0 +1,95 @@
+@import '../styles/layers.css';
+
+@layer components {
+	/* Prose and galleries get separate widths (ADR-0008); `standard` keeps the legacy width for surfaces
+	 * without a chosen one. Header, footer and banner stay full-bleed. */
+
+	/* The footer sits at the bottom even on a short page. A deliberate improvement: the tall legacy
+	 * footer never needed it. */
+	.page-shell {
+		display: flex;
+		min-height: 100dvh;
+		flex-direction: column;
+	}
+
+	.page-shell > main {
+		flex: 1 0 auto;
+	}
+
+	.content {
+		width: 100%;
+		margin-inline: auto;
+		padding-inline: var(--container-pad);
+		padding-block: 2rem;
+	}
+
+	.content--prose {
+		max-width: var(--container-prose);
+	}
+
+	.content--medium {
+		max-width: var(--container-medium);
+	}
+
+	.content--gallery {
+		max-width: var(--container-gallery);
+	}
+
+	.content--standard {
+		max-width: var(--container-standard);
+	}
+
+	.content--prose small {
+		color: color-mix(in srgb, var(--color-foreground) 75%, var(--color-background));
+		font-size: 0.875em;
+	}
+
+	/* Shown only below the menu breakpoint, when the bar is hidden; offsets match the hamburger
+	 * (--fs-edge). By default it scrolls away with the top section; `--sticky` pins it. z-index stays below
+	 * the panel (40) and the hamburger (50). */
+	.banner-logo {
+		position: absolute;
+		top: var(--fs-edge, 1.5rem);
+		left: var(--fs-edge, 1.5rem);
+		z-index: 30;
+		display: none;
+		align-items: center;
+	}
+
+	.banner-logo--sticky {
+		position: fixed;
+	}
+
+	@media (max-width: 1023px) {
+		.banner-logo {
+			display: inline-flex;
+		}
+	}
+
+	.banner-logo svg {
+		display: block;
+		width: auto;
+		/* base.astro computes the clamp from menu.topLogoSize; the fallback is the unscaled default. */
+		height: var(--banner-logo-height, clamp(40px, calc(6.16vw + 16.9px), 80px));
+	}
+
+	.banner-logo--over-photo {
+		color: var(--color-on-image);
+	}
+
+	.banner-logo--on-surface {
+		color: var(--color-logo);
+	}
+
+	/* Replaces the empty legacy banner; heights match it. Decorative and out of the tab order. */
+	.dominant-strip {
+		height: 40px;
+		box-shadow: inset 0 0 40px color-mix(in srgb, var(--color-shade) 40%, transparent);
+	}
+
+	@media (max-width: 1019px) {
+		.dominant-strip {
+			height: 80px;
+		}
+	}
+}

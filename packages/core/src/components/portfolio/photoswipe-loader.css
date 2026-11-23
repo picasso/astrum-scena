@@ -1,0 +1,235 @@
+@import '../../styles/layers.css';
+
+@layer components {
+	/* Equal-width side zones (flex 1 1 0) keep the caption exactly centered. The bar is lighter when the
+	 * photo fits between the bars (`pswp--fit-bars`). photoswipe-island.ts builds the structure.
+	 * Text over the photo uses the theme-independent tokens, as in the top section. */
+	/* Not PhotoSwipe's black (owner decision): the translucent bars are invisible on black. */
+	.pswp {
+		--pswp-bg: var(--color-surface-fixed);
+	}
+
+	/* The buttons use the legacy sprite (owner decision) instead of PhotoSwipe's icons. */
+	.pswp__top-bar {
+		height: 44px;
+		background: color-mix(in srgb, var(--color-shade) 50%, transparent);
+	}
+
+	.pswp--fit-bars .pswp__top-bar {
+		background: color-mix(in srgb, var(--color-shade) 30%, transparent);
+	}
+
+	.pswp__top-bar .pswp__button {
+		width: 44px;
+		height: 44px;
+		margin: 0;
+		opacity: 0.75;
+		background: url('../../assets/icons/viewer-skin.svg') no-repeat;
+		background-size: 264px 88px;
+		transition: opacity 0.25s ease-out;
+	}
+
+	.pswp__top-bar .pswp__button:hover,
+	.pswp__top-bar .pswp__button:focus-visible {
+		opacity: 1;
+	}
+
+	.pswp__top-bar .pswp__button .pswp__icn {
+		display: none;
+	}
+
+	.pswp__top-bar .pswp__button--zoom {
+		background-position: -88px 0;
+	}
+
+	.pswp--zoomed-in .pswp__top-bar .pswp__button--zoom {
+		background-position: -132px 0;
+	}
+
+	.pswp__top-bar .pswp__button--fullscreen {
+		background-position: 0 0;
+	}
+
+	.pswp--fs .pswp__top-bar .pswp__button--fullscreen {
+		background-position: -44px 0;
+	}
+
+	.pswp__top-bar .pswp__button--close {
+		background-position: 0 -44px;
+	}
+
+	.pswp__top-bar .pswp__preloader {
+		height: 44px;
+	}
+
+	/* Centered in the 44px bar: PhotoSwipe's 15px top offset assumes a 60px bar. The border is darker than
+	 * the digits (owner calibration). */
+	.pswp__top-bar .pswp__counter {
+		align-self: center;
+		height: 24px;
+		margin: 0 0 0 16px;
+		padding: 0 10px;
+		border: 1px solid color-mix(in srgb, var(--color-on-image) 20%, transparent);
+		border-radius: 12px;
+		font-size: 0.75rem;
+		line-height: 22px;
+		font-variant-numeric: tabular-nums;
+		letter-spacing: 0.05em;
+		color: color-mix(in srgb, var(--color-on-image) 50%, transparent);
+		text-shadow: none;
+		opacity: 1;
+	}
+
+	/* The arrow is centered in the circle by the 5px sprite offset. On touch PhotoSwipe hides the arrows
+	 * itself (`pswp--touch` without `pswp--has_mouse`). */
+	.pswp__button--arrow {
+		width: 100px;
+		height: 100px;
+		margin-top: -50px;
+	}
+
+	.pswp__button--arrow:hover,
+	.pswp__button--arrow:focus-visible {
+		opacity: 1;
+	}
+
+	.pswp__button--arrow .pswp__icn {
+		display: none;
+	}
+
+	.pswp__button--arrow::after,
+	.pswp__button--arrow::before {
+		content: '';
+		position: absolute;
+	}
+
+	.pswp__button--arrow::after {
+		top: 23px;
+		width: 54px;
+		height: 54px;
+		border-radius: 50%;
+		background-color: color-mix(in srgb, var(--color-shade) 30%, transparent);
+	}
+
+	.pswp__button--arrow::before {
+		z-index: 1;
+		top: 28px;
+		width: 44px;
+		height: 44px;
+		background: url('../../assets/icons/viewer-skin.svg') no-repeat;
+		background-size: 264px 88px;
+	}
+
+	.pswp__button--arrow--prev::after,
+	.pswp__button--arrow--prev::before {
+		left: 10px;
+	}
+
+	.pswp__button--arrow--prev::before {
+		background-position: -127px -44px;
+	}
+
+	.pswp__button--arrow--next::after,
+	.pswp__button--arrow--next::before {
+		right: 10px;
+	}
+
+	.pswp__button--arrow--next::before {
+		background-position: -93px -44px;
+	}
+
+	/* Idle: after a pause without the mouse the top bar and arrows fade out while the caption stays; the
+	 * island sets the class. The fade and its reduced-motion opt-out come from PhotoSwipe's
+	 * `pswp__hide-on-close` transition, which follows the viewer's animation duration. */
+	.pswp--idle .pswp__top-bar,
+	.pswp--idle .pswp__button--arrow {
+		opacity: 0;
+	}
+
+	.pswp__caption {
+		position: absolute;
+		left: 0;
+		bottom: 0;
+		width: 100%;
+		min-height: 44px;
+		display: flex;
+		align-items: center;
+		gap: 16px;
+		padding: 0 20px;
+		background: color-mix(in srgb, var(--color-shade) 50%, transparent);
+	}
+
+	.pswp--fit-bars .pswp__caption {
+		background: color-mix(in srgb, var(--color-shade) 30%, transparent);
+	}
+
+	.pswp__caption--empty {
+		display: none;
+	}
+
+	.pswp__caption__side {
+		flex: 1 1 0;
+		min-width: 0;
+		display: flex;
+		align-items: center;
+	}
+
+	.pswp__caption__side--end {
+		justify-content: flex-end;
+	}
+
+	.pswp__caption__center {
+		flex: 0 1 auto;
+		max-width: min(60%, 1024px);
+		padding: 10px 0;
+		text-align: center;
+		font-size: 1rem;
+		font-weight: 600;
+		line-height: 20px;
+		/* Ubuntu has no true small caps, so the browser synthesizes them (owner calibration). */
+		font-variant-caps: small-caps;
+		letter-spacing: 0.05em;
+		color: var(--color-on-image);
+	}
+
+	.pswp__caption .copyright {
+		overflow: hidden;
+		font-size: 0.75rem;
+		white-space: nowrap;
+		text-overflow: ellipsis;
+		color: color-mix(in srgb, var(--color-on-image) 50%, transparent);
+	}
+
+	.pswp__caption .pswp__image-link {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		font-size: 0.8125rem;
+		color: var(--color-accent);
+		opacity: 0.7;
+		text-decoration: none;
+		white-space: nowrap;
+		transition: opacity 0.25s ease-out;
+	}
+
+	.pswp__caption .pswp__image-link:hover,
+	.pswp__caption .pswp__image-link:focus-visible {
+		opacity: 1;
+	}
+
+	.pswp__image-link__icn {
+		flex: none;
+		width: 20px;
+		height: 20px;
+	}
+
+	@media (max-width: 768px) {
+		.pswp__caption__center {
+			max-width: 420px;
+		}
+		.pswp__caption .copyright,
+		.pswp__caption .pswp__image-link span {
+			display: none;
+		}
+	}
+}

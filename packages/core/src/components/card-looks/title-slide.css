@@ -1,0 +1,50 @@
+@import '../../styles/layers.css';
+@import './compact.css';
+
+@layer components {
+	/* Dark translucent plate with white text in both themes: a theme-colored plate gets lost on a light
+	 * sky, while this one stays ≈ 5.5:1 even on a white photo. Visible by default so touch needs no extra
+	 * tap; hidden at rest only for a fine hover pointer. */
+	.card--title-slide .card__media-frame {
+		position: relative;
+		overflow: hidden;
+	}
+
+	.card__overlay {
+		position: absolute;
+		inset-inline: 0;
+		bottom: 0;
+		padding: 10px 16px;
+		background-color: color-mix(in srgb, var(--color-overlay) 62%, transparent);
+	}
+
+	.card--title-slide .card__title,
+	.card--title-slide:hover .card__title,
+	.card--title-slide:focus-visible .card__title {
+		color: var(--color-on-image);
+	}
+
+	/* The moving plate is feedback enough; dimming the photo too would be redundant. */
+	.card--title-slide:hover .card__img,
+	.card--title-slide:focus-visible .card__img {
+		opacity: 1;
+	}
+
+	@media (hover: hover) and (pointer: fine) {
+		.card--title-slide .card__overlay {
+			transform: translateY(100%);
+			transition: transform var(--duration-base) var(--ease-out);
+		}
+
+		.card--title-slide:hover .card__overlay,
+		.card--title-slide:focus-visible .card__overlay {
+			transform: none;
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.card--title-slide .card__overlay {
+			transition: none;
+		}
+	}
+}

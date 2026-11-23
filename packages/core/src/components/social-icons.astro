@@ -1,0 +1,55 @@
+---
+import './social-icons.css'
+
+import { localizedLabel } from '../config/localized-label'
+import { isLocalizedRouteTemplate, resolveLocalizedRoute } from '../config/localized-route'
+import { site } from '../config/site'
+import { type Lang } from '../i18n/ui'
+import { requireIcon } from '../lib/icons'
+
+type Props = {
+	lang: Lang
+	variant?: 'over' | 'footer' // 'over' sits on a full-screen image, 'footer' uses the theme tokens
+}
+
+const { lang, variant = 'over' } = Astro.props
+
+// icons come from our reviewed asset folder by the configured name, never from the config itself
+const icons = import.meta.glob<string>('../assets/icons/social/*.svg', {
+	query: '?raw',
+	import: 'default',
+	eager: true,
+})
+---
+
+<ul class:list={['social-icons', 'circle-shape', variant]}>
+	{
+		site.social.map((entry, index) => {
+			const svg = requireIcon(
+				icons,
+				'../assets/icons/social/',
+				entry.icon,
+				`social[${index}].icon`,
+			)
+			const label = localizedLabel(entry.label, lang)
+			// a /{lang}/ route stays in the tab; an https link opens a new one without an opener
+			const internal = isLocalizedRouteTemplate(entry.href)
+			const href = internal ? resolveLocalizedRoute(entry.href, lang) : entry.href
+			const externalAttrs = internal ? {} : { target: '_blank', rel: 'noopener noreferrer' }
+			return (
+				<li class:list={['social-icon', `social-icon--${entry.id}`]}>
+					<a
+						href={href}
+						class="icon"
+						aria-label={label}
+						{...externalAttrs}
+						style={`--social-hover:${entry.hover}`}
+					>
+						<Fragment set:html={svg} />
+						<span class="sr-only">{label}</span>
+					</a>
+				</li>
+			)
+		})
+	}
+</ul>

@@ -1,0 +1,14 @@
+category: series
+title:
+    en: Geometry Studies
+    ru: Геометрические этюды
+description:
+    en: Three procedural compositions of a circle, a block and a band in colour and in grey.
+    ru: Три процедурные композиции из круга, блока и полосы, в цвете и в сером.
+layout: justified
+status: published
+coverId: still-square
+photoIds:
+    - still-square
+    - quiet-tower
+    - graphite-lines

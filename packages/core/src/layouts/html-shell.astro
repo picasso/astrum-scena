@@ -1,0 +1,154 @@
+---
+import '../styles/global.css'
+
+import { ClientRouter } from 'astro:transitions'
+
+import { LOCALE_CATALOG } from '../config/locale-schema.ts'
+import { localizedLabel } from '../config/localized-label.ts'
+import { seo } from '../config/seo.ts'
+import { site } from '../config/site.ts'
+import { siteRoot } from '../config/site-root.ts'
+import { type Lang } from '../i18n/ui'
+import { externalImageOrigin, loadImagePublicConfig } from '../lib/images/public-config.ts'
+import { selectDescription } from '../lib/seo/description.ts'
+import { fontPreloads, localeScript } from '../theme/fonts.ts'
+
+// every contextual route is self-canonical and its alternates keep the same album/photo pair in the
+// other locale; hrefs are absolute, and links render only when given
+export type AlternateLink = {
+	hreflang: string
+	href: string
+}
+
+type Props = {
+	lang: Lang
+	title?: string
+	description?: string
+	excerpt?: string
+	body?: string
+	// the home page is always dark and never touches localStorage
+	forceDark?: boolean
+	bodyClass?: string
+	canonical?: string
+	alternates?: AlternateLink[]
+	// opt-in robots meta for pages that stay public by URL but must not be indexed: `/status/` and
+	// unlisted documents, albums and photos (ADR-0010). By default none is rendered.
+	robots?: 'noindex,follow'
+}
+
+const {
+	lang,
+	title,
+	description,
+	excerpt,
+	body,
+	forceDark = false,
+	bodyClass = 'bg-background text-foreground',
+	canonical,
+	alternates = [],
+	robots,
+} = Astro.props
+const siteTitle = localizedLabel(site.identity.title, lang)
+const pageTitle = title ? `${title} — ${siteTitle}` : siteTitle
+const pageDescription = selectDescription(seo.description[lang], { description, excerpt, body })
+const socialUrl = canonical ?? new URL(Astro.url.pathname, site.origin).href
+const socialImage = seo.socialImage ? new URL(seo.socialImage, site.origin).href : undefined
+
+// banner, card and footer images load cross-origin, and without an early DNS+TLS handshake image
+// pages lost hundreds of ms of LCP (Lighthouse uses-rel-preconnect). No crossorigin: the images are
+// plain no-cors <img>, and the preconnect must match their network isolation key. A site that serves
+// its images itself has nothing to preconnect to.
+const mediaOrigin = externalImageOrigin(loadImagePublicConfig(siteRoot).config)
+
+// the locale script picks the font family (theme.css) and the files to preload
+const script = localeScript(lang)
+
+// TODO(favicon): a placeholder that only stops the /favicon.ico 404 on every page (Lighthouse
+// errors-in-console); replace it with the owner's real favicon. The icon is a document of its own that
+// no theme token reaches, so its colors come from the config
+const favicon = site.theme.favicon
+const faviconSvg =
+	'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">' +
+	`<rect width="32" height="32" rx="6" fill="${favicon.background}"/>` +
+	`<circle cx="16" cy="16" r="7" fill="${favicon.foreground}"/></svg>`
+const faviconHref = `data:image/svg+xml,${encodeURIComponent(faviconSvg)}`
+
+// the mode lives on <html> so that after a View Transitions swap the script reads the new page's
+// mode. 'force-dark' (home) ignores the saved choice; on inner pages a saved choice beats both the
+// fixed 'dark' | 'light' default and 'auto' (prefers-color-scheme, else dark).
+const themeMode = forceDark ? 'force-dark' : site.theme.default
+
+// apply() sets data-theme synchronously before first paint to avoid a flash; on navigation
+// ClientRouter copies the new page's <html> attributes and astro:after-swap reapplies the theme
+// before paint. force-dark never reads or writes localStorage, so the inner-page choice survives
+// the home page. This inline copy duplicates the minimum of src/lib/theme.ts, and it is injected as
+// a string through set:html because Prettier cannot parse JS inside a JSX expression.
+const themeScript = `;(() => {
+	const apply = () => {
+		const mode = document.documentElement.dataset.themeMode
+		if (mode === 'force-dark') {
+			document.documentElement.dataset.theme = 'dark'
+			return
+		}
+		let stored = null
+		try {
+			const s = localStorage.getItem('theme')
+			if (s === 'dark' || s === 'light') stored = s
+		} catch (e) {}
+		let theme
+		if (stored) theme = stored
+		else if (mode === 'light') theme = 'light'
+		else if (mode === 'auto') {
+			theme = 'dark'
+			try {
+				if (window.matchMedia('(prefers-color-scheme: light)').matches) theme = 'light'
+			} catch (e) {}
+		} else theme = 'dark'
+		document.documentElement.dataset.theme = theme
+	}
+	apply()
+	if (!window.__themeSwapBound) {
+		window.__themeSwapBound = true
+		document.addEventListener('astro:after-swap', apply)
+	}
+})()`
+---
+
+<!doctype html>
+<html lang={lang} data-script={script} data-theme-mode={themeMode}>
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta name="color-scheme" content="dark light" />
+		{robots && <meta name="robots" content={robots} />}
+		<title>{pageTitle}</title>
+		<meta name="description" content={pageDescription} />
+		<meta property="og:type" content="website" />
+		<meta property="og:title" content={pageTitle} />
+		<meta property="og:description" content={pageDescription} />
+		<meta property="og:url" content={socialUrl} />
+		<meta property="og:locale" content={LOCALE_CATALOG[lang].ogLocale} />
+		{socialImage && <meta property="og:image" content={socialImage} />}
+		<meta name="twitter:card" content={socialImage ? 'summary_large_image' : 'summary'} />
+		<meta name="twitter:title" content={pageTitle} />
+		<meta name="twitter:description" content={pageDescription} />
+		{socialImage && <meta name="twitter:image" content={socialImage} />}
+		<link rel="icon" href={faviconHref} />
+		{mediaOrigin && <link rel="preconnect" href={mediaOrigin} />}
+
+		{canonical && <link rel="canonical" href={canonical} />}
+		{alternates.map((alt) => <link rel="alternate" hreflang={alt.hreflang} href={alt.href} />)}
+
+		<ClientRouter />
+		<script is:inline set:html={themeScript} />
+
+		{
+			fontPreloads(script).map((href) => (
+				<link rel="preload" href={href} as="font" type="font/woff2" crossorigin />
+			))
+		}
+	</head>
+	<body class={bodyClass}>
+		<slot />
+	</body>
+</html>

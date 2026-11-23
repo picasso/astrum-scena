@@ -1,0 +1,13 @@
+schemaVersion: 1
+places:
+    - id: coastland
+      name:
+          en: Coastland
+          ru: Прибрежье
+      kind: country
+    - id: amber-bay
+      name:
+          en: Amber Bay
+          ru: Янтарная бухта
+      kind: locality
+      parentId: coastland

@@ -1,0 +1,38 @@
+---
+import './more-documents.css'
+
+import type { MoreDocumentsResult } from '../../lib/content/more-docs/resolve.ts'
+import CardCollection from '../card-collection.astro'
+
+type Props = {
+	more?: MoreDocumentsResult
+}
+
+const { more } = Astro.props
+---
+
+{
+	more && (
+		<nav
+			class:list={['more-documents', `more-documents--${more.config.width}`]}
+			aria-labelledby={more.config.heading === 'on' ? 'more-documents-heading' : undefined}
+			aria-label={more.config.heading === 'off' ? more.label : undefined}
+		>
+			<div class="more-documents__inner">
+				{more.config.heading === 'on' && (
+					<h2 class="more-documents__heading" id="more-documents-heading">
+						{more.heading}
+					</h2>
+				)}
+				<CardCollection
+					kind={more.config.layout}
+					cards={more.cards}
+					columns={more.config.columns}
+					titleLevel={3}
+					presentation={more.config.card}
+					gap={more.config.gap}
+				/>
+			</div>
+		</nav>
+	)
+}

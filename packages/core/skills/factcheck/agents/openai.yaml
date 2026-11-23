@@ -1,0 +1,7 @@
+interface:
+    display_name: 'Fact-check'
+    short_description: 'Verify document claims and record findings'
+    default_prompt: 'Use $factcheck to verify the external claims in a document.'
+
+policy:
+    allow_implicit_invocation: false

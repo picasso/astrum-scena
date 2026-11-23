@@ -1,0 +1,96 @@
+# a copy of the demo's site.yaml from before the lock, its own data with the rest left to the core;
+# later shapes are applied (schemaVersion 3: the courses module in `modules`)
+schemaVersion: 3
+origin: https://demo.example.com
+identity:
+    title:
+        en: Astrum Scena Demo
+        ru: Демо Astrum Scena
+    photoAlt:
+        en: Photograph from the Astrum Scena demo
+        ru: Фотография с демо-сайта Astrum Scena
+    copyright:
+        holder:
+            en: The Astrum Scena authors
+            ru: Авторы Astrum Scena
+        since: 2026
+content:
+    locales:
+        - en
+        - ru
+    referenceLocale: en
+privacy:
+    controller:
+        # the schema still requires both texts here, whatever content.locales holds
+        name:
+            en: The Astrum Scena authors
+            ru: Авторы Astrum Scena
+        contact:
+            kind: internal
+            href: /{lang}/contacts/
+menu:
+    items:
+        - segment: portfolio
+          label:
+              en: Portfolio
+              ru: Портфолио
+          icon:
+              - image
+              - grid
+        - segment: articles
+          label:
+              en: Articles
+              ru: Статьи
+          icon:
+              - bookmark
+              - text
+        - segment: courses
+          label:
+              en: Courses
+              ru: Курсы
+          icon: person
+        - segment: contacts
+          label:
+              en: Contacts
+              ru: Контакты
+          icon: mail
+modules:
+    courses: {}
+social:
+    - id: contacts
+      href: /{lang}/contacts/
+      label:
+          en: Contacts
+          ru: Контакты
+      icon: contacts
+      hover: '#5b9a68'
+seo:
+    # the schema still requires both descriptions, whatever content.locales holds
+    description:
+        en: A synthetic photography site that exercises the Astrum Scena core.
+        ru: Синтетический фотосайт для проверки ядра Astrum Scena.
+# the image pipeline: `pnpm demo:images` cuts the procedural masters into public/media/ and writes
+# src/generated/images-*.json; rerun it after any change here
+images:
+    rights:
+        copyright: © The Astrum Scena authors. CC0 1.0.
+        credit: The Astrum Scena authors
+        licensor: The Astrum Scena authors
+        source: demo.example.com
+        webStatement: https://demo.example.com/rights/
+        imageId: astrum-scena-demo
+    watermark:
+        aboveWidth: 800
+        assets:
+            - id: astrum-scena-mark
+              file: src/assets/images/watermarks/astrum-scena-mark.png
+              sha256: 3c20009eba427f50b87157de6f5916243e9332095a425bee3ce346cd3ed08642
+        profile:
+            id: watermark
+            assetId: astrum-scena-mark
+            scale: 0.17
+            minPx: 96
+            maxPx: 384
+            position: bottom-right
+            inset: 24
+            opacity: 0.8

@@ -1,0 +1,332 @@
+name: Site
+
+# The CI of a site on the core. A site calls it from its own workflow, pinned to the commit of the core's
+# release whose version its lockfile installs:
+#
+#     uses: <owner>/<repo>/.github/workflows/site.yml@<40-hex SHA> # v<version>
+#
+# and `astrum-scena check core-version` fails when the comment names another version. Every command
+# runs the core's bin from the site's lockfile. No job writes to the R2 bucket. A job whose secret is
+# not available (a pull request from a fork) skips its work with a notice instead of failing.
+on:
+    workflow_call:
+        inputs:
+            site-artifact:
+                description: >-
+                    The name of an artifact of the calling run that holds the site directory, taken
+                    instead of a checkout (the core's demo); empty for a site repository.
+                type: string
+                default: ''
+            node-version-file:
+                description: The file of the site that names its Node version.
+                type: string
+                default: .nvmrc
+            public-env:
+                description: >-
+                    `KEY=value` lines of the PUBLIC_* build variables, one per line; a name the core
+                    does not read or an empty value fails the run before the build.
+                type: string
+                default: ''
+            deploy:
+                description: Deploy the build to Cloudflare Pages on a push to main.
+                type: boolean
+                default: false
+            live-checks:
+                description: Run the read-only `images check-live` against the bucket.
+                type: boolean
+                default: true
+        secrets:
+            CLOUDFLARE_API_TOKEN:
+                required: false
+            CLOUDFLARE_ACCOUNT_ID:
+                required: false
+            R2_IMAGES_ACCOUNT_ID:
+                required: false
+            R2_IMAGES_ACCESS_KEY_ID:
+                required: false
+            R2_IMAGES_SECRET_ACCESS_KEY:
+                required: false
+            R2_IMAGES_BUCKET:
+                required: false
+
+permissions:
+    contents: read
+
+jobs:
+    # The single build of the run: the gates need no secret, and deploy ships the `dist` built here.
+    gates:
+        runs-on: ubuntu-latest
+        steps:
+            # the PUBLIC_* names the core reads; scripts/ci-workflows.test.ts keeps the list equal to the
+            # public build variables of the core's env snapshot
+            - name: Public build variables
+              env:
+                  PUBLIC_ENV: ${{ inputs.public-env }}
+                  PUBLIC_ENV_NAMES: PUBLIC_TURNSTILE_SITE_KEY
+              run: |
+                  while IFS= read -r line || [[ -n "$line" ]]; do
+                      line="${line%$'\r'}"
+                      [[ -z "${line//[[:space:]]/}" ]] && continue
+                      name="${line%%=*}"
+                      value="${line#*=}"
+                      if [[ "$line" != *=* || " $PUBLIC_ENV_NAMES " != *" $name "* ]]; then
+                          echo "::error::public-env: ${name} is not a public build variable of the core; allowed: ${PUBLIC_ENV_NAMES}"
+                          exit 1
+                      fi
+                      if [[ -z "$value" ]]; then
+                          echo "::error::public-env: ${name} has an empty value"
+                          exit 1
+                      fi
+                      echo "${name}=${value}" >> "$GITHUB_ENV"
+                  done <<< "$PUBLIC_ENV"
+
+            - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+              if: inputs.site-artifact == ''
+
+            - name: Download the site
+              if: inputs.site-artifact != ''
+              uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+              with:
+                  name: ${{ inputs.site-artifact }}
+                  path: .
+
+            - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+
+            - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+              with:
+                  node-version-file: ${{ inputs.node-version-file }}
+                  cache: pnpm
+
+            - run: pnpm install --frozen-lockfile
+
+            - name: Lint
+              run: pnpm run --if-present lint
+
+            - name: Typecheck
+              run: pnpm run --if-present typecheck
+
+            # CI=true: the gate core-version fails on a core linked with `pnpm link`
+            - name: Gates (astrum-scena check)
+              run: pnpm exec astrum-scena check
+              env:
+                  CI: 'true'
+
+            - name: Build
+              run: pnpm exec astro build
+
+            - name: Upload dist
+              uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+              with:
+                  name: dist
+                  path: dist/
+                  include-hidden-files: true
+                  if-no-files-found: error
+
+            # the jobs the conditions of the run leave out say why, as the jobs without a secret do
+            - name: Skipped jobs
+              env:
+                  LIVE_CHECKS: ${{ inputs.live-checks }}
+                  DEPLOY: ${{ inputs.deploy && github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+              run: |
+                  [[ "$LIVE_CHECKS" == true ]] || echo "::notice::live: skipped — live-checks is false"
+                  [[ "$DEPLOY" == true ]] || echo "::notice::deploy: skipped — it runs only on a push to main with deploy: true"
+
+    # Read-only: `images check-live` compares the bucket and the public origin with the release
+    # descriptor; nothing here syncs, prunes or activates a release.
+    live:
+        needs: gates
+        if: inputs.live-checks
+        runs-on: ubuntu-latest
+        # the secrets reach only the steps that need them, never the site's install scripts
+        steps:
+            - name: Secrets
+              id: secrets
+              env:
+                  R2_IMAGES_ACCOUNT_ID: ${{ secrets.R2_IMAGES_ACCOUNT_ID }}
+                  R2_IMAGES_ACCESS_KEY_ID: ${{ secrets.R2_IMAGES_ACCESS_KEY_ID }}
+                  R2_IMAGES_SECRET_ACCESS_KEY: ${{ secrets.R2_IMAGES_SECRET_ACCESS_KEY }}
+                  R2_IMAGES_BUCKET: ${{ secrets.R2_IMAGES_BUCKET }}
+              run: |
+                  for name in R2_IMAGES_ACCOUNT_ID R2_IMAGES_ACCESS_KEY_ID R2_IMAGES_SECRET_ACCESS_KEY R2_IMAGES_BUCKET; do
+                      if [[ -z "${!name}" ]]; then
+                          echo "::notice::live: skipped — ${name} is not available"
+                          echo "available=false" >> "$GITHUB_OUTPUT"
+                          exit 0
+                      fi
+                  done
+                  echo "available=true" >> "$GITHUB_OUTPUT"
+
+            - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+              if: steps.secrets.outputs.available == 'true' && inputs.site-artifact == ''
+
+            - name: Download the site
+              if: steps.secrets.outputs.available == 'true' && inputs.site-artifact != ''
+              uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+              with:
+                  name: ${{ inputs.site-artifact }}
+                  path: .
+
+            - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+              if: steps.secrets.outputs.available == 'true'
+
+            - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+              if: steps.secrets.outputs.available == 'true'
+              with:
+                  node-version-file: ${{ inputs.node-version-file }}
+                  cache: pnpm
+
+            - if: steps.secrets.outputs.available == 'true'
+              run: pnpm install --frozen-lockfile
+
+            - name: Live images check (read-only)
+              if: steps.secrets.outputs.available == 'true'
+              run: pnpm exec astrum-scena images check-live
+              env:
+                  R2_IMAGES_ACCOUNT_ID: ${{ secrets.R2_IMAGES_ACCOUNT_ID }}
+                  R2_IMAGES_ACCESS_KEY_ID: ${{ secrets.R2_IMAGES_ACCESS_KEY_ID }}
+                  R2_IMAGES_SECRET_ACCESS_KEY: ${{ secrets.R2_IMAGES_SECRET_ACCESS_KEY }}
+                  R2_IMAGES_BUCKET: ${{ secrets.R2_IMAGES_BUCKET }}
+
+    # Production: a push to main with `deploy: true`, after the gates and the live check (or with live
+    # checks turned off). One deploy at a time and none cancelled; a run whose commit is no longer the
+    # head of main publishes nothing.
+    deploy:
+        needs: [gates, live]
+        if: >-
+            ${{
+                !cancelled() && inputs.deploy &&
+                github.event_name == 'push' && github.ref == 'refs/heads/main' &&
+                needs.gates.result == 'success' &&
+                (needs.live.result == 'success' || needs.live.result == 'skipped')
+            }}
+        concurrency:
+            group: production-deploy
+            queue: max
+            cancel-in-progress: false
+        runs-on: ubuntu-latest
+        # GitHub Deployments of the panel; the caller grants it
+        permissions:
+            contents: read
+            deployments: write
+        steps:
+            - name: Secrets
+              id: secrets
+              env:
+                  CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+                  CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+              run: |
+                  for name in CLOUDFLARE_API_TOKEN CLOUDFLARE_ACCOUNT_ID; do
+                      if [[ -z "${!name}" ]]; then
+                          echo "::notice::deploy: skipped — ${name} is not available"
+                          echo "available=false" >> "$GITHUB_OUTPUT"
+                          exit 0
+                      fi
+                  done
+                  echo "available=true" >> "$GITHUB_OUTPUT"
+
+            - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+              if: steps.secrets.outputs.available == 'true' && inputs.site-artifact == ''
+
+            - name: Download the site
+              if: steps.secrets.outputs.available == 'true' && inputs.site-artifact != ''
+              uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+              with:
+                  name: ${{ inputs.site-artifact }}
+                  path: .
+
+            - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+              if: steps.secrets.outputs.available == 'true'
+
+            - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+              if: steps.secrets.outputs.available == 'true'
+              with:
+                  node-version-file: ${{ inputs.node-version-file }}
+                  cache: pnpm
+
+            # wrangler-action installs a Wrangler of its own when the site has none; the deploy runs only
+            # the one of the site's lockfile
+            - name: Wrangler from the site's lockfile
+              if: steps.secrets.outputs.available == 'true'
+              run: |
+                  pnpm install --frozen-lockfile
+                  pnpm exec wrangler --version
+
+            - name: Download dist (built and checked in gates)
+              if: steps.secrets.outputs.available == 'true'
+              uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+              with:
+                  name: dist
+                  path: dist
+
+            # the last step before publishing, so main has no time to move; an API error fails the job
+            - name: Check production freshness
+              id: freshness
+              if: steps.secrets.outputs.available == 'true'
+              uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+              with:
+                  script: |
+                      const { data } = await github.rest.repos.getBranch({
+                          owner: context.repo.owner,
+                          repo: context.repo.repo,
+                          branch: 'main',
+                      })
+                      if (!data.commit?.sha) throw new Error('Cannot verify the current main SHA')
+                      const current = data.commit.sha === context.sha
+                      if (!current) core.notice(`deploy: skipped — the run SHA ${context.sha} is not the main SHA ${data.commit.sha}`)
+                      core.setOutput('current', current ? 'true' : 'false')
+
+            # registered before the upload so the panel shows the deploy in progress
+            - name: Start GitHub deployment
+              id: gh_deploy
+              if: steps.freshness.outputs.current == 'true'
+              uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+              with:
+                  script: |
+                      const deployment = await github.rest.repos.createDeployment({
+                          owner: context.repo.owner,
+                          repo: context.repo.repo,
+                          ref: context.sha,
+                          environment: 'production',
+                          production_environment: true,
+                          transient_environment: false,
+                          auto_merge: false,
+                          required_contexts: [],
+                          description: 'Cloudflare Pages via Wrangler',
+                      })
+                      core.setOutput('deployment_id', deployment.data.id)
+
+            # the project and the output directory come from the site's wrangler.toml
+            - name: Deploy to Cloudflare Pages
+              id: deploy
+              if: steps.freshness.outputs.current == 'true'
+              uses: cloudflare/wrangler-action@953926a2e2182532811c01a25e53647d93bf07c0 # v4.1.3
+              with:
+                  apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+                  accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+                  packageManager: pnpm
+                  command: pages deploy --branch=main
+
+            # always(), so a failed upload shows as failed in the panel instead of staying in progress
+            - name: Finish GitHub deployment
+              if: always() && steps.gh_deploy.outputs.deployment_id
+              uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+              env:
+                  JOB_STATUS: ${{ job.status }}
+                  DEPLOY_ID: ${{ steps.gh_deploy.outputs.deployment_id }}
+                  WRANGLER_OUTPUT: ${{ steps.deploy.outputs.command-output }}
+              with:
+                  script: |
+                      const { JOB_STATUS, DEPLOY_ID, WRANGLER_OUTPUT = '' } = process.env
+                      const state = JOB_STATUS === 'success' ? 'success' : 'failure'
+                      const runUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`
+                      const match = WRANGLER_OUTPUT.match(/https:\/\/[a-z0-9-]+\.pages\.dev/i)
+                      const params = {
+                          owner: context.repo.owner,
+                          repo: context.repo.repo,
+                          deployment_id: Number(DEPLOY_ID),
+                          state,
+                          log_url: runUrl,
+                          description: state === 'success' ? 'Deployed to Cloudflare Pages' : 'Deploy failed',
+                      }
+                      if (match) params.environment_url = match[0]
+                      await github.rest.repos.createDeploymentStatus(params)

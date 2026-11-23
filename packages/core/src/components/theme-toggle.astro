@@ -1,0 +1,110 @@
+---
+import './theme-toggle.css'
+
+import { type Lang, useTranslations } from '../i18n/ui'
+
+type Props = {
+	lang: Lang
+	// `sun` swaps a sun and a crescent by theme; `duo` is a half-filled circle (Tabler contrast)
+	variant?: 'sun' | 'duo'
+}
+
+const { lang, variant = 'sun' } = Astro.props
+const t = useTranslations(lang)
+---
+
+{
+	/* a vanilla button (ADR-0006): aria-pressed and aria-label sync to the actual data-theme on mount,
+    and site-header decides whether it renders */
+}
+<button
+	type="button"
+	data-theme-toggle
+	data-label-to-dark={t('theme.toggle.toDark')}
+	data-label-to-light={t('theme.toggle.toLight')}
+	aria-label={t('theme.toggle.label')}
+	aria-pressed="false"
+	class="theme-toggle inline-flex h-9 w-9 items-center justify-center rounded text-menulink transition-colors duration-[var(--duration-base)] hover:text-menulink-hover"
+>
+	{
+		variant === 'duo' ? (
+			<svg
+				class="theme-toggle__icon--duo"
+				width="20"
+				height="20"
+				viewBox="0 0 24 24"
+				fill="none"
+				stroke="currentColor"
+				stroke-width="2"
+				stroke-linecap="round"
+				stroke-linejoin="round"
+				aria-hidden="true"
+			>
+				<circle cx="12" cy="12" r="9" />
+				<path d="M12 3v18" />
+				<path d="M12 9l4.65 -4.65" />
+				<path d="M12 14.3l7.37 -7.37" />
+				<path d="M12 19.6l8.85 -8.85" />
+			</svg>
+		) : (
+			<>
+				<svg
+					class="theme-toggle__icon--sun"
+					width="20"
+					height="20"
+					viewBox="0 0 24 24"
+					fill="none"
+					stroke="currentColor"
+					stroke-width="2"
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					aria-hidden="true"
+				>
+					<circle cx="12" cy="12" r="4" />
+					<path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
+				</svg>
+				<svg
+					class="theme-toggle__icon--moon"
+					width="20"
+					height="20"
+					viewBox="0 0 24 24"
+					fill="none"
+					stroke="currentColor"
+					stroke-width="2"
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					aria-hidden="true"
+				>
+					<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+				</svg>
+			</>
+		)
+	}
+</button>
+
+<script>
+	import { getCurrentTheme, toggleTheme } from '../lib/theme'
+
+	function syncButton(button: HTMLButtonElement) {
+		const theme = getCurrentTheme()
+		button.setAttribute('aria-pressed', String(theme === 'dark'))
+		const label = theme === 'dark' ? button.dataset.labelToLight : button.dataset.labelToDark
+		if (label) button.setAttribute('aria-label', label)
+	}
+
+	// astro:page-load fires on the first load and after every View Transitions swap, which recreates
+	// the button; data-bound prevents double binding
+	function initThemeToggles() {
+		for (const button of document.querySelectorAll<HTMLButtonElement>('[data-theme-toggle]')) {
+			if (button.dataset.bound) continue
+			button.dataset.bound = 'true'
+			syncButton(button)
+			button.addEventListener('click', () => {
+				toggleTheme()
+				syncButton(button)
+			})
+		}
+	}
+
+	document.addEventListener('astro:page-load', initThemeToggles)
+</script>

@@ -1,0 +1,353 @@
+/*
+ * Site theme: fonts, design tokens and every color the site paints with. Defaults (`@theme`, `:root`)
+ * are the DARK theme; `[data-theme='light']` on <html> overrides them. Component rules reference these
+ * tokens only (`pnpm check:color-literals`), so a site restyles by replacing this file. The file declares
+ * only the tokens the core exports (`api-snapshot/tokens.json` of the core package): the build and
+ * `astro dev` fail on an unknown token and on a required one left out, while an `optional` token (one
+ * Tailwind defines, such as `--font-sans`) may be overridden or left to Tailwind. Layout primitives
+ * (`--container-*`) are not part of the theme: they live in global.css and the generated layout tokens,
+ * and declaring one here fails the build too.
+ */
+
+/* `light:` utilities for occasional per-element overrides in markup. */
+@custom-variant light (&:where([data-theme='light'], [data-theme='light'] *));
+
+@layer theme {
+	/* --- Self-hosted Ubuntu (v9) -------------------------------------------------------------------
+	 * Two families, picked by the locale script (`data-script` on <html>, src/theme/fonts.ts):
+	 * 'Ubuntu' is the latin subset for latin locales; 'Ubuntu Full' is the original latin + cyrillic
+	 * file, kept whole because the browser picks a face per character, and cyrillic letters split from
+	 * punctuation into another file lose their kerning pairs. A latin page lists 'Ubuntu Full' as a
+	 * fallback, so a cyrillic passage on it still renders in Ubuntu. */
+
+	@font-face {
+		font-family: 'Ubuntu';
+		font-style: normal;
+		font-weight: 400;
+		font-display: swap;
+		src:
+			local('Ubuntu'),
+			url('/fonts/ubuntu/ubuntu-v9-latin-regular.woff2') format('woff2');
+		unicode-range:
+			U+0000, U+000D, U+0020-007E, U+00A0-00FF, U+0131, U+0152-0153, U+02C6, U+02DA, U+02DC,
+			U+2013-2014, U+2018-201A, U+201C-201E, U+2022, U+2026, U+2039-203A, U+2044, U+2074,
+			U+20AC, U+2212, U+2215, U+E0FF, U+EFFD, U+F000;
+	}
+
+	@font-face {
+		font-family: 'Ubuntu';
+		font-style: italic;
+		font-weight: 400;
+		font-display: swap;
+		src:
+			local('Ubuntu Italic'),
+			local('Ubuntu-Italic'),
+			url('/fonts/ubuntu/ubuntu-v9-latin-italic.woff2') format('woff2');
+		unicode-range:
+			U+0000, U+000D, U+0020-007E, U+00A0-00FF, U+0131, U+0152-0153, U+02C6, U+02DA, U+02DC,
+			U+2013-2014, U+2018-201A, U+201C-201E, U+2022, U+2026, U+2039-203A, U+2044, U+2074,
+			U+20AC, U+2212, U+2215, U+E0FF, U+EFFD, U+F000;
+	}
+
+	@font-face {
+		font-family: 'Ubuntu';
+		font-style: normal;
+		font-weight: 500;
+		font-display: swap;
+		src:
+			local('Ubuntu Medium'),
+			local('Ubuntu-Medium'),
+			url('/fonts/ubuntu/ubuntu-v9-latin-500.woff2') format('woff2');
+		unicode-range:
+			U+0000, U+000D, U+0020-007E, U+00A0-00FF, U+0131, U+0152-0153, U+02C6, U+02DA, U+02DC,
+			U+2013-2014, U+2018-201A, U+201C-201E, U+2022, U+2026, U+2039-203A, U+2044, U+2074,
+			U+20AC, U+2212, U+2215, U+E0FF, U+EFFD, U+F000;
+	}
+
+	@font-face {
+		font-family: 'Ubuntu';
+		font-style: italic;
+		font-weight: 500;
+		font-display: swap;
+		src:
+			local('Ubuntu Medium Italic'),
+			local('Ubuntu-MediumItalic'),
+			url('/fonts/ubuntu/ubuntu-v9-latin-500italic.woff2') format('woff2');
+		unicode-range:
+			U+0000, U+000D, U+0020-007E, U+00A0-00FF, U+0131, U+0152-0153, U+02C6, U+02DA, U+02DC,
+			U+2013-2014, U+2018-201A, U+201C-201E, U+2022, U+2026, U+2039-203A, U+2044, U+2074,
+			U+20AC, U+2212, U+2215, U+E0FF, U+EFFD, U+F000;
+	}
+
+	@font-face {
+		font-family: 'Ubuntu';
+		font-style: normal;
+		font-weight: 700;
+		font-display: swap;
+		src:
+			local('Ubuntu Bold'),
+			local('Ubuntu-Bold'),
+			url('/fonts/ubuntu/ubuntu-v9-latin-700.woff2') format('woff2');
+		unicode-range:
+			U+0000, U+000D, U+0020-007E, U+00A0-00FF, U+0131, U+0152-0153, U+02C6, U+02DA, U+02DC,
+			U+2013-2014, U+2018-201A, U+201C-201E, U+2022, U+2026, U+2039-203A, U+2044, U+2074,
+			U+20AC, U+2212, U+2215, U+E0FF, U+EFFD, U+F000;
+	}
+
+	@font-face {
+		font-family: 'Ubuntu Full';
+		font-style: normal;
+		font-weight: 400;
+		font-display: swap;
+		src:
+			local('Ubuntu'),
+			url('/fonts/ubuntu/ubuntu-v9-cyrillic_latin-regular.woff2') format('woff2');
+		unicode-range:
+			U+0000, U+000D, U+0020-007E, U+00A0-00FF, U+0131, U+0152-0153, U+02C6, U+02DA, U+02DC,
+			U+0400-045F, U+0490-0491, U+04B0-04B1, U+2013-2014, U+2018-201A, U+201C-201E, U+2022,
+			U+2026, U+2039-203A, U+2044, U+2074, U+20AC, U+2116, U+2212, U+2215, U+E0FF, U+EFFD,
+			U+F000;
+	}
+
+	@font-face {
+		font-family: 'Ubuntu Full';
+		font-style: italic;
+		font-weight: 400;
+		font-display: swap;
+		src:
+			local('Ubuntu Italic'),
+			local('Ubuntu-Italic'),
+			url('/fonts/ubuntu/ubuntu-v9-cyrillic_latin-italic.woff2') format('woff2');
+		unicode-range:
+			U+0000, U+000D, U+0020-007E, U+00A0-00FF, U+0131, U+0152-0153, U+02C6, U+02DA, U+02DC,
+			U+0400-045F, U+0490-0491, U+04B0-04B1, U+2013-2014, U+2018-201A, U+201C-201E, U+2022,
+			U+2026, U+2039-203A, U+2044, U+2074, U+20AC, U+2116, U+2212, U+2215, U+E0FF, U+EFFD,
+			U+F000;
+	}
+
+	@font-face {
+		font-family: 'Ubuntu Full';
+		font-style: normal;
+		font-weight: 500;
+		font-display: swap;
+		src:
+			local('Ubuntu Medium'),
+			local('Ubuntu-Medium'),
+			url('/fonts/ubuntu/ubuntu-v9-cyrillic_latin-500.woff2') format('woff2');
+		unicode-range:
+			U+0000, U+000D, U+0020-007E, U+00A0-00FF, U+0131, U+0152-0153, U+02C6, U+02DA, U+02DC,
+			U+0400-045F, U+0490-0491, U+04B0-04B1, U+2013-2014, U+2018-201A, U+201C-201E, U+2022,
+			U+2026, U+2039-203A, U+2044, U+2074, U+20AC, U+2116, U+2212, U+2215, U+E0FF, U+EFFD,
+			U+F000;
+	}
+
+	@font-face {
+		font-family: 'Ubuntu Full';
+		font-style: italic;
+		font-weight: 500;
+		font-display: swap;
+		src:
+			local('Ubuntu Medium Italic'),
+			local('Ubuntu-MediumItalic'),
+			url('/fonts/ubuntu/ubuntu-v9-cyrillic_latin-500italic.woff2') format('woff2');
+		unicode-range:
+			U+0000, U+000D, U+0020-007E, U+00A0-00FF, U+0131, U+0152-0153, U+02C6, U+02DA, U+02DC,
+			U+0400-045F, U+0490-0491, U+04B0-04B1, U+2013-2014, U+2018-201A, U+201C-201E, U+2022,
+			U+2026, U+2039-203A, U+2044, U+2074, U+20AC, U+2116, U+2212, U+2215, U+E0FF, U+EFFD,
+			U+F000;
+	}
+
+	@font-face {
+		font-family: 'Ubuntu Full';
+		font-style: normal;
+		font-weight: 700;
+		font-display: swap;
+		src:
+			local('Ubuntu Bold'),
+			local('Ubuntu-Bold'),
+			url('/fonts/ubuntu/ubuntu-v9-cyrillic_latin-700.woff2') format('woff2');
+		unicode-range:
+			U+0000, U+000D, U+0020-007E, U+00A0-00FF, U+0131, U+0152-0153, U+02C6, U+02DA, U+02DC,
+			U+0400-045F, U+0490-0491, U+04B0-04B1, U+2013-2014, U+2018-201A, U+201C-201E, U+2022,
+			U+2026, U+2039-203A, U+2044, U+2074, U+20AC, U+2116, U+2212, U+2215, U+E0FF, U+EFFD,
+			U+F000;
+	}
+
+	/* on <html> for a cyrillic page, on a section for a cyrillic passage on a latin page (`/rights/`),
+	 * so its punctuation comes from the same file as its letters */
+	[data-script='cyrillic'] {
+		--font-sans: 'Ubuntu Full', Arial, sans-serif;
+		font-family: var(--font-sans);
+	}
+}
+
+/* --- Tokens (defaults = DARK) ----------------------------------------------------------------- */
+
+@theme {
+	/* Theme-independent base colors: the dark theme and the places that keep their color in both
+	 * themes (text over photos, the PhotoSwipe viewer, fixed CTAs) share them. */
+	--color-accent-fixed: #fcbf00;
+	--color-alt-fixed: #ff4136;
+	--color-surface-fixed: #363636;
+	/* White over photos and fixed dark or colored overlays; alpha variants are mixed in place. */
+	--color-on-image: #ffffff;
+	/* Black for shadows, scrims and patterns; alpha variants are mixed in place. */
+	--color-shade: #000000;
+	/* Light fills and text on colored fills: form fields, buttons, the callout icon disc. */
+	--color-paper: #ffffff;
+	/* Dark text on light or accent fills. */
+	--color-ink: #222222;
+	/* Underlay of the archive course badge. */
+	--color-scrim: #141414;
+	/* Card title overlay. */
+	--color-overlay: #0b0b0b;
+	/* Start of the full-screen menu gradient (legacy red-gradient). */
+	--color-menu-overlay: #2f2933;
+	/* Neutral that contrasts with the page: white on dark, black on light; mixed with an alpha. */
+	--color-contrast: #ffffff;
+
+	/* Semantic colors. */
+	--color-background: #434750;
+	--color-surface: var(--color-surface-fixed); /* footer, header */
+	--color-foreground: #b5b5bf; /* body text */
+	--color-heading: #cfcfde; /* content headings */
+	--color-accent: var(--color-accent-fixed); /* current menu item, default image color */
+	--color-alt: var(--color-alt-fixed); /* split heading, loader, scroll-top */
+	--color-link: rgba(255, 255, 255, 0.7);
+	--color-link-hover: #ffffff;
+	--color-menulink: rgba(255, 255, 255, 0.7);
+	--color-menulink-hover: #ffffff;
+	--color-footer-text: #b5b5bf;
+	--color-social: rgba(255, 255, 255, 0.5);
+	--color-logo: #ffffff; /* `currentColor` part of the header logo */
+	--color-border: var(--color-surface-fixed); /* image border */
+	/* Collection card (legacy `.shadow-box`): the page background lightened by 10 %; the text underlay
+	 * and divider come from the same legacy block. */
+	--color-card: #5a606c;
+	--color-card-border: rgba(0, 0, 0, 0.4);
+	--color-card-divider: rgba(0, 0, 0, 0.2);
+	--color-card-body: rgba(54, 54, 54, 0.3);
+
+	/* Typography. */
+	--font-sans: 'Ubuntu', 'Ubuntu Full', Arial, sans-serif;
+
+	--text-base: 18px;
+	--text-base--line-height: 1.618;
+	--text-h1: 36px;
+	--text-h2: 30px;
+	--text-h3: 24px;
+	--text-h4: 20px;
+
+	--font-weight-normal: 400;
+	--font-weight-medium: 500;
+	--font-weight-semibold: 600; /* links with the borders-slide-in effect */
+	--font-weight-bold: 700; /* hero H1 (legacy synthetic 600 mapped to the real 700) */
+
+	--tracking-hero: 2px;
+	--leading-hero: 1.2;
+
+	/* Transitions. */
+	--ease-out: ease-out;
+	--ease-cubic: cubic-bezier(0.33, 0, 0.2, 1);
+	--duration-base: 0.3s;
+	--duration-medium: 0.6s;
+	--duration-long: 1s;
+
+	/* Spacing scale shared by content blocks (docs/blocks/README.md). Semantic names belong to the
+	 * MDX contract; values live only here. Use CSS lengths (px/rem/em or length-only calc), including
+	 * 0px for zero; percentages cannot supply Gallery geometry. */
+	--content-gap-none: 0px;
+	--content-gap-tiny: 4px;
+	--content-gap-small: 8px;
+	--content-gap-medium: 12px;
+	--content-gap-large: 16px;
+
+	/* Collection card (legacy `.shadow-box`): `1px 1px 8px 8px` radius and the plate shadow. */
+	--radius-card: 1px 1px 8px 8px;
+	--shadow-card: 0 1px 5px rgba(0, 0, 0, 0.3);
+	--shadow-card-hover: 0 4px 12px rgba(0, 0, 0, 0.45);
+}
+
+@layer theme {
+	/* --- Component palettes (defaults = DARK) ----------------------------------------------------- */
+
+	:root {
+		/* Callout fill/text pairs are WCAG-checked against src/lib/blocks/callout/tokens.ts. */
+		--callout-default-fill: #4f535e;
+		--callout-default-text: #ffffff;
+		--callout-default-line: #373b42;
+		--callout-default-icon: #434750;
+		--callout-default-line-text: #f2f2f4;
+		--callout-accent-fill: #fcbf00;
+		--callout-accent-text: #211c00;
+		--callout-alt-fill: #cc2c22;
+		--callout-alt-text: #ffffff;
+
+		/* Note tints mirror src/lib/blocks/note/tokens.ts. */
+		--note-outdated-fill: #fcbf00;
+		--note-outdated-border: #d9a400;
+		--note-info-fill: #3ea6ff;
+		--note-info-border: #2f83cc;
+		--note-alert-fill: #f9564b;
+		--note-alert-border: #d63a30;
+
+		/* Contact form states: the error is brighter than the legacy #ff5533, which got lost on grey. */
+		--cf-error: #ff6a3d;
+		--cf-error-label: #ff8066;
+		--cf-ok: #66cc52;
+		--cf-field-bg: #ffffeb; /* cream field */
+		--cf-field-ring: var(--color-accent);
+
+		--color-image-border-alt: #6b7280;
+	}
+
+	/* --- LIGHT ------------------------------------------------------------------------------------ */
+
+	[data-theme='light'] {
+		--color-contrast: #000000;
+
+		--color-background: #ffffff;
+		--color-surface: #ededed; /* footer/header */
+		--color-foreground: #9d9d9d; /* body text */
+		--color-heading: #696969; /* headings */
+		--color-accent: #ecae80;
+		--color-alt: #ef7674;
+		--color-link: #e59254; /* color.adjust(#ecae80, -10% L) */
+		--color-link-hover: #ef7674;
+		--color-menulink: #696969;
+		--color-menulink-hover: #ef7674;
+		--color-footer-text: #9d9d9d;
+		--color-social: rgba(106, 106, 106, 0.5); /* rgba(color.adjust(#9d9d9d, -20% L), .5) */
+		--color-logo: #202226; /* dark `currentColor` part of the logo on the light header */
+		--color-border: #b3b3b3;
+		--color-card: #fcfcfc; /* the page background minus 1 % lightness */
+		--color-card-border: rgba(105, 105, 105, 0.4);
+		--color-card-divider: rgba(105, 105, 105, 0.25);
+		--color-card-body: rgba(105, 105, 105, 0.15);
+		--shadow-card: 0 1px 6px rgba(105, 105, 105, 0.5);
+		--shadow-card-hover: 0 4px 12px rgba(105, 105, 105, 0.55);
+
+		/* The default callout stays dark in both themes. */
+		--callout-accent-fill: #ecae80;
+		--callout-accent-text: #3a2705;
+		--callout-alt-fill: #c0392b;
+		--callout-alt-text: #ffffff;
+
+		/* A yellow sticky-note tint rather than peach: over white the tint reads as pale paper. */
+		--note-outdated-fill: #e6bb3f;
+		--note-outdated-border: #cda23a;
+		--note-info-fill: #6aa9e0;
+		--note-info-border: #4a89c4;
+		--note-alert-fill: #e2867f;
+		--note-alert-border: #c8615a;
+
+		--cf-error: #c62f16; /* darkened to WCAG AA on the light background */
+		--cf-error-label: #b0402a;
+		--cf-ok: #2f8132;
+		--cf-field-bg: #fffdf5;
+		/* Warm amber focus ring: the pale accent #ecae80 is 1.9:1 against white. */
+		--cf-field-ring: #e89a3c;
+
+		--color-image-border-alt: #9d9d9d;
+	}
+}

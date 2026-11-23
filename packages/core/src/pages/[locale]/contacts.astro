@@ -1,0 +1,150 @@
+---
+import '../../styles/image-frame.css'
+import '../../styles/pages/contacts.css'
+
+import { getEntry } from 'astro:content'
+
+import ResponsivePicture from '../../components/portfolio/responsive-picture.astro'
+import type { Locale } from '../../config/locale-schema.ts'
+import { site } from '../../config/site.ts'
+import { siteRoot } from '../../config/site-root.ts'
+import { useTranslations } from '../../i18n/ui.ts'
+import Base from '../../layouts/base.astro'
+import { resolveBanner } from '../../lib/banner/build-data.ts'
+import { contactsAsideCropScale, contactsAsideFrameAspect } from '../../lib/contact/aside.ts'
+import { localizedStaticPaths, pageHref } from '../../lib/content/routes.ts'
+import { loadImageCatalog } from '../../lib/images/catalog.ts'
+import { buildPictureModel } from '../../lib/images/media.ts'
+import { bannerPhotoId, footerPromoContext } from '../../lib/portfolio/footer-promo-build.ts'
+import { buildLocaleMeta } from '../../lib/portfolio/page-meta.ts'
+import { contactsAsideSizes } from '../../lib/portfolio/sizes.ts'
+import { resolveSurfaceMedia } from '../../lib/portfolio/surface.ts'
+import { ContactForm } from '../../ui/contact-form.tsx'
+
+// port of the legacy `[x_row] 1/4 image + 3/4 form` layout, the image share now set by
+// `contacts.aside.width`. The `medium` width keeps the form column within the form's prose limit;
+// at the shipped aside width the form fills it with no gap on the right. The form hydrates on load,
+// which narrows the window in which a native submit can beat validation and preventDefault; it posts
+// to the Cloudflare Pages Function `/api/contact` with Turnstile.
+export function getStaticPaths() {
+	return localizedStaticPaths(site.content.locales)
+}
+
+type Props = { locale: Locale }
+
+const { locale } = Astro.props
+const t = useTranslations(locale)
+const banner = await resolveBanner({ kind: 'surface', surface: 'contacts' }, locale, site)
+const meta = buildLocaleMeta(Astro.url.pathname, Astro.site!.href, site.content.locales)
+
+// the aside image is decorative and not a link, hence the empty alt. It is optional, so a bad id or
+// a missing derivative skips it instead of failing the contacts build.
+const aside = site.contacts.aside
+const asideId = aside.image
+let asideModel = null
+if (asideId !== 'off') {
+	try {
+		const catalog = loadImageCatalog(siteRoot)
+		const media = resolveSurfaceMedia(catalog.manifest, asideId, 'contactsAside')
+		asideModel = buildPictureModel(media, {
+			originBase: catalog.originBase,
+			alt: '',
+			sizes: contactsAsideSizes(aside.width, contactsAsideCropScale(aside.ratio, media)),
+		})
+	} catch (error) {
+		console.warn('[contacts] aside image skipped:', (error as Error).message)
+	}
+}
+const asideAspect = contactsAsideFrameAspect(aside.ratio)
+const asideFocal =
+	asideModel && asideAspect ? (await getEntry('photos', asideId))?.data.focalPoint : undefined
+const contactsStyle = asideModel
+	? `--contacts-columns:${aside.width}fr ${100 - aside.width}fr`
+	: '--contacts-columns:1fr'
+const asideFrameStyle = asideAspect
+	? [
+			`aspect-ratio:${asideAspect}`,
+			asideFocal && `--contacts-focal:${asideFocal.x}% ${asideFocal.y}%`,
+		]
+			.filter(Boolean)
+			.join(';')
+	: undefined
+
+// only the public site key is exposed; the secret lives in the Function. Until the owner sets it the
+// form still renders, and the server rejects the empty token.
+const siteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY ?? ''
+const strings = {
+	name: t('contact.name'),
+	email: t('contact.email'),
+	message: t('contact.message'),
+	send: t('contact.send'),
+	sending: t('contact.sending'),
+	verifying: t('contact.verifying'),
+	success: t('contact.success'),
+	mailFailed: t('contact.mailFailed'),
+	summaryError: t('contact.summaryError'),
+	requiredName: t('contact.requiredName'),
+	requiredEmail: t('contact.requiredEmail'),
+	requiredMessage: t('contact.requiredMessage'),
+	tooLong: t('contact.tooLong'),
+	invalidEmail: t('contact.invalidEmail'),
+	challenge: t('contact.challenge'),
+}
+const footerPromo = footerPromoContext(
+	'surface:contacts',
+	bannerPhotoId(banner),
+	asideModel && asideId !== 'off' ? asideId : undefined,
+)
+---
+
+<Base
+	footerPromo={footerPromo}
+	title={t('nav.contacts')}
+	canonical={meta.canonical}
+	alternates={meta.alternates}
+	width="medium"
+	heading={t('nav.contacts')}
+	banner={banner}
+>
+	<div class="contacts" style={contactsStyle}>
+		{
+			asideModel && (
+				<div
+					class:list={[
+						'contacts__aside',
+						`image-frame--${aside.frame}`,
+						`image-frame--${aside.frameColor}`,
+					]}
+				>
+					<div
+						class:list={[
+							'contacts__aside-frame',
+							asideAspect && 'contacts__aside-frame--crop',
+						]}
+						style={asideFrameStyle}
+					>
+						<ResponsivePicture
+							model={asideModel}
+							class="contacts__aside-media"
+							imgClass="contacts__aside-img image-frame__target"
+						/>
+					</div>
+				</div>
+			)
+		}
+		<div class="contacts__main">
+			<ContactForm
+				client:load
+				locale={locale}
+				siteKey={siteKey}
+				strings={strings}
+				subheading={t('contacts.intro')}
+				privacyNotice={{
+					lead: t('contact.privacyNotice'),
+					label: t('contact.privacyLink'),
+					href: pageHref('privacy', locale),
+				}}
+			/>
+		</div>
+	</div>
+</Base>

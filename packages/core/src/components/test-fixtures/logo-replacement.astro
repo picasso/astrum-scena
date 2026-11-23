@@ -1,0 +1,9 @@
+---
+import type { LogoReplacementProps } from '../../overrides/points.ts'
+
+type Props = LogoReplacementProps
+
+const { placement, title } = Astro.props
+---
+
+<span data-replacement="logo" data-placement={placement}>{title}</span>

@@ -1,0 +1,48 @@
+---
+import './card-masonry.css'
+
+import { site } from '../config/site.ts'
+import type { CardPresentation } from '../config/variants.ts'
+import { type CardModel, excerptHiddenClass } from '../lib/cards/select.ts'
+import type { MasonryConfig } from '../lib/portfolio/layout.ts'
+import Card from './card.astro'
+
+// CSS multicol keeps card proportions and packs them without JS, so the browser picks the column
+// count from the width and DOM order stays the input order. One masonry serves every collection,
+// portfolio albums and articles alike
+type Props = {
+	cards: readonly CardModel[]
+	config?: MasonryConfig
+	// "read more" link label, passed only when `listing.moreLink: on`
+	more?: string
+	columns?: number
+	titleLevel?: 2 | 3
+	// defaults to `details`
+	presentation?: CardPresentation
+	// overrides config.gap for callers with their own spacing, such as moreDocs
+	gap?: number
+}
+
+const {
+	cards,
+	config = site.portfolio.masonry,
+	more,
+	columns,
+	titleLevel,
+	presentation,
+	gap,
+} = Astro.props
+---
+
+<ul
+	class:list={['card-masonry', excerptHiddenClass(site.listing.excerptHiddenBelow)]}
+	style={`--portfolio-col-width:${config.minColumnWidth}px; --portfolio-gap:${gap ?? config.gap}px; --portfolio-max-columns:${columns ?? config.maxColumns};`}
+>
+	{
+		cards.map((card) => (
+			<li class="card-masonry__item">
+				<Card card={card} more={more} titleLevel={titleLevel} presentation={presentation} />
+			</li>
+		))
+	}
+</ul>

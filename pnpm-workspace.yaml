@@ -1,0 +1,7 @@
+packages:
+    - packages/*
+    - demo
+# only trusted packages may run build scripts
+allowBuilds:
+    esbuild: true
+    sharp: true

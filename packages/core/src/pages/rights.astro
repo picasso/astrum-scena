@@ -1,0 +1,52 @@
+---
+import { getEntry, render } from 'astro:content'
+
+import { site } from '../config/site.ts'
+import { siteRoot } from '../config/site-root.ts'
+import { languageName } from '../i18n/ui'
+import Base from '../layouts/base.astro'
+import { localizedDocumentId } from '../lib/content/localized-id.ts'
+import { RIGHTS_PATH } from '../lib/content/routes.ts'
+import { loadImagePublicConfig } from '../lib/images/public-config.ts'
+import { footerPromoContext } from '../lib/portfolio/footer-promo-build.ts'
+import { localeScript } from '../theme/fonts.ts'
+
+// /rights/ is already embedded in the XMP of published files (`site.yaml` →
+// images.rights.webStatement), so it must answer 200 on its own, with no locale prefix and no redirect. One
+// URL serves every locale, a section each; the copyright line comes from the same public config
+// projection as the photo captions.
+const { config } = loadImagePublicConfig(siteRoot)
+const canonical = new URL(RIGHTS_PATH, Astro.site!.href).href
+const footerPromo = footerPromoContext('surface:rights')
+
+const sections = await Promise.all(
+	site.content.locales.map(async (locale) => {
+		const entry = await getEntry('legal', localizedDocumentId(`rights.${locale}.md`))
+		if (!entry) throw new Error(`src/content/legal/rights.${locale}.md is missing`)
+		const { Content } = await render(entry)
+		return { locale, title: entry.data.title, Content }
+	}),
+)
+const title = sections.map((section) => section.title).join(' · ')
+---
+
+<Base
+	footerPromo={footerPromo}
+	title={title}
+	canonical={canonical}
+	localeNeutral
+	width="prose"
+	heading={title}
+>
+	<div class="prose">
+		{
+			sections.map(({ locale, Content }) => (
+				<section lang={locale} data-script={localeScript(locale)}>
+					<h2>{languageName(locale, locale)}</h2>
+					<p>{config.copyright}</p>
+					<Content />
+				</section>
+			))
+		}
+	</div>
+</Base>

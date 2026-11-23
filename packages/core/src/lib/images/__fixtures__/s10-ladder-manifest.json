@@ -1,0 +1,1142 @@
+{
+	"configDigest": "aa63804cae6c3acbd759ad27f41efeafa50fc1e158aefacf553b83bf074aa779",
+	"photos": {
+		"savanna-dreams": {
+			"derivatives": [
+				{
+					"byteSize": 5291,
+					"format": "avif",
+					"height": 77,
+					"objectKey": "savanna-dreams/200w-c5809ec4b3989794e59b8ba05b9b795686fe67ac0337d79dac16c70bdc6f5a2f.avif",
+					"privacyChecked": true,
+					"rightsEmbedded": true,
+					"sha256": "c5809ec4b3989794e59b8ba05b9b795686fe67ac0337d79dac16c70bdc6f5a2f",
+					"watermarkProfile": "none",
+					"width": 200
+				},
+				{
+					"byteSize": 5154,
+					"format": "webp",
+					"height": 77,
+					"objectKey": "savanna-dreams/200w-77aeaf08ef39baa3f256b90b9213ce95963dd4e27b62cb5164aac004f3f71d02.webp",
+					"privacyChecked": true,
+					"rightsEmbedded": true,
+					"sha256": "77aeaf08ef39baa3f256b90b9213ce95963dd4e27b62cb5164aac004f3f71d02",
+					"watermarkProfile": "none",
+					"width": 200
+				},
+				{
+					"byteSize": 6943,
+					"format": "avif",
+					"height": 154,
+					"objectKey": "savanna-dreams/400w-278ed30f68f6aec777e5750bf91d9f8db7fd4591cd7d58b2954503772a526d37.avif",
+					"privacyChecked": true,
+					"rightsEmbedded": true,
+					"sha256": "278ed30f68f6aec777e5750bf91d9f8db7fd4591cd7d58b2954503772a526d37",
+					"watermarkProfile": "none",
+					"width": 400
+				},
+				{
+					"byteSize": 7218,
+					"format": "webp",
+					"height": 154,
+					"objectKey": "savanna-dreams/400w-6c6b93f6c5388ce6dd0822c37b18819655396a3278533eb065c5536c4d4c1447.webp",
+					"privacyChecked": true,
+					"rightsEmbedded": true,
+					"sha256": "6c6b93f6c5388ce6dd0822c37b18819655396a3278533eb065c5536c4d4c1447",
+					"watermarkProfile": "none",
+					"width": 400
+				},
+				{
+					"byteSize": 12516,
+					"format": "avif",
+					"height": 308,
+					"objectKey": "savanna-dreams/800w-e3b844f99b4975ec31138e6f7fc7e38583f92f7e5bcce48de69f0f7822d85e96.avif",
+					"privacyChecked": true,
+					"rightsEmbedded": true,
+					"sha256": "e3b844f99b4975ec31138e6f7fc7e38583f92f7e5bcce48de69f0f7822d85e96",
+					"watermarkProfile": "none",
+					"width": 800
+				},
+				{
+					"byteSize": 13914,
+					"format": "webp",
+					"height": 308,
+					"objectKey": "savanna-dreams/800w-fe922f0b4e9f1f3db57475629d0d57cf4dab8ba3abc4152d9d425f14b56e7527.webp",
+					"privacyChecked": true,
+					"rightsEmbedded": true,
+					"sha256": "fe922f0b4e9f1f3db57475629d0d57cf4dab8ba3abc4152d9d425f14b56e7527",
+					"watermarkProfile": "none",
+					"width": 800
+				},
+				{
+					"byteSize": 24395,
+					"format": "avif",
+					"height": 463,
+					"objectKey": "savanna-dreams/1200w-cdd0bc32ebdca748d84ff97bedd227bcb98a632fef2616f5ba3789bfb0835050.avif",
+					"privacyChecked": true,
+					"rightsEmbedded": true,
+					"sha256": "cdd0bc32ebdca748d84ff97bedd227bcb98a632fef2616f5ba3789bfb0835050",
+					"watermarkProfile": "watermark",
+					"width": 1200
+				},
+				{
+					"byteSize": 29350,
+					"format": "webp",
+					"height": 463,
+					"objectKey": "savanna-dreams/1200w-744557c8ca30579e72ea468f65bebfb3836abad63a8ff5c610dc1b2099b0536c.webp",
+					"privacyChecked": true,
+					"rightsEmbedded": true,
+					"sha256": "744557c8ca30579e72ea468f65bebfb3836abad63a8ff5c610dc1b2099b0536c",
+					"watermarkProfile": "watermark",
+					"width": 1200
+				},
+				{
+					"byteSize": 37731,
+					"format": "avif",
+					"height": 617,
+					"objectKey": "savanna-dreams/1600w-50a048fcb5cb82b39375e8693f2e3bd9b3e41654bf71ad2e95cafe46ecdfaf37.avif",
+					"privacyChecked": true,
+					"rightsEmbedded": true,
+					"sha256": "50a048fcb5cb82b39375e8693f2e3bd9b3e41654bf71ad2e95cafe46ecdfaf37",
+					"watermarkProfile": "watermark",
+					"width": 1600
+				},
+				{
+					"byteSize": 45450,
+					"format": "webp",
+					"height": 617,
+					"objectKey": "savanna-dreams/1600w-373129e262ad517a494b1daaad91ac832741e5cb94fd1d779d80d1876c127caf.webp",
+					"privacyChecked": true,
+					"rightsEmbedded": true,
+					"sha256": "373129e262ad517a494b1daaad91ac832741e5cb94fd1d779d80d1876c127caf",
+					"watermarkProfile": "watermark",
+					"width": 1600
+				},
+				{
+					"byteSize": 53593,
+					"format": "avif",
+					"height": 740,
+					"objectKey": "savanna-dreams/1920w-4f826b6770b52413555079470306a2b807e4b700ea781dffbf9c7c6c98c82751.avif",
+					"privacyChecked": true,
+					"rightsEmbedded": true,
+					"sha256": "4f826b6770b52413555079470306a2b807e4b700ea781dffbf9c7c6c98c82751",
+					"watermarkProfile": "watermark",
+					"width": 1920
+				},
+				{
+					"byteSize": 61372,
+					"format": "webp",
+					"height": 740,
+					"objectKey": "savanna-dreams/1920w-ad5338861c9aa5b8e42f9284c8e161f92f9745a7baaeac46c00ab97040ba64a3.webp",
+					"privacyChecked": true,
+					"rightsEmbedded": true,
+					"sha256": "ad5338861c9aa5b8e42f9284c8e161f92f9745a7baaeac46c00ab97040ba64a3",
+					"watermarkProfile": "watermark",
+					"width": 1920
+				}
+			],
+			"dominantColor": "#8878b8",
+			"masterSha256": "141b22fc0e304d908d2797c4c399cf3df8009c6e018f3131844e613030eee584",
+			"orientation": 1,
+			"rightsId": "demo-rights",
+			"sourceHeight": 740,
+			"sourceWidth": 1920
+		},
+		"quiet-light": {
+			"derivatives": [
+				{
+					"byteSize": 5908,
+					"format": "avif",
+					"height": 103,
+					"objectKey": "quiet-light/200w-28043d971d7ce690c812ae2a9bbd6dbfa397ea597624110b598b77813dc9f42a.avif",
+					"privacyChecked": true,
+					"rightsEmbedded": true,
+					"sha256": "28043d971d7ce690c812ae2a9bbd6dbfa397ea597624110b598b77813dc9f42a",
+					"watermarkProfile": "none",
+					"width": 200
+				},
+				{
+					"byteSize": 6192,
+					"format": "webp",
+					"height": 103,
+					"objectKey": "quiet-light/200w-3a719d98eb5f8117448ac5416bde7012f49a6c9633b7ca2ed55faeae42c1fe25.webp",
+					"privacyChecked": true,
+					"rightsEmbedded": true,
+					"sha256": "3a719d98eb5f8117448ac5416bde7012f49a6c9633b7ca2ed55faeae42c1fe25",
+					"watermarkProfile": "none",
+					"width": 200
+				},
+				{
+					"byteSize": 8949,
+					"format": "avif",
+					"height": 206,
+					"objectKey": "quiet-light/400w-4227d24491f5a185eadee2dd40fb745069c1a949e9a1f272a7113ccf9999f8e2.avif",
+					"privacyChecked": true,
+					"rightsEmbedded": true,
+					"sha256": "4227d24491f5a185eadee2dd40fb745069c1a949e9a1f272a7113ccf9999f8e2",
+					"watermarkProfile": "none",
+					"width": 400
+				},
+				{
+					"byteSize": 10004,
+					"format": "webp",
+					"height": 206,
+					"objectKey": "quiet-light/400w-93390714d168de4cf1b3bf4fb5c7850b6da9fbaf34e31805b70e33cf0eadc3ae.webp",
+					"privacyChecked": true,
+					"rightsEmbedded": true,
+					"sha256": "93390714d168de4cf1b3bf4fb5c7850b6da9fbaf34e31805b70e33cf0eadc3ae",
+					"watermarkProfile": "none",
+					"width": 400
+				},
+				{
+					"byteSize": 18668,
+					"format": "avif",
+					"height": 413,
+					"objectKey": "quiet-light/800w-29ecd92ed2e6b9b8e7a28e30c464497492d31cf9f03a80ff38797b63ef7d84ae.avif",
+					"privacyChecked": true,
+					"rightsEmbedded": true,
+					"sha256": "29ecd92ed2e6b9b8e7a28e30c464497492d31cf9f03a80ff38797b63ef7d84ae",
+					"watermarkProfile": "none",
+					"width": 800
+				},
+				{
+					"byteSize": 21034,
+					"format": "webp",
+					"height": 413,
+					"objectKey": "quiet-light/800w-b6a1b0d056cb281e16c4c58b61017190156790cd90730fe1f4feaac9492058ba.webp",
+					"privacyChecked": true,
+					"rightsEmbedded": true,
+					"sha256": "b6a1b0d056cb281e16c4c58b61017190156790cd90730fe1f4feaac9492058ba",
+					"watermarkProfile": "none",
+					"width": 800
+				},
+				{
+					"byteSize": 40294,
+					"format": "avif",
+					"height": 619,
+					"objectKey": "quiet-light/1200w-c5c44e8d50fac4699ab42715b28941931ecb2482166e6b6d4b35712cfc5d1101.avif",
+					"privacyChecked": true,
+					"rightsEmbedded": true,
+					"sha256": "c5c44e8d50fac4699ab42715b28941931ecb2482166e6b6d4b35712cfc5d1101",
+					"watermarkProfile": "watermark",
+					"width": 1200
+				},
+				{
+					"byteSize": 48892,
+					"format": "webp",
+					"height": 619,
+					"objectKey": "quiet-light/1200w-02b6fb8725295bfda902fd2ee136b52c756f823fdf0e036427316fb2423ab658.webp",
+					"privacyChecked": true,
+					"rightsEmbedded": true,
+					"sha256": "02b6fb8725295bfda902fd2ee136b52c756f823fdf0e036427316fb2423ab658",
+					"watermarkProfile": "watermark",
+					"width": 1200
+				},
+				{
+					"byteSize": 64850,
+					"format": "avif",
+					"height": 825,
+					"objectKey": "quiet-light/1600w-87963629c0bd1ec7951b591166669c461ada26e30dc146002a0f37e8aa1fab81.avif",
+					"privacyChecked": true,
+					"rightsEmbedded": true,
+					"sha256": "87963629c0bd1ec7951b591166669c461ada26e30dc146002a0f37e8aa1fab81",
+					"watermarkProfile": "watermark",
+					"width": 1600
+				},
+				{
+					"byteSize": 79328,
+					"format": "webp",
+					"height": 825,
+					"objectKey": "quiet-light/1600w-85ab1826eb1eeeeab49e4a87a0f2efada8f0180fa5c6566e61e90cb5a9bf5765.webp",
+					"privacyChecked": true,
+					"rightsEmbedded": true,
+					"sha256": "85ab1826eb1eeeeab49e4a87a0f2efada8f0180fa5c6566e61e90cb5a9bf5765",
+					"watermarkProfile": "watermark",
+					"width": 1600
+				},
+				{
+					"byteSize": 97840,
+					"format": "avif",
+					"height": 990,
+					"objectKey": "quiet-light/1920w-1662a62e772d8cac50342f0bd2d1677482818f0b8b3080afdb9620fd569e6ffc.avif",
+					"privacyChecked": true,
+					"rightsEmbedded": true,
+					"sha256": "1662a62e772d8cac50342f0bd2d1677482818f0b8b3080afdb9620fd569e6ffc",
+					"watermarkProfile": "watermark",
+					"width": 1920
+				},
+				{
+					"byteSize": 108460,
+					"format": "webp",
+					"height": 990,
+					"objectKey": "quiet-light/1920w-0d18ae96d956a065743fc03001816cedf6313cb7559a00bfcb3b28936473d08b.webp",
+					"privacyChecked": true,
+					"rightsEmbedded": true,
+					"sha256": "0d18ae96d956a065743fc03001816cedf6313cb7559a00bfcb3b28936473d08b",
+					"watermarkProfile": "watermark",
+					"width": 1920
+				}
+			],
+			"dominantColor": "#886858",
+			"masterSha256": "8ef25b4c459309feec4f31edd99666bc7a3fcf5bb699630b320005ba9ec7b816",
+			"orientation": 1,
+			"rightsId": "demo-rights",
+			"sourceHeight": 990,
+			"sourceWidth": 1920
+		},
+		"morning-ridge": {
+			"derivatives": [
+				{
+					"byteSize": 5755,
+					"format": "avif",
+					"height": 94,
+					"objectKey": "morning-ridge/200w-eb5228d5f0cfd9ddd0b94df18d9002fd1e95c03f6f80e110e35f0093cfa53e60.avif",
+					"privacyChecked": true,
+					"rightsEmbedded": true,
+					"sha256": "eb5228d5f0cfd9ddd0b94df18d9002fd1e95c03f6f80e110e35f0093cfa53e60",
+					"watermarkProfile": "none",
+					"width": 200
+				},
+				{
+					"byteSize": 6000,
+					"format": "webp",
+					"height": 94,
+					"objectKey": "morning-ridge/200w-3348f06ca1b3d48f6cc80e18f5ce7d770b81a6e374d03158b26b87de53bf0a05.webp",
+					"privacyChecked": true,
+					"rightsEmbedded": true,
+					"sha256": "3348f06ca1b3d48f6cc80e18f5ce7d770b81a6e374d03158b26b87de53bf0a05",
+					"watermarkProfile": "none",
+					"width": 200
+				},
+				{
+					"byteSize": 9686,
+					"format": "avif",
+					"height": 188,
+					"objectKey": "morning-ridge/400w-278e795e9d9839a9b4f1d37d6452d48ca9ff72ab8deb1aaaa3856511eee99dab.avif",
+					"privacyChecked": true,
+					"rightsEmbedded": true,
+					"sha256": "278e795e9d9839a9b4f1d37d6452d48ca9ff72ab8deb1aaaa3856511eee99dab",
+					"watermarkProfile": "none",
+					"width": 400
+				},
+				{
+					"byteSize": 11370,
+					"format": "webp",
+					"height": 188,
+					"objectKey": "morning-ridge/400w-7bfdfb777ff8d78500d022c543d628cac49c7b66419f6fd6736d901c6d1075e0.webp",
+					"privacyChecked": true,
+					"rightsEmbedded": true,
+					"sha256": "7bfdfb777ff8d78500d022c543d628cac49c7b66419f6fd6736d901c6d1075e0",
+					"watermarkProfile": "none",
+					"width": 400
+				},
+				{
+					"byteSize": 24913,
+					"format": "avif",
+					"height": 377,
+					"objectKey": "morning-ridge/800w-3107a1717ef74eb85e5e5adf49c43272d60d0d8626f6f1a930b933b973583c23.avif",
+					"privacyChecked": true,
+					"rightsEmbedded": true,
+					"sha256": "3107a1717ef74eb85e5e5adf49c43272d60d0d8626f6f1a930b933b973583c23",
+					"watermarkProfile": "none",
+					"width": 800
+				},
+				{
+					"byteSize": 33586,
+					"format": "webp",
+					"height": 377,
+					"objectKey": "morning-ridge/800w-029790aafb4c7dc733a94622ba6080e7a782db1f4d7d38b712f70c7e77333975.webp",
+					"privacyChecked": true,
+					"rightsEmbedded": true,
+					"sha256": "029790aafb4c7dc733a94622ba6080e7a782db1f4d7d38b712f70c7e77333975",
+					"watermarkProfile": "none",
+					"width": 800
+				},
+				{
+					"byteSize": 58666,
+					"format": "avif",
+					"height": 565,
+					"objectKey": "morning-ridge/1200w-4580164c2eda09ae8b559c12f7093a5d355f6e5ee933a0962f4c1498ee61b797.avif",
+					"privacyChecked": true,
+					"rightsEmbedded": true,
+					"sha256": "4580164c2eda09ae8b559c12f7093a5d355f6e5ee933a0962f4c1498ee61b797",
+					"watermarkProfile": "watermark",
+					"width": 1200
+				},
+				{
+					"byteSize": 83538,
+					"format": "webp",
+					"height": 565,
+					"objectKey": "morning-ridge/1200w-0656849475934496e6154338516bd85a9b7c24332d8997f524e427b5cae34560.webp",
+					"privacyChecked": true,
+					"rightsEmbedded": true,
+					"sha256": "0656849475934496e6154338516bd85a9b7c24332d8997f524e427b5cae34560",
+					"watermarkProfile": "watermark",
+					"width": 1200
+				},
+				{
+					"byteSize": 94358,
+					"format": "avif",
+					"height": 753,
+					"objectKey": "morning-ridge/1600w-5406a8f45fe91ecb95da1abfb161363b457a7abb777861320c8bdbb34908e7b1.avif",
+					"privacyChecked": true,
+					"rightsEmbedded": true,
+					"sha256": "5406a8f45fe91ecb95da1abfb161363b457a7abb777861320c8bdbb34908e7b1",
+					"watermarkProfile": "watermark",
+					"width": 1600
+				},
+				{
+					"byteSize": 136658,
+					"format": "webp",
+					"height": 753,
+					"objectKey": "morning-ridge/1600w-04687f020d050895e695f376479f431a1a9b0b2681fc6ce214a48dca141a751f.webp",
+					"privacyChecked": true,
+					"rightsEmbedded": true,
+					"sha256": "04687f020d050895e695f376479f431a1a9b0b2681fc6ce214a48dca141a751f",
+					"watermarkProfile": "watermark",
+					"width": 1600
+				},
+				{
+					"byteSize": 132479,
+					"format": "avif",
+					"height": 904,
+					"objectKey": "morning-ridge/1920w-10f5e85e4da60f990445aed6c5c221fbcafb51af2f5f24514d42f37f1cebbbc5.avif",
+					"privacyChecked": true,
+					"rightsEmbedded": true,
+					"sha256": "10f5e85e4da60f990445aed6c5c221fbcafb51af2f5f24514d42f37f1cebbbc5",
+					"watermarkProfile": "watermark",
+					"width": 1920
+				},
+				{
+					"byteSize": 187698,
+					"format": "webp",
+					"height": 904,
+					"objectKey": "morning-ridge/1920w-6c4bab71ccc56e5b31081855d0bc9fbc8b3ed86e7e09c8baab66998915036e31.webp",
+					"privacyChecked": true,
+					"rightsEmbedded": true,
+					"sha256": "6c4bab71ccc56e5b31081855d0bc9fbc8b3ed86e7e09c8baab66998915036e31",
+					"watermarkProfile": "watermark",
+					"width": 1920
+				}
+			],
+			"dominantColor": "#484858",
+			"masterSha256": "4a57d7d37544824498ed86a6513f3a484b42c8aef76c5392896a00cbd9476f4b",
+			"orientation": 1,
+			"rightsId": "demo-rights",
+			"sourceHeight": 904,
+			"sourceWidth": 1920
+		},
+		"snow-and-stones": {
+			"derivatives": [
+				{
+					"byteSize": 6460,
+					"format": "avif",
+					"height": 94,
+					"objectKey": "snow-and-stones/200w-47a3cf38a55998bbb3e5559fcf819a774bf4091373c2662c4a1bc996b1ad3cf6.avif",
+					"privacyChecked": true,
+					"rightsEmbedded": true,
+					"sha256": "47a3cf38a55998bbb3e5559fcf819a774bf4091373c2662c4a1bc996b1ad3cf6",
+					"watermarkProfile": "none",
+					"width": 200
+				},
+				{
+					"byteSize": 7030,
+					"format": "webp",
+					"height": 94,
+					"objectKey": "snow-and-stones/200w-22e3443a80b84d2d6c84f59ebc2e939645001d1a274e2a1353ee42f368597a3c.webp",
+					"privacyChecked": true,
+					"rightsEmbedded": true,
+					"sha256": "22e3443a80b84d2d6c84f59ebc2e939645001d1a274e2a1353ee42f368597a3c",
+					"watermarkProfile": "none",
+					"width": 200
+				},
+				{
+					"byteSize": 10951,
+					"format": "avif",
+					"height": 188,
+					"objectKey": "snow-and-stones/400w-b8d34cd6fe4c8c72f5c3b2e32941597067e67da17130d7a3ec73fb4d78469f2c.avif",
+					"privacyChecked": true,
+					"rightsEmbedded": true,
+					"sha256": "b8d34cd6fe4c8c72f5c3b2e32941597067e67da17130d7a3ec73fb4d78469f2c",
+					"watermarkProfile": "none",
+					"width": 400
+				},
+				{
+					"byteSize": 13418,
+					"format": "webp",
+					"height": 188,
+					"objectKey": "snow-and-stones/400w-fb95cf36ea18a4e7336e1a96cb2af32fb8dc0e259ca48b9193c55b760d853428.webp",
+					"privacyChecked": true,
+					"rightsEmbedded": true,
+					"sha256": "fb95cf36ea18a4e7336e1a96cb2af32fb8dc0e259ca48b9193c55b760d853428",
+					"watermarkProfile": "none",
+					"width": 400
+				},
+				{
+					"byteSize": 26030,
+					"format": "avif",
+					"height": 377,
+					"objectKey": "snow-and-stones/800w-f53d11b73d2f6ece62d2ec32ce503a445ece8ed682fa78be73946b452381ca43.avif",
+					"privacyChecked": true,
+					"rightsEmbedded": true,
+					"sha256": "f53d11b73d2f6ece62d2ec32ce503a445ece8ed682fa78be73946b452381ca43",
+					"watermarkProfile": "none",
+					"width": 800
+				},
+				{
+					"byteSize": 33578,
+					"format": "webp",
+					"height": 377,
+					"objectKey": "snow-and-stones/800w-219024d776ee9b383ac60722b06dedcdabb61e98b6fbcb232c93261f731ddffc.webp",
+					"privacyChecked": true,
+					"rightsEmbedded": true,
+					"sha256": "219024d776ee9b383ac60722b06dedcdabb61e98b6fbcb232c93261f731ddffc",
+					"watermarkProfile": "none",
+					"width": 800
+				},
+				{
+					"byteSize": 56069,
+					"format": "avif",
+					"height": 566,
+					"objectKey": "snow-and-stones/1200w-7ba93ba3ff5bad4653dbda793e0a1f08df1cfa5f7fd45b7367cbc8853779d852.avif",
+					"privacyChecked": true,
+					"rightsEmbedded": true,
+					"sha256": "7ba93ba3ff5bad4653dbda793e0a1f08df1cfa5f7fd45b7367cbc8853779d852",
+					"watermarkProfile": "watermark",
+					"width": 1200
+				},
+				{
+					"byteSize": 76112,
+					"format": "webp",
+					"height": 566,
+					"objectKey": "snow-and-stones/1200w-88b49e0c32c5fbacf9338a9913bfef6606986616e212ad3f23782a7ce7e1fe5c.webp",
+					"privacyChecked": true,
+					"rightsEmbedded": true,
+					"sha256": "88b49e0c32c5fbacf9338a9913bfef6606986616e212ad3f23782a7ce7e1fe5c",
+					"watermarkProfile": "watermark",
+					"width": 1200
+				},
+				{
+					"byteSize": 86667,
+					"format": "avif",
+					"height": 754,
+					"objectKey": "snow-and-stones/1600w-bc9d5ac751836b4b820703b9d9d2e09e501ced0ce606f565964d35386a725780.avif",
+					"privacyChecked": true,
+					"rightsEmbedded": true,
+					"sha256": "bc9d5ac751836b4b820703b9d9d2e09e501ced0ce606f565964d35386a725780",
+					"watermarkProfile": "watermark",
+					"width": 1600
+				},
+				{
+					"byteSize": 116980,
+					"format": "webp",
+					"height": 754,
+					"objectKey": "snow-and-stones/1600w-bcdbd154e98d187000db078d1539efb5b1c23cca5fb53996d61a78c146b6867e.webp",
+					"privacyChecked": true,
+					"rightsEmbedded": true,
+					"sha256": "bcdbd154e98d187000db078d1539efb5b1c23cca5fb53996d61a78c146b6867e",
+					"watermarkProfile": "watermark",
+					"width": 1600
+				},
+				{
+					"byteSize": 125378,
+					"format": "avif",
+					"height": 905,
+					"objectKey": "snow-and-stones/1920w-85f87534eb8d4d7888b2120bb265515749687b5dce8246fb2be8d97a663d29a3.avif",
+					"privacyChecked": true,
+					"rightsEmbedded": true,
+					"sha256": "85f87534eb8d4d7888b2120bb265515749687b5dce8246fb2be8d97a663d29a3",
+					"watermarkProfile": "watermark",
+					"width": 1920
+				},
+				{
+					"byteSize": 159500,
+					"format": "webp",
+					"height": 905,
+					"objectKey": "snow-and-stones/1920w-c3c27306e0ebc0934c020f8929376efb04e00d8794b8b6353540e2aee7b81534.webp",
+					"privacyChecked": true,
+					"rightsEmbedded": true,
+					"sha256": "c3c27306e0ebc0934c020f8929376efb04e00d8794b8b6353540e2aee7b81534",
+					"watermarkProfile": "watermark",
+					"width": 1920
+				}
+			],
+			"dominantColor": "#6888b8",
+			"masterSha256": "9ed88e083dc9206dd220ae7dbed74888f51db8364c5efa9163b92fc13c8190ab",
+			"orientation": 1,
+			"rightsId": "demo-rights",
+			"sourceHeight": 905,
+			"sourceWidth": 1920
+		},
+		"harbor-sunrise": {
+			"derivatives": [
+				{
+					"byteSize": 6432,
+					"format": "avif",
+					"height": 107,
+					"objectKey": "harbor-sunrise/200w-c0ae44631f0377b54048c9060a2777abc1cc5c8f87a9a90deaebe856a91ee46e.avif",
+					"privacyChecked": true,
+					"rightsEmbedded": true,
+					"sha256": "c0ae44631f0377b54048c9060a2777abc1cc5c8f87a9a90deaebe856a91ee46e",
+					"watermarkProfile": "none",
+					"width": 200
+				},
+				{
+					"byteSize": 7712,
+					"format": "webp",
+					"height": 107,
+					"objectKey": "harbor-sunrise/200w-4a918530e38718457f25c4887089839d46e932f3783649abeddb4ac483114d74.webp",
+					"privacyChecked": true,
+					"rightsEmbedded": true,
+					"sha256": "4a918530e38718457f25c4887089839d46e932f3783649abeddb4ac483114d74",
+					"watermarkProfile": "none",
+					"width": 200
+				},
+				{
+					"byteSize": 11402,
+					"format": "avif",
+					"height": 215,
+					"objectKey": "harbor-sunrise/400w-849715d5d0aeea1ac01d32e4ffde560f77e47b1f2b20461ee9c2909341ed3fa0.avif",
+					"privacyChecked": true,
+					"rightsEmbedded": true,
+					"sha256": "849715d5d0aeea1ac01d32e4ffde560f77e47b1f2b20461ee9c2909341ed3fa0",
+					"watermarkProfile": "none",
+					"width": 400
+				},
+				{
+					"byteSize": 15572,
+					"format": "webp",
+					"height": 215,
+					"objectKey": "harbor-sunrise/400w-780bfe24e2e213880f4d566131bdeddeb024c9a104c4d7ee39e38a59ec09cd72.webp",
+					"privacyChecked": true,
+					"rightsEmbedded": true,
+					"sha256": "780bfe24e2e213880f4d566131bdeddeb024c9a104c4d7ee39e38a59ec09cd72",
+					"watermarkProfile": "none",
+					"width": 400
+				},
+				{
+					"byteSize": 26373,
+					"format": "avif",
+					"height": 430,
+					"objectKey": "harbor-sunrise/800w-e2547d7f5577f4a374f23116be5abb817eb95b549ba68a3a1430d7146ef657b4.avif",
+					"privacyChecked": true,
+					"rightsEmbedded": true,
+					"sha256": "e2547d7f5577f4a374f23116be5abb817eb95b549ba68a3a1430d7146ef657b4",
+					"watermarkProfile": "none",
+					"width": 800
+				},
+				{
+					"byteSize": 37604,
+					"format": "webp",
+					"height": 430,
+					"objectKey": "harbor-sunrise/800w-9ee77a7e7f6e205c0136093f3343f2514b9bf05536cf830b691b66e83b7ea953.webp",
+					"privacyChecked": true,
+					"rightsEmbedded": true,
+					"sha256": "9ee77a7e7f6e205c0136093f3343f2514b9bf05536cf830b691b66e83b7ea953",
+					"watermarkProfile": "none",
+					"width": 800
+				},
+				{
+					"byteSize": 55997,
+					"format": "avif",
+					"height": 644,
+					"objectKey": "harbor-sunrise/1200w-61cbaf456987638b5d9329d3956a83bde5f8f09ccf4a537d11698f264544c03c.avif",
+					"privacyChecked": true,
+					"rightsEmbedded": true,
+					"sha256": "61cbaf456987638b5d9329d3956a83bde5f8f09ccf4a537d11698f264544c03c",
+					"watermarkProfile": "watermark",
+					"width": 1200
+				},
+				{
+					"byteSize": 79344,
+					"format": "webp",
+					"height": 644,
+					"objectKey": "harbor-sunrise/1200w-ac242ba15f2a449f2b757752a737786875f95ff805fe32b96f3ec7b40a681bbf.webp",
+					"privacyChecked": true,
+					"rightsEmbedded": true,
+					"sha256": "ac242ba15f2a449f2b757752a737786875f95ff805fe32b96f3ec7b40a681bbf",
+					"watermarkProfile": "watermark",
+					"width": 1200
+				},
+				{
+					"byteSize": 84637,
+					"format": "avif",
+					"height": 859,
+					"objectKey": "harbor-sunrise/1600w-f5ee41dff867ac1e56ad94f48c66c4f9e6a04bb92ff6b0e0da3126e53e845d42.avif",
+					"privacyChecked": true,
+					"rightsEmbedded": true,
+					"sha256": "f5ee41dff867ac1e56ad94f48c66c4f9e6a04bb92ff6b0e0da3126e53e845d42",
+					"watermarkProfile": "watermark",
+					"width": 1600
+				},
+				{
+					"byteSize": 116692,
+					"format": "webp",
+					"height": 859,
+					"objectKey": "harbor-sunrise/1600w-c1ff2f06e1dff3b60476a96cafddfe284251cf5843e96a752fa4f32473465020.webp",
+					"privacyChecked": true,
+					"rightsEmbedded": true,
+					"sha256": "c1ff2f06e1dff3b60476a96cafddfe284251cf5843e96a752fa4f32473465020",
+					"watermarkProfile": "watermark",
+					"width": 1600
+				},
+				{
+					"byteSize": 121677,
+					"format": "avif",
+					"height": 1031,
+					"objectKey": "harbor-sunrise/1920w-2c3e199e2a9e3f7ff7581c49eb767a0cd7ae8d376f1ac07bedb21d1d25564625.avif",
+					"privacyChecked": true,
+					"rightsEmbedded": true,
+					"sha256": "2c3e199e2a9e3f7ff7581c49eb767a0cd7ae8d376f1ac07bedb21d1d25564625",
+					"watermarkProfile": "watermark",
+					"width": 1920
+				},
+				{
+					"byteSize": 156724,
+					"format": "webp",
+					"height": 1031,
+					"objectKey": "harbor-sunrise/1920w-a37a1291718c83bd081a125b73fa95a396c1f325230171d01dc3f24d3786bfb4.webp",
+					"privacyChecked": true,
+					"rightsEmbedded": true,
+					"sha256": "a37a1291718c83bd081a125b73fa95a396c1f325230171d01dc3f24d3786bfb4",
+					"watermarkProfile": "watermark",
+					"width": 1920
+				}
+			],
+			"dominantColor": "#080808",
+			"masterSha256": "44e144a12e744e80c765e0e6b7699a67561831f90c4af7a1873198cd18e3b914",
+			"orientation": 1,
+			"rightsId": "demo-rights",
+			"sourceHeight": 1031,
+			"sourceWidth": 1920
+		},
+		"prairie-sunrise": {
+			"derivatives": [
+				{
+					"byteSize": 6133,
+					"format": "avif",
+					"height": 83,
+					"objectKey": "prairie-sunrise/200w-e015846c676b435ca40e44014bf241293162208262b0b748e15e8457e2da0ce4.avif",
+					"privacyChecked": true,
+					"rightsEmbedded": true,
+					"sha256": "e015846c676b435ca40e44014bf241293162208262b0b748e15e8457e2da0ce4",
+					"watermarkProfile": "none",
+					"width": 200
+				},
+				{
+					"byteSize": 6980,
+					"format": "webp",
+					"height": 83,
+					"objectKey": "prairie-sunrise/200w-d880772c5993ebe25eed4dd29fc404d8820da98900d233472764b6df720e84b3.webp",
+					"privacyChecked": true,
+					"rightsEmbedded": true,
+					"sha256": "d880772c5993ebe25eed4dd29fc404d8820da98900d233472764b6df720e84b3",
+					"watermarkProfile": "none",
+					"width": 200
+				},
+				{
+					"byteSize": 11045,
+					"format": "avif",
+					"height": 165,
+					"objectKey": "prairie-sunrise/400w-671c8cd802854f8274a52dce898199f0d4bb5902433b3a3afb7de5ab02176f60.avif",
+					"privacyChecked": true,
+					"rightsEmbedded": true,
+					"sha256": "671c8cd802854f8274a52dce898199f0d4bb5902433b3a3afb7de5ab02176f60",
+					"watermarkProfile": "none",
+					"width": 400
+				},
+				{
+					"byteSize": 14606,
+					"format": "webp",
+					"height": 165,
+					"objectKey": "prairie-sunrise/400w-df7bf9615f603a85ef2266fcb7edd230ea3ab91e59010be4ebcb432921e9a8d9.webp",
+					"privacyChecked": true,
+					"rightsEmbedded": true,
+					"sha256": "df7bf9615f603a85ef2266fcb7edd230ea3ab91e59010be4ebcb432921e9a8d9",
+					"watermarkProfile": "none",
+					"width": 400
+				},
+				{
+					"byteSize": 30554,
+					"format": "avif",
+					"height": 330,
+					"objectKey": "prairie-sunrise/800w-e1ec868344ea3a2ad778a965768d84b7e382b89751389dfb2626f20ab8dbeefe.avif",
+					"privacyChecked": true,
+					"rightsEmbedded": true,
+					"sha256": "e1ec868344ea3a2ad778a965768d84b7e382b89751389dfb2626f20ab8dbeefe",
+					"watermarkProfile": "none",
+					"width": 800
+				},
+				{
+					"byteSize": 45780,
+					"format": "webp",
+					"height": 330,
+					"objectKey": "prairie-sunrise/800w-2bacd7922d1d175d70bf2d44999f1ec46b469a91943ac72ea3a332a5f4998019.webp",
+					"privacyChecked": true,
+					"rightsEmbedded": true,
+					"sha256": "2bacd7922d1d175d70bf2d44999f1ec46b469a91943ac72ea3a332a5f4998019",
+					"watermarkProfile": "none",
+					"width": 800
+				},
+				{
+					"byteSize": 76634,
+					"format": "avif",
+					"height": 496,
+					"objectKey": "prairie-sunrise/1200w-f3fbe6ed27eb46e8cb4fce7ba53a7b42e2b227bb29761aba23752a7ce06a02ec.avif",
+					"privacyChecked": true,
+					"rightsEmbedded": true,
+					"sha256": "f3fbe6ed27eb46e8cb4fce7ba53a7b42e2b227bb29761aba23752a7ce06a02ec",
+					"watermarkProfile": "watermark",
+					"width": 1200
+				},
+				{
+					"byteSize": 116430,
+					"format": "webp",
+					"height": 496,
+					"objectKey": "prairie-sunrise/1200w-84b998dff46b3629313c4b1aea718a1a682018e63618507b1c76188883dc65be.webp",
+					"privacyChecked": true,
+					"rightsEmbedded": true,
+					"sha256": "84b998dff46b3629313c4b1aea718a1a682018e63618507b1c76188883dc65be",
+					"watermarkProfile": "watermark",
+					"width": 1200
+				},
+				{
+					"byteSize": 129841,
+					"format": "avif",
+					"height": 661,
+					"objectKey": "prairie-sunrise/1600w-29e8923bd0f58f8a84e9453f4e254688343743c55ba2eb0311631360d704a812.avif",
+					"privacyChecked": true,
+					"rightsEmbedded": true,
+					"sha256": "29e8923bd0f58f8a84e9453f4e254688343743c55ba2eb0311631360d704a812",
+					"watermarkProfile": "watermark",
+					"width": 1600
+				},
+				{
+					"byteSize": 190822,
+					"format": "webp",
+					"height": 661,
+					"objectKey": "prairie-sunrise/1600w-0969c9e0b3cd7e31d61cd18b582e3be66fcf5286743638e32b2e723bf828425c.webp",
+					"privacyChecked": true,
+					"rightsEmbedded": true,
+					"sha256": "0969c9e0b3cd7e31d61cd18b582e3be66fcf5286743638e32b2e723bf828425c",
+					"watermarkProfile": "watermark",
+					"width": 1600
+				},
+				{
+					"byteSize": 198029,
+					"format": "avif",
+					"height": 793,
+					"objectKey": "prairie-sunrise/1920w-018e6c1d5e46ef5f40a15ac4eeb304b4b1f4efb0395e52198d5aac634a38858d.avif",
+					"privacyChecked": true,
+					"rightsEmbedded": true,
+					"sha256": "018e6c1d5e46ef5f40a15ac4eeb304b4b1f4efb0395e52198d5aac634a38858d",
+					"watermarkProfile": "watermark",
+					"width": 1920
+				},
+				{
+					"byteSize": 263906,
+					"format": "webp",
+					"height": 793,
+					"objectKey": "prairie-sunrise/1920w-e7bc78eab66480cd266fff391b79db4c3911983752af1b288d310ad78fb2ed0a.webp",
+					"privacyChecked": true,
+					"rightsEmbedded": true,
+					"sha256": "e7bc78eab66480cd266fff391b79db4c3911983752af1b288d310ad78fb2ed0a",
+					"watermarkProfile": "watermark",
+					"width": 1920
+				}
+			],
+			"dominantColor": "#482828",
+			"masterSha256": "bc70643667b237fc431f989e61c8806265203c64bcd9de8b96a840bf06722cc3",
+			"orientation": 1,
+			"rightsId": "demo-rights",
+			"sourceHeight": 793,
+			"sourceWidth": 1920
+		},
+		"still-symmetry": {
+			"derivatives": [
+				{
+					"byteSize": 5842,
+					"format": "avif",
+					"height": 108,
+					"objectKey": "still-symmetry/200w-3071a3392d4e2fd5cabf8d8cf11a0a8d927cbaedaee24267847f3d6b5887d7ec.avif",
+					"privacyChecked": true,
+					"rightsEmbedded": true,
+					"sha256": "3071a3392d4e2fd5cabf8d8cf11a0a8d927cbaedaee24267847f3d6b5887d7ec",
+					"watermarkProfile": "none",
+					"width": 200
+				},
+				{
+					"byteSize": 6214,
+					"format": "webp",
+					"height": 108,
+					"objectKey": "still-symmetry/200w-d32a576a518f5eaa821318fd76be2da2feae45a67453c23d33e880a5dbd3d233.webp",
+					"privacyChecked": true,
+					"rightsEmbedded": true,
+					"sha256": "d32a576a518f5eaa821318fd76be2da2feae45a67453c23d33e880a5dbd3d233",
+					"watermarkProfile": "none",
+					"width": 200
+				},
+				{
+					"byteSize": 8818,
+					"format": "avif",
+					"height": 217,
+					"objectKey": "still-symmetry/400w-cda523923def3612b5651cdad2e9c2b45cc1aec059bbd35dcc69a0ad7052dd45.avif",
+					"privacyChecked": true,
+					"rightsEmbedded": true,
+					"sha256": "cda523923def3612b5651cdad2e9c2b45cc1aec059bbd35dcc69a0ad7052dd45",
+					"watermarkProfile": "none",
+					"width": 400
+				},
+				{
+					"byteSize": 9968,
+					"format": "webp",
+					"height": 217,
+					"objectKey": "still-symmetry/400w-c2402b6666b43a2bb91ce757d292698bc451ae75bc32b28e7d2cfe3cf98e56e5.webp",
+					"privacyChecked": true,
+					"rightsEmbedded": true,
+					"sha256": "c2402b6666b43a2bb91ce757d292698bc451ae75bc32b28e7d2cfe3cf98e56e5",
+					"watermarkProfile": "none",
+					"width": 400
+				},
+				{
+					"byteSize": 18299,
+					"format": "avif",
+					"height": 434,
+					"objectKey": "still-symmetry/800w-69bf5cff6ece58e910bfadd7887efee60d8387583a03799556317913b4df99f3.avif",
+					"privacyChecked": true,
+					"rightsEmbedded": true,
+					"sha256": "69bf5cff6ece58e910bfadd7887efee60d8387583a03799556317913b4df99f3",
+					"watermarkProfile": "none",
+					"width": 800
+				},
+				{
+					"byteSize": 21020,
+					"format": "webp",
+					"height": 434,
+					"objectKey": "still-symmetry/800w-e71733dad6519acc44fbe15cf5af8669ac74741a63e325b3bd49e19e2f1524a9.webp",
+					"privacyChecked": true,
+					"rightsEmbedded": true,
+					"sha256": "e71733dad6519acc44fbe15cf5af8669ac74741a63e325b3bd49e19e2f1524a9",
+					"watermarkProfile": "none",
+					"width": 800
+				},
+				{
+					"byteSize": 37080,
+					"format": "avif",
+					"height": 651,
+					"objectKey": "still-symmetry/1200w-aaf708e10c1d51199214906dd689a0d5f0c70cdfa3680b078c8da88f08788ead.avif",
+					"privacyChecked": true,
+					"rightsEmbedded": true,
+					"sha256": "aaf708e10c1d51199214906dd689a0d5f0c70cdfa3680b078c8da88f08788ead",
+					"watermarkProfile": "watermark",
+					"width": 1200
+				},
+				{
+					"byteSize": 44216,
+					"format": "webp",
+					"height": 651,
+					"objectKey": "still-symmetry/1200w-88a67f0f0fc834a6d5fb4b400ac35534cb5ede17b26b51dfbcc59242cb5ea1cd.webp",
+					"privacyChecked": true,
+					"rightsEmbedded": true,
+					"sha256": "88a67f0f0fc834a6d5fb4b400ac35534cb5ede17b26b51dfbcc59242cb5ea1cd",
+					"watermarkProfile": "watermark",
+					"width": 1200
+				},
+				{
+					"byteSize": 54847,
+					"format": "avif",
+					"height": 868,
+					"objectKey": "still-symmetry/1600w-871a73f2a172d411291d6dc8bc1a7d015c5ac76ef7b3ead89b7ccc69dc938614.avif",
+					"privacyChecked": true,
+					"rightsEmbedded": true,
+					"sha256": "871a73f2a172d411291d6dc8bc1a7d015c5ac76ef7b3ead89b7ccc69dc938614",
+					"watermarkProfile": "watermark",
+					"width": 1600
+				},
+				{
+					"byteSize": 64780,
+					"format": "webp",
+					"height": 868,
+					"objectKey": "still-symmetry/1600w-c6b5bf6cb861b5fb2cdadd0f5d2082857ec63086e0b533255abf61d1c069b8b1.webp",
+					"privacyChecked": true,
+					"rightsEmbedded": true,
+					"sha256": "c6b5bf6cb861b5fb2cdadd0f5d2082857ec63086e0b533255abf61d1c069b8b1",
+					"watermarkProfile": "watermark",
+					"width": 1600
+				},
+				{
+					"byteSize": 76840,
+					"format": "avif",
+					"height": 1041,
+					"objectKey": "still-symmetry/1920w-8edb13be4d1c3045f1c562777b0a1052c03b0f22f7de990018c666dae5d385c2.avif",
+					"privacyChecked": true,
+					"rightsEmbedded": true,
+					"sha256": "8edb13be4d1c3045f1c562777b0a1052c03b0f22f7de990018c666dae5d385c2",
+					"watermarkProfile": "watermark",
+					"width": 1920
+				},
+				{
+					"byteSize": 86228,
+					"format": "webp",
+					"height": 1041,
+					"objectKey": "still-symmetry/1920w-62a87de5724ba8c14a71ba3b9e3cc6162577c6df2b5cce0cd3e0e9047a37c0ce.webp",
+					"privacyChecked": true,
+					"rightsEmbedded": true,
+					"sha256": "62a87de5724ba8c14a71ba3b9e3cc6162577c6df2b5cce0cd3e0e9047a37c0ce",
+					"watermarkProfile": "watermark",
+					"width": 1920
+				}
+			],
+			"dominantColor": "#080818",
+			"masterSha256": "440502b57f03a92e4c7f8c064d45964e06d671bfdeb67c3612bcd67de6e2f624",
+			"orientation": 1,
+			"rightsId": "demo-rights",
+			"sourceHeight": 1041,
+			"sourceWidth": 1920
+		},
+		"stone-gaze": {
+			"derivatives": [
+				{
+					"byteSize": 5887,
+					"format": "avif",
+					"height": 105,
+					"objectKey": "stone-gaze/200w-a5b546dd1e67346b3a4c978e252eb1b05d5fb7b912c64ed20d4f144b0eea67e4.avif",
+					"privacyChecked": true,
+					"rightsEmbedded": true,
+					"sha256": "a5b546dd1e67346b3a4c978e252eb1b05d5fb7b912c64ed20d4f144b0eea67e4",
+					"watermarkProfile": "none",
+					"width": 200
+				},
+				{
+					"byteSize": 6346,
+					"format": "webp",
+					"height": 105,
+					"objectKey": "stone-gaze/200w-87e6bfac74fc88f789d8b5bc938e21a9f8f4044643fe6744400de6b7fde656e2.webp",
+					"privacyChecked": true,
+					"rightsEmbedded": true,
+					"sha256": "87e6bfac74fc88f789d8b5bc938e21a9f8f4044643fe6744400de6b7fde656e2",
+					"watermarkProfile": "none",
+					"width": 200
+				},
+				{
+					"byteSize": 9420,
+					"format": "avif",
+					"height": 210,
+					"objectKey": "stone-gaze/400w-928a3544c490993e12ab066f32adfa615d1bfa029e898ff914c8acac11c891c3.avif",
+					"privacyChecked": true,
+					"rightsEmbedded": true,
+					"sha256": "928a3544c490993e12ab066f32adfa615d1bfa029e898ff914c8acac11c891c3",
+					"watermarkProfile": "none",
+					"width": 400
+				},
+				{
+					"byteSize": 11506,
+					"format": "webp",
+					"height": 210,
+					"objectKey": "stone-gaze/400w-245f5a4f8210db42ba838b6bbe0bbbfe372cbe23c93a5810d8a3978fd8b14d15.webp",
+					"privacyChecked": true,
+					"rightsEmbedded": true,
+					"sha256": "245f5a4f8210db42ba838b6bbe0bbbfe372cbe23c93a5810d8a3978fd8b14d15",
+					"watermarkProfile": "none",
+					"width": 400
+				},
+				{
+					"byteSize": 22763,
+					"format": "avif",
+					"height": 421,
+					"objectKey": "stone-gaze/800w-bd1f2ab399a7c6dd622570c6ad7a337445aed20fb7217460812661d61d45bd97.avif",
+					"privacyChecked": true,
+					"rightsEmbedded": true,
+					"sha256": "bd1f2ab399a7c6dd622570c6ad7a337445aed20fb7217460812661d61d45bd97",
+					"watermarkProfile": "none",
+					"width": 800
+				},
+				{
+					"byteSize": 31002,
+					"format": "webp",
+					"height": 421,
+					"objectKey": "stone-gaze/800w-0debe2a75d366f32724f861f60ec00150b020ab986ff9eae6e7d382463464236.webp",
+					"privacyChecked": true,
+					"rightsEmbedded": true,
+					"sha256": "0debe2a75d366f32724f861f60ec00150b020ab986ff9eae6e7d382463464236",
+					"watermarkProfile": "none",
+					"width": 800
+				},
+				{
+					"byteSize": 60055,
+					"format": "avif",
+					"height": 631,
+					"objectKey": "stone-gaze/1200w-be04e2cd1ec3bad9d897ab18061aa8b1dc1654f1ce4d6ab194463b65dd2786bd.avif",
+					"privacyChecked": true,
+					"rightsEmbedded": true,
+					"sha256": "be04e2cd1ec3bad9d897ab18061aa8b1dc1654f1ce4d6ab194463b65dd2786bd",
+					"watermarkProfile": "watermark",
+					"width": 1200
+				},
+				{
+					"byteSize": 91334,
+					"format": "webp",
+					"height": 631,
+					"objectKey": "stone-gaze/1200w-6d7694d76e2ff00b7598be3e19992454df438c18a7d905fb864e9a6f0c8c370b.webp",
+					"privacyChecked": true,
+					"rightsEmbedded": true,
+					"sha256": "6d7694d76e2ff00b7598be3e19992454df438c18a7d905fb864e9a6f0c8c370b",
+					"watermarkProfile": "watermark",
+					"width": 1200
+				},
+				{
+					"byteSize": 107278,
+					"format": "avif",
+					"height": 842,
+					"objectKey": "stone-gaze/1600w-f5ddfb7d86d4bae11830e9b3e6783e6c95ea8e1cc5f9ac133b81421df9448f72.avif",
+					"privacyChecked": true,
+					"rightsEmbedded": true,
+					"sha256": "f5ddfb7d86d4bae11830e9b3e6783e6c95ea8e1cc5f9ac133b81421df9448f72",
+					"watermarkProfile": "watermark",
+					"width": 1600
+				},
+				{
+					"byteSize": 157982,
+					"format": "webp",
+					"height": 842,
+					"objectKey": "stone-gaze/1600w-f6bae5ba847a6cb15faffec5bf5452f198a182e69744221adb6b36a149760bb6.webp",
+					"privacyChecked": true,
+					"rightsEmbedded": true,
+					"sha256": "f6bae5ba847a6cb15faffec5bf5452f198a182e69744221adb6b36a149760bb6",
+					"watermarkProfile": "watermark",
+					"width": 1600
+				},
+				{
+					"byteSize": 163871,
+					"format": "avif",
+					"height": 1010,
+					"objectKey": "stone-gaze/1920w-90e1dc1bbeb1d95d3e8538a3825d63c10cf82d036edee2614f6848fe28206331.avif",
+					"privacyChecked": true,
+					"rightsEmbedded": true,
+					"sha256": "90e1dc1bbeb1d95d3e8538a3825d63c10cf82d036edee2614f6848fe28206331",
+					"watermarkProfile": "watermark",
+					"width": 1920
+				},
+				{
+					"byteSize": 218266,
+					"format": "webp",
+					"height": 1010,
+					"objectKey": "stone-gaze/1920w-b3bb282256041feb3490919495424a7930ca24e5512dbfba497e020c603d5dac.webp",
+					"privacyChecked": true,
+					"rightsEmbedded": true,
+					"sha256": "b3bb282256041feb3490919495424a7930ca24e5512dbfba497e020c603d5dac",
+					"watermarkProfile": "watermark",
+					"width": 1920
+				}
+			],
+			"dominantColor": "#684848",
+			"masterSha256": "2498d46e3d677774f1c06fec49cb06fce3572aa83171025823d20d676c109875",
+			"orientation": 1,
+			"rightsId": "demo-rights",
+			"sourceHeight": 1010,
+			"sourceWidth": 1920
+		}
+	},
+	"schemaVersion": 3
+}

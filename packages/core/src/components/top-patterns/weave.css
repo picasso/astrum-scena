@@ -1,0 +1,30 @@
+@import '../../styles/layers.css';
+
+@layer components {
+	.top-section--pattern-weave .top-section__pattern::after {
+		background:
+			linear-gradient(
+				45deg,
+				color-mix(in srgb, var(--color-on-image) 10%, transparent) 12%,
+				transparent 0,
+				transparent 88%,
+				color-mix(in srgb, var(--color-on-image) 10%, transparent) 0
+			),
+			linear-gradient(
+				135deg,
+				transparent 37%,
+				color-mix(in srgb, var(--color-shade) 15%, transparent) 0,
+				color-mix(in srgb, var(--color-shade) 15%, transparent) 63%,
+				transparent 0
+			),
+			linear-gradient(
+					45deg,
+					transparent 37%,
+					color-mix(in srgb, var(--color-on-image) 10%, transparent) 0,
+					color-mix(in srgb, var(--color-on-image) 10%, transparent) 63%,
+					transparent 0
+				)
+				color-mix(in srgb, var(--color-shade) 20%, transparent);
+		background-size: 5px 5px;
+	}
+}

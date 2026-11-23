@@ -1,0 +1,7 @@
+/* Swiper loads as a page chunk, possibly before global.css, so it declares the layer order itself. */
+@import '../layers.css';
+
+@import 'swiper/css' layer(vendor);
+@import 'swiper/css/effect-fade' layer(vendor);
+@import 'swiper/css/navigation' layer(vendor);
+@import 'swiper/css/pagination' layer(vendor);

@@ -1,0 +1,199 @@
+@import '../styles/layers.css';
+
+@layer components {
+	/* The surface is full-bleed while the content is centered, like the legacy site. The container width
+	 * comes from the page width modifier below, so the menu aligns with this page's <main>. */
+	.site-header {
+		background: var(--color-surface);
+	}
+
+	/* Below the menu breakpoint navigation moves to the overlay and the logo to the banner. The overlay
+	 * is a sibling, so hiding the bar leaves its fixed toggle and panel alone. */
+	@media (max-width: 1023px) {
+		.site-header {
+			display: none;
+		}
+	}
+
+	/* The bar is hidden below lg, so sticky mode only applies on desktop. The sentinel is the 1px anchor,
+	 * its layout space cancelled by a negative margin, that IntersectionObserver watches to detect the
+	 * stuck state. */
+	.site-header--sticky {
+		position: sticky;
+		top: 0;
+		z-index: 30;
+		box-shadow: 0 2px 6px color-mix(in srgb, var(--color-shade) 25%, transparent);
+	}
+
+	.site-header__sentinel {
+		/* 1px, not 0: some engines do not track a zero-height IntersectionObserver target. */
+		height: 1px;
+		margin-bottom: -1px;
+	}
+
+	/* --sticky-opacity comes inline from menu.stickyFade; data-stuck is set by the script in
+	 * site-header.astro. */
+	.site-header--fade {
+		transition: opacity var(--duration-base) var(--ease-out);
+	}
+
+	.site-header--fade[data-stuck] {
+		opacity: var(--sticky-opacity, 0.7);
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.site-header--fade {
+			transition: none;
+		}
+	}
+
+	.site-header__inner {
+		margin-inline: auto;
+	}
+
+	/* The logo is inlined as <svg> so its currentColor parts follow --color-logo. --logo-scale comes
+	 * inline from menu.logoSize; round() keeps the height in whole pixels, as the owner requires. The
+	 * negative margin lets a larger logo use the header padding. */
+	.site-header__logo {
+		color: var(--color-logo);
+		margin-block: -0.5rem;
+		--logo-base: 3rem;
+	}
+
+	@media (min-width: 1024px) and (max-width: 1280px) {
+		.site-header__logo {
+			--logo-base: 2.5rem;
+		}
+	}
+
+	.site-header__logo svg {
+		display: block;
+		width: auto;
+		height: round(calc(var(--logo-base) * var(--logo-scale, 1)), 1px);
+	}
+
+	/* The section icon uses the same height as the logo so the slot does not jump on swap. */
+	.site-header__icon {
+		display: inline-flex;
+		color: var(--color-accent);
+	}
+
+	/* Swap mode stacks icon and logo in one grid cell. The shift uses `left` in percent of the container,
+	 * not the element, so the slide spans the whole logo zone and the fade finishes during it. No
+	 * overflow:hidden, matching the legacy site: a local clip shows a visible seam where the swapping
+	 * elements vanish, and the root `overflow-x: clip` already cuts the overflow. */
+	.site-header__logo--swap {
+		display: grid;
+		align-items: center;
+		/* Timings match the legacy site. */
+		--menu-swap-ease-icon: ease-in;
+		--menu-swap-ease-logo: cubic-bezier(0.33, 0, 0.2, 1);
+		--menu-swap-dur-in: 1s;
+		--menu-swap-dur-out: 0.6s;
+		--menu-swap-delay-icon-out: 2s;
+		--menu-swap-delay-logo-in: 2.6s;
+		--menu-swap-delay-logo-out: 0.7s;
+		--menu-swap-delay-icon-in: 1s;
+	}
+
+	.site-header__logo--swap > .site-header__icon,
+	.site-header__logo--swap > .site-header__brand {
+		grid-area: 1 / 1;
+		position: relative;
+	}
+
+	/* The resting state carries the shorter timings for the transition back to the top. */
+	.site-header__logo--swap > .site-header__icon {
+		opacity: 1;
+		left: 0;
+		transition:
+			left var(--menu-swap-dur-out) var(--menu-swap-ease-icon) var(--menu-swap-delay-icon-in),
+			opacity var(--menu-swap-dur-out) var(--menu-swap-ease-icon)
+				var(--menu-swap-delay-icon-in);
+	}
+
+	.site-header__logo--swap > .site-header__brand {
+		opacity: 0;
+		left: -100%;
+		transition:
+			left var(--menu-swap-dur-out) var(--menu-swap-ease-logo) var(--menu-swap-delay-logo-out),
+			opacity var(--menu-swap-dur-out) var(--menu-swap-ease-logo)
+				var(--menu-swap-delay-logo-out);
+	}
+
+	/* The stuck state carries longer delays so a short scroll does not flicker the swap. */
+	.site-header[data-stuck] .site-header__logo--swap > .site-header__icon {
+		opacity: 0;
+		left: 200%;
+		transition:
+			left var(--menu-swap-dur-in) var(--menu-swap-ease-icon) var(--menu-swap-delay-icon-out),
+			opacity var(--menu-swap-dur-in) var(--menu-swap-ease-icon)
+				var(--menu-swap-delay-icon-out);
+	}
+
+	.site-header[data-stuck] .site-header__logo--swap > .site-header__brand {
+		opacity: 1;
+		left: 0;
+		transition:
+			left var(--menu-swap-dur-in) var(--menu-swap-ease-logo) var(--menu-swap-delay-logo-in),
+			opacity var(--menu-swap-dur-in) var(--menu-swap-ease-logo)
+				var(--menu-swap-delay-logo-in);
+	}
+
+	/* The stuck selectors repeat the stuck rules' specificity, so the reset wins there too. */
+	@media (prefers-reduced-motion: reduce) {
+		.site-header__logo--swap > .site-header__icon,
+		.site-header__logo--swap > .site-header__brand,
+		.site-header[data-stuck] .site-header__logo--swap > .site-header__icon,
+		.site-header[data-stuck] .site-header__logo--swap > .site-header__brand {
+			transition: none;
+			left: 0;
+		}
+	}
+
+	/* One modifier per MENU_WIDTH_LADDER step; resolveMenuWidth picks it, so no exceptions here. */
+	.site-header__inner--prose {
+		max-width: var(--container-prose);
+	}
+
+	.site-header__inner--medium {
+		max-width: var(--container-medium);
+	}
+
+	.site-header__inner--standard {
+		max-width: var(--container-standard);
+	}
+
+	.site-header__inner--gallery {
+		max-width: var(--container-gallery);
+	}
+
+	.site-header__inner--screen {
+		max-width: none;
+	}
+
+	@supports (animation-timeline: scroll()) {
+		@media (prefers-reduced-motion: no-preference) {
+			.scroll-fade-logo {
+				animation: scroll-fade-out linear both;
+				animation-timeline: scroll(root);
+				animation-range: 0 240px;
+			}
+
+			@keyframes scroll-fade-out {
+				to {
+					opacity: 0.2;
+				}
+			}
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.scroll-fade-logo {
+			animation: none !important;
+			transition: none !important;
+			transform: none !important;
+			opacity: 1 !important;
+		}
+	}
+}

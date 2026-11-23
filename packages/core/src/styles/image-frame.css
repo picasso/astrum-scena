@@ -1,0 +1,44 @@
+/*
+ * Shared image frame scale (Wrap Around, the Contacts image); widths and radius match the legacy site.
+ * The default frame color is the theme border; the alt one is declared in the theme.
+ *
+ * Modifiers go on the container; the nested `.image-frame__target` (usually `<img>`) draws the frame.
+ */
+@import './layers.css';
+
+@layer components {
+	:root {
+		--color-image-border: var(--color-border);
+		--image-frame-radius-base: 3px;
+	}
+
+	.image-frame--none {
+		--image-frame-width: 0px;
+		--image-frame-radius: 0px;
+	}
+	.image-frame--thin {
+		--image-frame-width: 1px;
+		--image-frame-radius: var(--image-frame-radius-base);
+	}
+	.image-frame--medium {
+		--image-frame-width: 3px;
+		--image-frame-radius: var(--image-frame-radius-base);
+	}
+	.image-frame--thick {
+		--image-frame-width: 5px;
+		--image-frame-radius: var(--image-frame-radius-base);
+	}
+
+	.image-frame--default {
+		--image-frame-color: var(--color-image-border);
+	}
+	.image-frame--alt {
+		--image-frame-color: var(--color-image-border-alt);
+	}
+
+	.image-frame__target {
+		border: var(--image-frame-width, 5px) solid
+			var(--image-frame-color, var(--color-image-border));
+		border-radius: var(--image-frame-radius, var(--image-frame-radius-base));
+	}
+}

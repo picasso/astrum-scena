@@ -1,0 +1,25 @@
+@import '../../../styles/layers.css';
+
+@layer components {
+	/* photo-item.astro sets flex-grow ∝ aspect-ratio and flex-basis ∝ aspect-ratio × row height inline per
+	 * photo, which gives every photo in a row the same height without cropping. The `::after` with a large
+	 * flex-grow takes the slack only on the incomplete last row, so its photos keep the target height. */
+	.album-justified {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--justified-gap, 12px);
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	.album-justified::after {
+		content: '';
+		flex-grow: 1000000;
+		flex-basis: 0;
+	}
+
+	.album-justified__item {
+		min-width: 0;
+	}
+}

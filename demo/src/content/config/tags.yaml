@@ -1,0 +1,12 @@
+schemaVersion: 1
+tags:
+    - id: dusk
+      label:
+          en: Dusk
+          ru: Сумерки
+      kind: moment
+    - id: geometry
+      label:
+          en: Geometry
+          ru: Геометрия
+      kind: motif

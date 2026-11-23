@@ -1,0 +1,70 @@
+---
+// effects load first: the reduced-motion overrides in site-nav.css win over them by source order
+import 'virtual:variant-css/menu-effect'
+import './site-nav.css'
+
+import { localizedLabel } from '../config/localized-label'
+import { type MenuAnimation } from '../config/menu'
+import { site } from '../config/site'
+import { isActive, isCurrentSection, type Lang, localizedHref } from '../i18n/ui'
+
+type Props = {
+	lang: Lang
+	// applies only to the desktop navbar, not the overlay menu
+	animate: MenuAnimation
+}
+
+const { lang, animate } = Astro.props
+const pathname = Astro.url.pathname
+const animated = animate !== 'off'
+---
+
+{
+	/* styles live in site-nav.css and each hover effect in menu-effects/<name>.css, not a scoped <style>:
+    the enum↔CSS contract test reads those files. `hidden lg:block` only splits the inline navbar from
+    the overlay at 1024px.
+    A non-`off` effect adds `anim-links` plus its effect class; `off` never gets a class. */
+}
+<nav
+	aria-label="Primary"
+	class:list={['hidden', 'lg:block', animated && ['anim-links', `anim-${animate}`]]}
+>
+	<ul class="top-menu">
+		{
+			site.menu.items.map((item) => {
+				// only the exact URL gets aria-current="page"; nested routes still mark the section visually
+				const exact = isActive(pathname, lang, item.segment)
+				const current = isCurrentSection(pathname, lang, item.segment)
+				const label = localizedLabel(item.label, lang)
+				return (
+					<li>
+						<a
+							class="top-menu-link"
+							href={localizedHref(lang, item.segment)}
+							aria-current={exact ? 'page' : undefined}
+							data-current-section={current ? '' : undefined}
+							aria-label={animated ? label : undefined}
+						>
+							{
+								// with an effect the visible copy sits in an aria-hidden `span[data-hover]`
+								// and the link's `aria-label` is the single accessible name, so screen
+								// readers and find-in-page see no duplicate
+								animated ? (
+									<span
+										class="top-menu-label"
+										data-hover={label}
+										aria-hidden="true"
+									>
+										{label}
+									</span>
+								) : (
+									label
+								)
+							}
+						</a>
+					</li>
+				)
+			})
+		}
+	</ul>
+</nav>

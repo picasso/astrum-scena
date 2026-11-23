@@ -1,0 +1,21 @@
+@import '../styles/layers.css';
+
+@layer components {
+	/* block removes the SVG baseline gap that made the glyph look raised. Only on icons visible by
+	 * default (sun in dark, duo always): a shared rule would compete with the moon's `display: none`
+	 * and dark would show both icons. */
+	.theme-toggle__icon--sun,
+	.theme-toggle__icon--duo {
+		display: block;
+	}
+
+	.theme-toggle__icon--moon {
+		display: none;
+	}
+	[data-theme='light'] .theme-toggle__icon--sun {
+		display: none;
+	}
+	[data-theme='light'] .theme-toggle__icon--moon {
+		display: block;
+	}
+}

@@ -1,0 +1,82 @@
+---
+import 'virtual:variant-css/album-layout'
+
+import { site } from '../../config/site.ts'
+import { useTranslations } from '../../i18n/ui.ts'
+import type { Locale } from '../../lib/content/schemas.ts'
+import type { ImageCatalog } from '../../lib/images/catalog.ts'
+import { isCropLayout, resolveAlbumLayout } from '../../lib/portfolio/album-layout.ts'
+import type { AlbumEntry, PhotoEntry } from '../../lib/portfolio/publication.ts'
+import { resolveAlbumPhotos } from '../../lib/portfolio/publication.ts'
+import { albumGridSizes } from '../../lib/portfolio/sizes.ts'
+import PhotoItem from './photo-item.astro'
+
+// the album page grid for every `album.layout` mode, so routes never branch on it: photo order is
+// album.photoIds (an unknown or draft photo fails the build) and stays the DOM, keyboard and viewer
+// order. Geometry is CSS only; PhotoSwipe mounts on the shared `.album-grid` class in every mode
+type Props = {
+	catalog: ImageCatalog
+	album: AlbumEntry
+	photosById: ReadonlyMap<string, PhotoEntry>
+	locale: Locale
+}
+
+// the album's own `layout` wins over the site's `album.layout`
+const { catalog, album, photosById, locale } = Astro.props
+const resolved = resolveAlbumLayout(site.album, album.data.layout)
+
+const photos = resolveAlbumPhotos(album, photosById)
+const t = useTranslations(locale)
+// the client has no site config, so viewer options travel as JSON on the container; crop modes open
+// with a fade because zooming a natural-aspect slide out of a cropped thumbnail jumps
+const viewerOptions = JSON.stringify(
+	isCropLayout(resolved.layout) ? { ...site.viewer, showHideAnimationType: 'fade' } : site.viewer,
+)
+
+// album-intro's mosaic shares albumGridSizes so both pick the same file; the exhaustive switch makes
+// a new ResolvedAlbumLayout mode without a branch here a compile error, not an empty grid
+const sizes = albumGridSizes(resolved)
+let style: string
+switch (resolved.layout) {
+	case 'justified':
+		style = `--justified-row-height:${resolved.settings.targetRowHeight}px; --justified-gap:${resolved.settings.gap}px;`
+		break
+	case 'masonry': {
+		const settings = resolved.settings
+		style = `--album-col-width:${settings.minColumnWidth}px; --album-max-columns:${settings.maxColumns}; --album-gap:${settings.gap}px;`
+		break
+	}
+	case 'square':
+	case 'rect': {
+		const settings = resolved.settings
+		style = `--album-columns:${settings.columns}; --album-min-columns:${settings.minColumns}; --album-gap:${settings.gap}px;`
+		break
+	}
+	default: {
+		const unreachable: never = resolved
+		throw new Error(`album layout "${String(unreachable)}" has no renderer`)
+	}
+}
+---
+
+<ul
+	class:list={['album-grid', `album-${resolved.layout}`]}
+	data-copyright={catalog.copyright}
+	data-more-label={t('viewer.moreInfo')}
+	data-fullscreen-label={t('viewer.fullscreen')}
+	data-pswp-options={viewerOptions}
+	style={style}
+>
+	{
+		photos.map((photo) => (
+			<PhotoItem
+				catalog={catalog}
+				albumId={album.id}
+				photo={photo}
+				locale={locale}
+				layout={resolved.layout}
+				sizes={sizes}
+			/>
+		))
+	}
+</ul>

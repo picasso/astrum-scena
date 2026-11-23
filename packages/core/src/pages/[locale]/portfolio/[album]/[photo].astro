@@ -1,0 +1,170 @@
+---
+import '../../../../components/portfolio/album-photo.css'
+import '../../../../styles/pages/photo.css'
+
+import PhotoSwipeLoader from '../../../../components/portfolio/photoswipe-loader.astro'
+import ResponsivePicture from '../../../../components/portfolio/responsive-picture.astro'
+import type { Locale } from '../../../../config/locale-schema.ts'
+import { site } from '../../../../config/site.ts'
+import { useTranslations } from '../../../../i18n/ui.ts'
+import Base from '../../../../layouts/base.astro'
+import { albumHref, localizedStaticPaths, photoHref } from '../../../../lib/content/routes.ts'
+import { photoStaticPaths } from '../../../../lib/portfolio/build-data.ts'
+import { footerPromoContext } from '../../../../lib/portfolio/footer-promo-build.ts'
+import { buildLocaleMeta, unlistedRobots } from '../../../../lib/portfolio/page-meta.ts'
+import { buildPhotoPageModel } from '../../../../lib/portfolio/photo-page.ts'
+import { photoDescription } from '../../../../lib/seo/description.ts'
+
+// a photo page lives inside an album (`/{locale}/portfolio/{album}/{photo}/`), so the related grid
+// and back link point to that album; it follows the legacy `single-attachment.php`
+export async function getStaticPaths() {
+	return localizedStaticPaths(site.content.locales, await photoStaticPaths())
+}
+
+type Props = { locale: Locale }
+
+const { locale } = Astro.props
+const t = useTranslations(locale)
+const { album: albumId, photo: photoId } = Astro.params
+
+const model = await buildPhotoPageModel(
+	albumId!,
+	photoId!,
+	locale,
+	albumHref(albumId!, locale),
+	(id) => photoHref(albumId!, id, locale),
+	site,
+)
+
+const meta = buildLocaleMeta(Astro.url.pathname, Astro.site!.href, site.content.locales)
+const showStrip = site.photo.dominantStrip === 'on'
+const showRelated = site.photo.showRelated === 'on' && model.related.length > 0
+const hasMeta = model.placeHierarchy.length > 0 || model.tags.length > 0 || Boolean(model.captured)
+const footerPromo = footerPromoContext(`photo:${albumId}/${photoId}`, model.albumPhotoIds)
+---
+
+<Base
+	footerPromo={footerPromo}
+	description={photoDescription(model)}
+	title={model.title}
+	canonical={meta.canonical}
+	robots={unlistedRobots(model.unlisted)}
+	alternates={meta.alternates}
+	width="gallery"
+	dominantStrip={showStrip ? model.dominantColor : undefined}
+>
+	<article class="photo">
+		<div class="photo__layout">
+			<figure class="photo__figure">
+				{/* without JS the link opens the image itself */}
+				<div
+					class="photo__viewer"
+					data-copyright={model.copyright}
+					data-fullscreen-label={t('viewer.fullscreen')}
+					data-pswp-options={model.viewerOptions}
+				>
+					<a
+						class="album-photo"
+						href={model.primaryViewer.src}
+						data-pswp-width={model.primaryViewer.width}
+						data-pswp-height={model.primaryViewer.height}
+						data-pswp-src={model.primaryViewer.src}
+						data-pswp-srcset={model.primaryViewer.srcset}
+						data-pswp-caption={model.primaryViewer.caption}
+					>
+						<ResponsivePicture
+							model={model.primaryModel}
+							class="photo__media"
+							imgClass="photo__img"
+							loading="eager"
+							fetchpriority="high"
+						/>
+					</a>
+				</div>
+				{model.caption && <figcaption class="photo__caption">{model.caption}</figcaption>}
+			</figure>
+
+			<div class="photo__text">
+				<a class="photo__backlink" href={model.albumHref}>
+					<svg
+						class="photo__backlink-icon"
+						viewBox="0 0 48 48"
+						fill="currentColor"
+						aria-hidden="true"
+					>
+						<path
+							d="M26 40c-1.604 0-3.11-0.624-4.244-1.758l-14.242-14.242 14.244-14.242c2.266-2.266 6.22-2.266 8.486 0 1.132 1.132 1.756 2.64 1.756 4.242s-0.624 3.11-1.758 4.244l-5.756 5.756 5.756 5.758c1.134 1.132 1.758 2.64 1.758 4.242s-0.624 3.11-1.758 4.244c-1.132 1.132-2.638 1.756-4.242 1.756zM13.17 24l11.416 11.414c0.756 0.756 2.074 0.754 2.828 0 0.378-0.378 0.586-0.878 0.586-1.414s-0.208-1.036-0.586-1.414l-8.584-8.586 8.584-8.586c0.378-0.378 0.586-0.88 0.586-1.414s-0.208-1.036-0.586-1.414c-0.756-0.758-2.074-0.756-2.828-0.002l-11.416 11.416z"
+						></path>
+					</svg>
+					<span>{model.albumTitle}</span>
+				</a>
+				<h1 class="photo__title">
+					{model.titleSplit.head}
+					{
+						model.titleSplit.tail && (
+							<span class="photo__title-accent">{model.titleSplit.tail}</span>
+						)
+					}
+				</h1>
+
+				{
+					hasMeta && (
+						<div class="photo__meta">
+							{model.placeHierarchy.length > 0 && (
+								<p class="photo__place">
+									{model.placeHierarchy.map((name) => (
+										<span class="photo__place-part">{name}</span>
+									))}
+								</p>
+							)}
+							{model.captured && <p class="photo__captured">{model.captured}</p>}
+							{model.tags.length > 0 && (
+								<ul class="photo__tags">
+									{model.tags.map((tag) => (
+										<li class="photo__tag">{tag.label}</li>
+									))}
+								</ul>
+							)}
+						</div>
+					)
+				}
+
+				{model.description && <div class="photo__description">{model.description}</div>}
+			</div>
+		</div>
+
+		{
+			showRelated && (
+				<section class="photo__related" aria-labelledby="photo-related-heading">
+					<h2 id="photo-related-heading" class="photo__related-heading">
+						<a class="photo__related-link-title" href={model.albumHref}>
+							<svg
+								class="photo__related-icon"
+								viewBox="0 0 24 24"
+								fill="currentColor"
+								aria-hidden="true"
+							>
+								<path d="M6.563 13c.38 0 .688.307.687.688v4.124a.686.686 0 0 1-.687.688H2.438a.688.688 0 0 1-.688-.688v-4.124A.688.688 0 0 1 2.438 13h4.125zm-.773 1.031H3.212a.43.43 0 0 0-.43.43v2.578c0 .238.193.43.43.43H5.79a.43.43 0 0 0 .43-.43v-2.578a.43.43 0 0 0-.43-.43zM19 13c.829 0 .748.335.748.75v4c0 .415.081.75-.748.75h-8.999c-.829 0-.748-.335-.749-.75v-4c.001-.415-.08-.75.749-.75H19zm-.75 1h-7.5c-.5 0-.498.224-.498.5V17c0 .277-.002.5.498.5h7.5c.485 0 .499-.223.498-.5v-2.5c.001-.276-.013-.5-.498-.5zm-4.187-8.5c.38 0 .688.307.687.688v4.124a.686.686 0 0 1-.687.688H9.938a.688.688 0 0 1-.688-.688V6.188a.688.688 0 0 1 .688-.688h4.125zm-.774 1.031h-2.578a.43.43 0 0 0-.429.43v2.578c0 .238.192.43.429.43h2.578a.43.43 0 0 0 .43-.43V6.961a.43.43 0 0 0-.43-.43zM21.563 5.5c.38 0 .688.307.687.688v4.124a.686.686 0 0 1-.687.688h-4.125a.688.688 0 0 1-.688-.688V6.188a.688.688 0 0 1 .688-.688h4.125zm-.774 1.031h-2.578a.43.43 0 0 0-.429.43v2.578c0 .238.192.43.429.43h2.578a.43.43 0 0 0 .43-.43V6.961a.43.43 0 0 0-.43-.43zM6.563 5.5H2.438a.686.686 0 0 0-.687.688v4.124c0 .381.307.688.687.688h4.125c.38 0 .688-.307.688-.688V6.188a.687.687 0 0 0-.688-.688z" />
+							</svg>
+							<span class="photo__related-title-text">{model.albumTitle}</span>
+						</a>
+					</h2>
+					<ul class="photo__related-grid">
+						{model.related.map((card) => (
+							<li>
+								<a class="photo__related-link" href={card.href}>
+									<ResponsivePicture
+										model={card.media}
+										class="photo__related-media"
+										imgClass="photo__related-img"
+									/>
+								</a>
+							</li>
+						))}
+					</ul>
+				</section>
+			)
+		}
+	</article>
+	<PhotoSwipeLoader />
+</Base>

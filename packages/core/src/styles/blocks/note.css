@@ -1,0 +1,100 @@
+/*
+ * Tone colors live in the theme (src/theme/theme.css) and mirror src/lib/blocks/note/tokens.ts.
+ */
+
+:root {
+	--note-radius: 6px;
+	--note-tint: 20%;
+}
+
+.note--outdated {
+	--note-fill: var(--note-outdated-fill);
+	--note-border: var(--note-outdated-border);
+}
+
+.note--info {
+	--note-fill: var(--note-info-fill);
+	--note-border: var(--note-info-border);
+}
+
+.note--alert {
+	--note-fill: var(--note-alert-fill);
+	--note-border: var(--note-alert-border);
+}
+
+/* The text is a warm tint of the contrast color, not a text-on-fill pair: the theme and the text's own
+ * transparency hold the contrast. */
+/* Zero specificity: a component that reuses the note look (the contact form) overrides its box
+ * whichever order the page chunks load in. */
+:where(.note) {
+	margin: 0 0 8px;
+	padding: 16px 20px;
+	border-left: 4px solid var(--note-border);
+	border-radius: var(--note-radius);
+	background: color-mix(in srgb, var(--note-fill) var(--note-tint), transparent);
+	font-size: 0.8em;
+	line-height: 1.4;
+	/* Two nested color-mix: the inner one warms the contrast color (white in dark) with the tone, the
+	 * share of white sets the warmth; the outer one adds transparency. */
+	color: color-mix(
+		in srgb,
+		color-mix(in srgb, var(--color-contrast) 92%, var(--note-fill)) 70%,
+		transparent
+	);
+}
+
+/* Warm white is unreadable on the light tint, so light uses a warm dark the same way. */
+[data-theme='light'] .note {
+	color: color-mix(
+		in srgb,
+		color-mix(in srgb, var(--color-contrast) 84%, var(--note-fill)) 82%,
+		transparent
+	);
+}
+
+.note__title {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin: 0 0 12px !important;
+	font-size: 1em;
+	font-weight: var(--font-weight-medium);
+	color: var(--note-fill);
+	letter-spacing: 1px;
+	text-transform: uppercase;
+}
+
+.prose .note__content > p {
+	line-height: 1.4;
+}
+
+.note__icon {
+	flex: 0 0 auto;
+	display: inline-flex;
+	width: 20px;
+	height: 20px;
+	color: var(--note-border);
+}
+
+.note__icon svg {
+	display: block;
+	width: 20px;
+	height: 20px;
+}
+
+.prose .note__content > :first-child {
+	margin-top: 0;
+}
+
+.prose .note__content > :last-child {
+	margin-bottom: 0;
+}
+
+/* Underlined so links do not rely on color. */
+.prose .note a {
+	color: inherit;
+	text-decoration-line: underline;
+	text-decoration-style: solid;
+	text-decoration-thickness: 1px;
+	text-underline-offset: 2px;
+}

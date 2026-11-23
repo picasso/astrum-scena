@@ -1,0 +1,13 @@
+@import '../../styles/layers.css';
+
+@layer components {
+	.top-section--pattern-diagonal .top-section__pattern::after {
+		background: repeating-linear-gradient(
+			-25deg,
+			color-mix(in srgb, var(--color-shade) 20%, transparent),
+			color-mix(in srgb, var(--color-shade) 20%, transparent) 3px,
+			color-mix(in srgb, var(--color-shade) 10%, transparent) 3px,
+			color-mix(in srgb, var(--color-shade) 10%, transparent) 6px
+		);
+	}
+}

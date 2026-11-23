@@ -1,0 +1,19 @@
+@import '../styles/layers.css';
+
+@layer components {
+	/* column-width is the minimum (preferred) card width and column-count caps the number of columns,
+	 * so maxColumns limits the count without JS. */
+	.card-masonry {
+		column-width: var(--portfolio-col-width, 300px);
+		column-count: var(--portfolio-max-columns, 5);
+		column-gap: var(--portfolio-gap, 16px);
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	.card-masonry__item {
+		break-inside: avoid;
+		margin-bottom: var(--portfolio-gap, 16px);
+	}
+}

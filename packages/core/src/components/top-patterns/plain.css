@@ -1,0 +1,7 @@
+@import '../../styles/layers.css';
+
+@layer components {
+	.top-section--pattern-plain .top-section__pattern::after {
+		background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAAEAQMAAACTPww9AAAABlBMVEUAAAAAAAClZ7nPAAAAAnRSTlMAtyOW6xcAAAAQSURBVAjXYxBgUGBwYGgAAAJYAPF9gAMvAAAAAElFTkSuQmCC);
+	}
+}

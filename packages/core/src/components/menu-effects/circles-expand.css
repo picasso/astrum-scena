@@ -1,0 +1,52 @@
+@import '../../styles/layers.css';
+
+@layer components {
+	/* Two circles expand from the center. */
+	nav[aria-label='Primary'].anim-circles-expand .top-menu-label {
+		position: relative;
+	}
+
+	nav[aria-label='Primary'].anim-circles-expand .top-menu-label::before,
+	nav[aria-label='Primary'].anim-circles-expand .top-menu-label::after {
+		content: '';
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		width: 50px;
+		height: 50px;
+		border: 2px solid var(--menu-effect-color);
+		border-radius: 50%;
+		opacity: 0;
+		transform: translate(-50%, -50%) scale(0.2);
+		transition:
+			opacity var(--duration-base) linear,
+			transform var(--duration-base) linear;
+		pointer-events: none;
+	}
+
+	nav[aria-label='Primary'].anim-circles-expand .top-menu-label::after {
+		width: 40px;
+		height: 40px;
+		border-width: 5px;
+		transform: translate(-50%, -50%) scale(0.8);
+	}
+
+	/* In light this effect alone draws the circles in translucent black, not the hover color, matching the
+	 * legacy site. */
+	[data-theme='light'] nav[aria-label='Primary'].anim-circles-expand .top-menu-label::before,
+	[data-theme='light'] nav[aria-label='Primary'].anim-circles-expand .top-menu-label::after {
+		border-color: color-mix(in srgb, var(--color-shade) 15%, transparent);
+	}
+
+	nav[aria-label='Primary'].anim-circles-expand .top-menu-link:hover .top-menu-label::before,
+	nav[aria-label='Primary'].anim-circles-expand .top-menu-link:hover .top-menu-label::after,
+	nav[aria-label='Primary'].anim-circles-expand
+		.top-menu-link:focus-visible
+		.top-menu-label::before,
+	nav[aria-label='Primary'].anim-circles-expand
+		.top-menu-link:focus-visible
+		.top-menu-label::after {
+		opacity: 1;
+		transform: translate(-50%, -50%) scale(1);
+	}
+}

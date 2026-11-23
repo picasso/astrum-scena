@@ -1,0 +1,841 @@
+{
+	"active": true,
+	"configDigest": "e56c2944a27f156c464102514cfa7737d0766de47dca8f265664de73c5434c41",
+	"manifest": {
+		"configDigest": "e56c2944a27f156c464102514cfa7737d0766de47dca8f265664de73c5434c41",
+		"photos": {
+			"amber-dunes": {
+				"derivatives": [
+					{
+						"byteSize": 569,
+						"format": "avif",
+						"height": 133,
+						"objectKey": "amber-dunes/200w-c528858226c2e7d205c5a2f9dbf0410c650cca92f3af4d211e8ecffab5231a20.avif",
+						"privacyChecked": true,
+						"rightsEmbedded": false,
+						"sha256": "c528858226c2e7d205c5a2f9dbf0410c650cca92f3af4d211e8ecffab5231a20",
+						"watermarkProfile": "none",
+						"width": 200
+					},
+					{
+						"byteSize": 452,
+						"format": "webp",
+						"height": 133,
+						"objectKey": "amber-dunes/200w-7cfd3a658a50914d4e2d1312baf74719c94e5611c1b1e9e69ffcee55ed075006.webp",
+						"privacyChecked": true,
+						"rightsEmbedded": false,
+						"sha256": "7cfd3a658a50914d4e2d1312baf74719c94e5611c1b1e9e69ffcee55ed075006",
+						"watermarkProfile": "none",
+						"width": 200
+					},
+					{
+						"byteSize": 849,
+						"format": "avif",
+						"height": 267,
+						"objectKey": "amber-dunes/400w-bc16e60c2031094d2f961398342ba2be79f54fddf45f2fbb9023c937813c1600.avif",
+						"privacyChecked": true,
+						"rightsEmbedded": false,
+						"sha256": "bc16e60c2031094d2f961398342ba2be79f54fddf45f2fbb9023c937813c1600",
+						"watermarkProfile": "none",
+						"width": 400
+					},
+					{
+						"byteSize": 962,
+						"format": "webp",
+						"height": 267,
+						"objectKey": "amber-dunes/400w-69a37a4f6b96a30b10a3c5b8b6e7174420ffc98d82e64599ce7a1bdcaf11a8f2.webp",
+						"privacyChecked": true,
+						"rightsEmbedded": false,
+						"sha256": "69a37a4f6b96a30b10a3c5b8b6e7174420ffc98d82e64599ce7a1bdcaf11a8f2",
+						"watermarkProfile": "none",
+						"width": 400
+					},
+					{
+						"byteSize": 1711,
+						"format": "avif",
+						"height": 533,
+						"objectKey": "amber-dunes/800w-0e1d6bbb8b46c84b4fb3cb7ac37b7f0e4978cf953bfdbec8afe102074dbf59a6.avif",
+						"privacyChecked": true,
+						"rightsEmbedded": false,
+						"sha256": "0e1d6bbb8b46c84b4fb3cb7ac37b7f0e4978cf953bfdbec8afe102074dbf59a6",
+						"watermarkProfile": "none",
+						"width": 800
+					},
+					{
+						"byteSize": 2366,
+						"format": "webp",
+						"height": 533,
+						"objectKey": "amber-dunes/800w-ccd444b2425d356de0b6bd80c24440634ce5deba4799003e936e177472005ee6.webp",
+						"privacyChecked": true,
+						"rightsEmbedded": false,
+						"sha256": "ccd444b2425d356de0b6bd80c24440634ce5deba4799003e936e177472005ee6",
+						"watermarkProfile": "none",
+						"width": 800
+					},
+					{
+						"byteSize": 4130,
+						"format": "avif",
+						"height": 800,
+						"objectKey": "amber-dunes/1200w-fdf2ea9820e06e6b357b6a4c6391386e247f352264a58b1edfa7a7916bb0e4c5.avif",
+						"privacyChecked": true,
+						"rightsEmbedded": false,
+						"sha256": "fdf2ea9820e06e6b357b6a4c6391386e247f352264a58b1edfa7a7916bb0e4c5",
+						"watermarkProfile": "watermark",
+						"width": 1200
+					},
+					{
+						"byteSize": 6038,
+						"format": "webp",
+						"height": 800,
+						"objectKey": "amber-dunes/1200w-06c5268243e3f8232e003e26c5ad7811422c4cd274a94a3e86a8e280763be1bb.webp",
+						"privacyChecked": true,
+						"rightsEmbedded": false,
+						"sha256": "06c5268243e3f8232e003e26c5ad7811422c4cd274a94a3e86a8e280763be1bb",
+						"watermarkProfile": "watermark",
+						"width": 1200
+					},
+					{
+						"byteSize": 6447,
+						"format": "avif",
+						"height": 1067,
+						"objectKey": "amber-dunes/1600w-8165b9aba6d9dbf7e6d81dfbdb71ccf397c025549e0a02b4545ac5a5bac58acf.avif",
+						"privacyChecked": true,
+						"rightsEmbedded": false,
+						"sha256": "8165b9aba6d9dbf7e6d81dfbdb71ccf397c025549e0a02b4545ac5a5bac58acf",
+						"watermarkProfile": "watermark",
+						"width": 1600
+					},
+					{
+						"byteSize": 10040,
+						"format": "webp",
+						"height": 1067,
+						"objectKey": "amber-dunes/1600w-34e1bb522d52238fa0ee8cf59810b43a1fc4578fd3c763da57eeeb537deb96f7.webp",
+						"privacyChecked": true,
+						"rightsEmbedded": false,
+						"sha256": "34e1bb522d52238fa0ee8cf59810b43a1fc4578fd3c763da57eeeb537deb96f7",
+						"watermarkProfile": "watermark",
+						"width": 1600
+					},
+					{
+						"byteSize": 8887,
+						"format": "avif",
+						"height": 1333,
+						"objectKey": "amber-dunes/2000w-1170b5bd9fc14e4345aff8dd863084d4e3897e30833e3e5df6e9e9520206283d.avif",
+						"privacyChecked": true,
+						"rightsEmbedded": false,
+						"sha256": "1170b5bd9fc14e4345aff8dd863084d4e3897e30833e3e5df6e9e9520206283d",
+						"watermarkProfile": "watermark",
+						"width": 2000
+					},
+					{
+						"byteSize": 15158,
+						"format": "webp",
+						"height": 1333,
+						"objectKey": "amber-dunes/2000w-bd005544f7dfa042d940b7d5963a71f93cbee809b9519fdd1805615b004950c5.webp",
+						"privacyChecked": true,
+						"rightsEmbedded": false,
+						"sha256": "bd005544f7dfa042d940b7d5963a71f93cbee809b9519fdd1805615b004950c5",
+						"watermarkProfile": "watermark",
+						"width": 2000
+					}
+				],
+				"dominantColor": "#f8b878",
+				"masterSha256": "b99d91ec12ff9330018c7655f02d1103e14bcf1d155087e96c9ee359e4128cb6",
+				"orientation": 1,
+				"rightsId": "astrum-scena-demo",
+				"sourceHeight": 1600,
+				"sourceWidth": 2400
+			},
+			"graphite-lines": {
+				"derivatives": [
+					{
+						"byteSize": 1059,
+						"format": "avif",
+						"height": 133,
+						"objectKey": "graphite-lines/200w-22c9fc75639623fea11f68cbacea3eeaa9c4c1a01abc0c16819979e745bd3133.avif",
+						"privacyChecked": true,
+						"rightsEmbedded": false,
+						"sha256": "22c9fc75639623fea11f68cbacea3eeaa9c4c1a01abc0c16819979e745bd3133",
+						"watermarkProfile": "none",
+						"width": 200
+					},
+					{
+						"byteSize": 988,
+						"format": "webp",
+						"height": 133,
+						"objectKey": "graphite-lines/200w-21f0bcd3be651136c85b8231e04ca349a30e98ab3caaa65797b6cfe0f049181b.webp",
+						"privacyChecked": true,
+						"rightsEmbedded": false,
+						"sha256": "21f0bcd3be651136c85b8231e04ca349a30e98ab3caaa65797b6cfe0f049181b",
+						"watermarkProfile": "none",
+						"width": 200
+					},
+					{
+						"byteSize": 1822,
+						"format": "avif",
+						"height": 267,
+						"objectKey": "graphite-lines/400w-b2bd5cc18e2f3825e8f13b6616d99deb64edb7290f5551d5080008135b80ec97.avif",
+						"privacyChecked": true,
+						"rightsEmbedded": false,
+						"sha256": "b2bd5cc18e2f3825e8f13b6616d99deb64edb7290f5551d5080008135b80ec97",
+						"watermarkProfile": "none",
+						"width": 400
+					},
+					{
+						"byteSize": 1884,
+						"format": "webp",
+						"height": 267,
+						"objectKey": "graphite-lines/400w-8ec93b876e154e5336decbc54266a2d087303cc5349c2ea0c44d2723d62e3d8c.webp",
+						"privacyChecked": true,
+						"rightsEmbedded": false,
+						"sha256": "8ec93b876e154e5336decbc54266a2d087303cc5349c2ea0c44d2723d62e3d8c",
+						"watermarkProfile": "none",
+						"width": 400
+					},
+					{
+						"byteSize": 3352,
+						"format": "avif",
+						"height": 533,
+						"objectKey": "graphite-lines/800w-c552e3717f887cb726921add8e517fa2d84e6da83ef4c62111ceca19f845c9ad.avif",
+						"privacyChecked": true,
+						"rightsEmbedded": false,
+						"sha256": "c552e3717f887cb726921add8e517fa2d84e6da83ef4c62111ceca19f845c9ad",
+						"watermarkProfile": "none",
+						"width": 800
+					},
+					{
+						"byteSize": 3890,
+						"format": "webp",
+						"height": 533,
+						"objectKey": "graphite-lines/800w-dbc7817d62115e870b0b65fdb203e3292ba736b842c11823d83976496b5507c3.webp",
+						"privacyChecked": true,
+						"rightsEmbedded": false,
+						"sha256": "dbc7817d62115e870b0b65fdb203e3292ba736b842c11823d83976496b5507c3",
+						"watermarkProfile": "none",
+						"width": 800
+					},
+					{
+						"byteSize": 5885,
+						"format": "avif",
+						"height": 800,
+						"objectKey": "graphite-lines/1200w-9f5b062a1fa1d6fa51693f14f248cab9191613cc753a9c835104faa4d3ce5e5a.avif",
+						"privacyChecked": true,
+						"rightsEmbedded": false,
+						"sha256": "9f5b062a1fa1d6fa51693f14f248cab9191613cc753a9c835104faa4d3ce5e5a",
+						"watermarkProfile": "watermark",
+						"width": 1200
+					},
+					{
+						"byteSize": 7468,
+						"format": "webp",
+						"height": 800,
+						"objectKey": "graphite-lines/1200w-32da90de55cb52d86cb6b18a894d7e76ec872e04317a16cf745415d4fa1834b9.webp",
+						"privacyChecked": true,
+						"rightsEmbedded": false,
+						"sha256": "32da90de55cb52d86cb6b18a894d7e76ec872e04317a16cf745415d4fa1834b9",
+						"watermarkProfile": "watermark",
+						"width": 1200
+					},
+					{
+						"byteSize": 8540,
+						"format": "avif",
+						"height": 1067,
+						"objectKey": "graphite-lines/1600w-440856677ada5863713d5107701b574ec2e01c87b3c30a683484a63847a71ad3.avif",
+						"privacyChecked": true,
+						"rightsEmbedded": false,
+						"sha256": "440856677ada5863713d5107701b574ec2e01c87b3c30a683484a63847a71ad3",
+						"watermarkProfile": "watermark",
+						"width": 1600
+					},
+					{
+						"byteSize": 10482,
+						"format": "webp",
+						"height": 1067,
+						"objectKey": "graphite-lines/1600w-a3b297b832a0600dddf0d4640a923eb4511ca7246fd8330b5c7e5278c087ddb1.webp",
+						"privacyChecked": true,
+						"rightsEmbedded": false,
+						"sha256": "a3b297b832a0600dddf0d4640a923eb4511ca7246fd8330b5c7e5278c087ddb1",
+						"watermarkProfile": "watermark",
+						"width": 1600
+					},
+					{
+						"byteSize": 11677,
+						"format": "avif",
+						"height": 1333,
+						"objectKey": "graphite-lines/2000w-1c163b168a8ffaff2d7ba0815c60ca99b6f4c41837ced934004b83cdce92ba43.avif",
+						"privacyChecked": true,
+						"rightsEmbedded": false,
+						"sha256": "1c163b168a8ffaff2d7ba0815c60ca99b6f4c41837ced934004b83cdce92ba43",
+						"watermarkProfile": "watermark",
+						"width": 2000
+					},
+					{
+						"byteSize": 14892,
+						"format": "webp",
+						"height": 1333,
+						"objectKey": "graphite-lines/2000w-adcac5b945278e360b2561c3ed05762c067635789c8e99e38a9696e656780b11.webp",
+						"privacyChecked": true,
+						"rightsEmbedded": false,
+						"sha256": "adcac5b945278e360b2561c3ed05762c067635789c8e99e38a9696e656780b11",
+						"watermarkProfile": "watermark",
+						"width": 2000
+					}
+				],
+				"dominantColor": "#d8d8d8",
+				"masterSha256": "08526c30b98b09e8e2ccf1443b982079355ea011168a4431c0ab90e7be5c9905",
+				"orientation": 1,
+				"rightsId": "astrum-scena-demo",
+				"sourceHeight": 1400,
+				"sourceWidth": 2100
+			},
+			"long-horizon": {
+				"derivatives": [
+					{
+						"byteSize": 421,
+						"format": "avif",
+						"height": 67,
+						"objectKey": "long-horizon/200w-4ed0c38184cbcab13dd77a1cd1ed88622845cfbc90ad7a83a563bc3532afd5fb.avif",
+						"privacyChecked": true,
+						"rightsEmbedded": false,
+						"sha256": "4ed0c38184cbcab13dd77a1cd1ed88622845cfbc90ad7a83a563bc3532afd5fb",
+						"watermarkProfile": "none",
+						"width": 200
+					},
+					{
+						"byteSize": 306,
+						"format": "webp",
+						"height": 67,
+						"objectKey": "long-horizon/200w-5e7803f26959f78138b1d68d71bbd9dea6d858493327e083c85eafefc544189e.webp",
+						"privacyChecked": true,
+						"rightsEmbedded": false,
+						"sha256": "5e7803f26959f78138b1d68d71bbd9dea6d858493327e083c85eafefc544189e",
+						"watermarkProfile": "none",
+						"width": 200
+					},
+					{
+						"byteSize": 713,
+						"format": "avif",
+						"height": 133,
+						"objectKey": "long-horizon/400w-095702ba85fcf8c8e15c9a47f84af8cfb2328d83728a1744f58d916559b28150.avif",
+						"privacyChecked": true,
+						"rightsEmbedded": false,
+						"sha256": "095702ba85fcf8c8e15c9a47f84af8cfb2328d83728a1744f58d916559b28150",
+						"watermarkProfile": "none",
+						"width": 400
+					},
+					{
+						"byteSize": 594,
+						"format": "webp",
+						"height": 133,
+						"objectKey": "long-horizon/400w-5b93f858fafdbd5718642693376e44166766129f9f36741d4ecf5ffb919d75d5.webp",
+						"privacyChecked": true,
+						"rightsEmbedded": false,
+						"sha256": "5b93f858fafdbd5718642693376e44166766129f9f36741d4ecf5ffb919d75d5",
+						"watermarkProfile": "none",
+						"width": 400
+					},
+					{
+						"byteSize": 1291,
+						"format": "avif",
+						"height": 267,
+						"objectKey": "long-horizon/800w-b5c44d370dd5cc795bf026c0a55c1b5fb20ca80ef33958dbdb3b6fd4063c04d8.avif",
+						"privacyChecked": true,
+						"rightsEmbedded": false,
+						"sha256": "b5c44d370dd5cc795bf026c0a55c1b5fb20ca80ef33958dbdb3b6fd4063c04d8",
+						"watermarkProfile": "none",
+						"width": 800
+					},
+					{
+						"byteSize": 1386,
+						"format": "webp",
+						"height": 267,
+						"objectKey": "long-horizon/800w-b0cca1a12d67719d2ea514df4151915ee1d750d69ff903ed12927c1e8d209feb.webp",
+						"privacyChecked": true,
+						"rightsEmbedded": false,
+						"sha256": "b0cca1a12d67719d2ea514df4151915ee1d750d69ff903ed12927c1e8d209feb",
+						"watermarkProfile": "none",
+						"width": 800
+					},
+					{
+						"byteSize": 3550,
+						"format": "avif",
+						"height": 400,
+						"objectKey": "long-horizon/1200w-1e655e1a573a52d1d5fae3b244510730d2216744ecbb0208e4a4d97fe09dc24c.avif",
+						"privacyChecked": true,
+						"rightsEmbedded": false,
+						"sha256": "1e655e1a573a52d1d5fae3b244510730d2216744ecbb0208e4a4d97fe09dc24c",
+						"watermarkProfile": "watermark",
+						"width": 1200
+					},
+					{
+						"byteSize": 3872,
+						"format": "webp",
+						"height": 400,
+						"objectKey": "long-horizon/1200w-29b9f931958683ea752dc004e97c3a98bf7878f72128d5d23e1c13a325298618.webp",
+						"privacyChecked": true,
+						"rightsEmbedded": false,
+						"sha256": "29b9f931958683ea752dc004e97c3a98bf7878f72128d5d23e1c13a325298618",
+						"watermarkProfile": "watermark",
+						"width": 1200
+					},
+					{
+						"byteSize": 4802,
+						"format": "avif",
+						"height": 533,
+						"objectKey": "long-horizon/1600w-53d0f503ce8f262801ddab5f9381f69ea41271e4647b5eaf400b8ff30b0daf71.avif",
+						"privacyChecked": true,
+						"rightsEmbedded": false,
+						"sha256": "53d0f503ce8f262801ddab5f9381f69ea41271e4647b5eaf400b8ff30b0daf71",
+						"watermarkProfile": "watermark",
+						"width": 1600
+					},
+					{
+						"byteSize": 6260,
+						"format": "webp",
+						"height": 533,
+						"objectKey": "long-horizon/1600w-125b53744b7aa58722d99a9021b467844d9a348e348604347e4464da535a5891.webp",
+						"privacyChecked": true,
+						"rightsEmbedded": false,
+						"sha256": "125b53744b7aa58722d99a9021b467844d9a348e348604347e4464da535a5891",
+						"watermarkProfile": "watermark",
+						"width": 1600
+					},
+					{
+						"byteSize": 6753,
+						"format": "avif",
+						"height": 667,
+						"objectKey": "long-horizon/2000w-765d6dba4fae74f69bb50143aa2eaa63ab4908d093aabe90f369f2ceed9c2f6b.avif",
+						"privacyChecked": true,
+						"rightsEmbedded": false,
+						"sha256": "765d6dba4fae74f69bb50143aa2eaa63ab4908d093aabe90f369f2ceed9c2f6b",
+						"watermarkProfile": "watermark",
+						"width": 2000
+					},
+					{
+						"byteSize": 9292,
+						"format": "webp",
+						"height": 667,
+						"objectKey": "long-horizon/2000w-82e66ff484c555a10245503d47f8ca640d1f56fa66f2ea57234d402206993f4c.webp",
+						"privacyChecked": true,
+						"rightsEmbedded": false,
+						"sha256": "82e66ff484c555a10245503d47f8ca640d1f56fa66f2ea57234d402206993f4c",
+						"watermarkProfile": "watermark",
+						"width": 2000
+					}
+				],
+				"dominantColor": "#98b8d8",
+				"masterSha256": "e5234d57b1c41d900cfedec543c4977d6460d2253b17c0e8abf2de9dc4aca459",
+				"orientation": 1,
+				"rightsId": "astrum-scena-demo",
+				"sourceHeight": 800,
+				"sourceWidth": 2400
+			},
+			"quiet-tower": {
+				"derivatives": [
+					{
+						"byteSize": 1601,
+						"format": "avif",
+						"height": 300,
+						"objectKey": "quiet-tower/200w-8c5599f017acdec34b0ae65e3b6d2750c2419e9079f3c6eed7ebf0b34a205a3f.avif",
+						"privacyChecked": true,
+						"rightsEmbedded": false,
+						"sha256": "8c5599f017acdec34b0ae65e3b6d2750c2419e9079f3c6eed7ebf0b34a205a3f",
+						"watermarkProfile": "none",
+						"width": 200
+					},
+					{
+						"byteSize": 1750,
+						"format": "webp",
+						"height": 300,
+						"objectKey": "quiet-tower/200w-1196fd79a0ca6381128ad4e3041708fbd87c287eda249aaef3433cf10c8bf410.webp",
+						"privacyChecked": true,
+						"rightsEmbedded": false,
+						"sha256": "1196fd79a0ca6381128ad4e3041708fbd87c287eda249aaef3433cf10c8bf410",
+						"watermarkProfile": "none",
+						"width": 200
+					},
+					{
+						"byteSize": 2883,
+						"format": "avif",
+						"height": 600,
+						"objectKey": "quiet-tower/400w-d8b22abb5a725c8cc2ba697d13bb9ef79b551625864d5c945c9544c7eed3c0e7.avif",
+						"privacyChecked": true,
+						"rightsEmbedded": false,
+						"sha256": "d8b22abb5a725c8cc2ba697d13bb9ef79b551625864d5c945c9544c7eed3c0e7",
+						"watermarkProfile": "none",
+						"width": 400
+					},
+					{
+						"byteSize": 3524,
+						"format": "webp",
+						"height": 600,
+						"objectKey": "quiet-tower/400w-92ae3bca117b479979ea85c66b1f05c3b9bad9e7dd288593d99f114a4ff809ae.webp",
+						"privacyChecked": true,
+						"rightsEmbedded": false,
+						"sha256": "92ae3bca117b479979ea85c66b1f05c3b9bad9e7dd288593d99f114a4ff809ae",
+						"watermarkProfile": "none",
+						"width": 400
+					},
+					{
+						"byteSize": 5308,
+						"format": "avif",
+						"height": 1200,
+						"objectKey": "quiet-tower/800w-00d47ec947fc075daf8283dd6de43b2ad5297c973ee6dad7e31799ddd2e01e4c.avif",
+						"privacyChecked": true,
+						"rightsEmbedded": false,
+						"sha256": "00d47ec947fc075daf8283dd6de43b2ad5297c973ee6dad7e31799ddd2e01e4c",
+						"watermarkProfile": "none",
+						"width": 800
+					},
+					{
+						"byteSize": 7154,
+						"format": "webp",
+						"height": 1200,
+						"objectKey": "quiet-tower/800w-83df33f632b92c04973ea27f183a95607fd608f4be7e939163f105659e1d68f7.webp",
+						"privacyChecked": true,
+						"rightsEmbedded": false,
+						"sha256": "83df33f632b92c04973ea27f183a95607fd608f4be7e939163f105659e1d68f7",
+						"watermarkProfile": "none",
+						"width": 800
+					},
+					{
+						"byteSize": 9668,
+						"format": "avif",
+						"height": 1800,
+						"objectKey": "quiet-tower/1200w-37336c5f97f9d2cce3c3444b662c84ff772b28ea93fbe960b3a73eed53972407.avif",
+						"privacyChecked": true,
+						"rightsEmbedded": false,
+						"sha256": "37336c5f97f9d2cce3c3444b662c84ff772b28ea93fbe960b3a73eed53972407",
+						"watermarkProfile": "watermark",
+						"width": 1200
+					},
+					{
+						"byteSize": 14658,
+						"format": "webp",
+						"height": 1800,
+						"objectKey": "quiet-tower/1200w-f75f52f5840aacd5bbee91909af88a3c0c44cca8454cb3acf361df2634d4a23e.webp",
+						"privacyChecked": true,
+						"rightsEmbedded": false,
+						"sha256": "f75f52f5840aacd5bbee91909af88a3c0c44cca8454cb3acf361df2634d4a23e",
+						"watermarkProfile": "watermark",
+						"width": 1200
+					},
+					{
+						"byteSize": 10857,
+						"format": "avif",
+						"height": 2000,
+						"objectKey": "quiet-tower/1333w-605f93f7824cd36d767297b4e4b5ecbdb833aa38f16b8435f8addd619ed282b4.avif",
+						"privacyChecked": true,
+						"rightsEmbedded": false,
+						"sha256": "605f93f7824cd36d767297b4e4b5ecbdb833aa38f16b8435f8addd619ed282b4",
+						"watermarkProfile": "watermark",
+						"width": 1333
+					},
+					{
+						"byteSize": 17036,
+						"format": "webp",
+						"height": 2000,
+						"objectKey": "quiet-tower/1333w-6eea9851067f4ef39e26c70f9a657129dd4c4d5c4d925a02d3d83c1b1a5fdb43.webp",
+						"privacyChecked": true,
+						"rightsEmbedded": false,
+						"sha256": "6eea9851067f4ef39e26c70f9a657129dd4c4d5c4d925a02d3d83c1b1a5fdb43",
+						"watermarkProfile": "watermark",
+						"width": 1333
+					}
+				],
+				"dominantColor": "#c8d8d8",
+				"masterSha256": "b2a71ca90d752ab9ae14082306fefb813252fa918dfe9bf34c7527e333b5e1e1",
+				"orientation": 1,
+				"rightsId": "astrum-scena-demo",
+				"sourceHeight": 2400,
+				"sourceWidth": 1600
+			},
+			"still-square": {
+				"derivatives": [
+					{
+						"byteSize": 1551,
+						"format": "avif",
+						"height": 200,
+						"objectKey": "still-square/200w-61a3958d5d8c5f9b5cc7072bd54522d83600818099e100c5d4ad7e1b77f1b6eb.avif",
+						"privacyChecked": true,
+						"rightsEmbedded": false,
+						"sha256": "61a3958d5d8c5f9b5cc7072bd54522d83600818099e100c5d4ad7e1b77f1b6eb",
+						"watermarkProfile": "none",
+						"width": 200
+					},
+					{
+						"byteSize": 1618,
+						"format": "webp",
+						"height": 200,
+						"objectKey": "still-square/200w-123b7877c41c6d695889b9c0316c7c8e443555d1104686968fccfd0e4167c813.webp",
+						"privacyChecked": true,
+						"rightsEmbedded": false,
+						"sha256": "123b7877c41c6d695889b9c0316c7c8e443555d1104686968fccfd0e4167c813",
+						"watermarkProfile": "none",
+						"width": 200
+					},
+					{
+						"byteSize": 3038,
+						"format": "avif",
+						"height": 400,
+						"objectKey": "still-square/400w-deb7341252252ddfa4786a99255662ce6473c9e6500363ecc7ff3548952cb69a.avif",
+						"privacyChecked": true,
+						"rightsEmbedded": false,
+						"sha256": "deb7341252252ddfa4786a99255662ce6473c9e6500363ecc7ff3548952cb69a",
+						"watermarkProfile": "none",
+						"width": 400
+					},
+					{
+						"byteSize": 3142,
+						"format": "webp",
+						"height": 400,
+						"objectKey": "still-square/400w-affe2dcd25d033d22e5e6a4426fa92ce7a9a23b8b18858eb01dc05cf4a62e920.webp",
+						"privacyChecked": true,
+						"rightsEmbedded": false,
+						"sha256": "affe2dcd25d033d22e5e6a4426fa92ce7a9a23b8b18858eb01dc05cf4a62e920",
+						"watermarkProfile": "none",
+						"width": 400
+					},
+					{
+						"byteSize": 4869,
+						"format": "avif",
+						"height": 800,
+						"objectKey": "still-square/800w-8b2a5790f5e664307d15a85b5844898a6ef0bba3b0eb25606a102487dc48e613.avif",
+						"privacyChecked": true,
+						"rightsEmbedded": false,
+						"sha256": "8b2a5790f5e664307d15a85b5844898a6ef0bba3b0eb25606a102487dc48e613",
+						"watermarkProfile": "none",
+						"width": 800
+					},
+					{
+						"byteSize": 6484,
+						"format": "webp",
+						"height": 800,
+						"objectKey": "still-square/800w-b492462e632554a1fab2285e76bd65ec0a277ceea4cbafd6441a583e295d1194.webp",
+						"privacyChecked": true,
+						"rightsEmbedded": false,
+						"sha256": "b492462e632554a1fab2285e76bd65ec0a277ceea4cbafd6441a583e295d1194",
+						"watermarkProfile": "none",
+						"width": 800
+					},
+					{
+						"byteSize": 8209,
+						"format": "avif",
+						"height": 1200,
+						"objectKey": "still-square/1200w-49161c4abe26d4b230e994c1712682a355731e9e0d6f43006e8c2cda2d6cb601.avif",
+						"privacyChecked": true,
+						"rightsEmbedded": false,
+						"sha256": "49161c4abe26d4b230e994c1712682a355731e9e0d6f43006e8c2cda2d6cb601",
+						"watermarkProfile": "watermark",
+						"width": 1200
+					},
+					{
+						"byteSize": 11980,
+						"format": "webp",
+						"height": 1200,
+						"objectKey": "still-square/1200w-324d8d22971d7d63322cfa9b9fb015ae3d52ac5e6d7549e63d5a30592f63c4be.webp",
+						"privacyChecked": true,
+						"rightsEmbedded": false,
+						"sha256": "324d8d22971d7d63322cfa9b9fb015ae3d52ac5e6d7549e63d5a30592f63c4be",
+						"watermarkProfile": "watermark",
+						"width": 1200
+					},
+					{
+						"byteSize": 11644,
+						"format": "avif",
+						"height": 1600,
+						"objectKey": "still-square/1600w-9d91e01c770beba6c342638825088ce41451220922cf75e48acc92349b7f9988.avif",
+						"privacyChecked": true,
+						"rightsEmbedded": false,
+						"sha256": "9d91e01c770beba6c342638825088ce41451220922cf75e48acc92349b7f9988",
+						"watermarkProfile": "watermark",
+						"width": 1600
+					},
+					{
+						"byteSize": 16700,
+						"format": "webp",
+						"height": 1600,
+						"objectKey": "still-square/1600w-21f6da5288d7f8fc6afb459fc752c668cb80fedf536a7ccec9e3e6535360d240.webp",
+						"privacyChecked": true,
+						"rightsEmbedded": false,
+						"sha256": "21f6da5288d7f8fc6afb459fc752c668cb80fedf536a7ccec9e3e6535360d240",
+						"watermarkProfile": "watermark",
+						"width": 1600
+					},
+					{
+						"byteSize": 16968,
+						"format": "avif",
+						"height": 2000,
+						"objectKey": "still-square/2000w-b54ebb6d0f24b26b15d2ca33bebef99ca46c4a0caff34e30fe27f7bac9dd56c6.avif",
+						"privacyChecked": true,
+						"rightsEmbedded": false,
+						"sha256": "b54ebb6d0f24b26b15d2ca33bebef99ca46c4a0caff34e30fe27f7bac9dd56c6",
+						"watermarkProfile": "watermark",
+						"width": 2000
+					},
+					{
+						"byteSize": 25894,
+						"format": "webp",
+						"height": 2000,
+						"objectKey": "still-square/2000w-2e8a9c3b1488d4ee48cc98e88c1a484bf647edde9f047612961ee50c72930571.webp",
+						"privacyChecked": true,
+						"rightsEmbedded": false,
+						"sha256": "2e8a9c3b1488d4ee48cc98e88c1a484bf647edde9f047612961ee50c72930571",
+						"watermarkProfile": "watermark",
+						"width": 2000
+					}
+				],
+				"dominantColor": "#e8d8c8",
+				"masterSha256": "404aa9147f853452aca252fe43b3402e1896fb9a7789a566a79db2218b45e45c",
+				"orientation": 1,
+				"rightsId": "astrum-scena-demo",
+				"sourceHeight": 2000,
+				"sourceWidth": 2000
+			},
+			"wide-tide": {
+				"derivatives": [
+					{
+						"byteSize": 637,
+						"format": "avif",
+						"height": 113,
+						"objectKey": "wide-tide/200w-6f76309f32bb9f6613e256e069b3b05e629bf8ebbf3470a9febe0a81a1abb89e.avif",
+						"privacyChecked": true,
+						"rightsEmbedded": false,
+						"sha256": "6f76309f32bb9f6613e256e069b3b05e629bf8ebbf3470a9febe0a81a1abb89e",
+						"watermarkProfile": "none",
+						"width": 200
+					},
+					{
+						"byteSize": 520,
+						"format": "webp",
+						"height": 113,
+						"objectKey": "wide-tide/200w-ead56f4619c5ddb854748f8a81b05cdde6e7a273fb2fde13b7b0dc1e55dd10b6.webp",
+						"privacyChecked": true,
+						"rightsEmbedded": false,
+						"sha256": "ead56f4619c5ddb854748f8a81b05cdde6e7a273fb2fde13b7b0dc1e55dd10b6",
+						"watermarkProfile": "none",
+						"width": 200
+					},
+					{
+						"byteSize": 935,
+						"format": "avif",
+						"height": 225,
+						"objectKey": "wide-tide/400w-d3dc863a88ead1af100e294fa3a26659644e0c7e4d08c876f52627d0ad033f40.avif",
+						"privacyChecked": true,
+						"rightsEmbedded": false,
+						"sha256": "d3dc863a88ead1af100e294fa3a26659644e0c7e4d08c876f52627d0ad033f40",
+						"watermarkProfile": "none",
+						"width": 400
+					},
+					{
+						"byteSize": 1122,
+						"format": "webp",
+						"height": 225,
+						"objectKey": "wide-tide/400w-8ab8c32a8864792edcbdc04c02f1b5254ea80ffaae4b21edb50ddd39dc464cf5.webp",
+						"privacyChecked": true,
+						"rightsEmbedded": false,
+						"sha256": "8ab8c32a8864792edcbdc04c02f1b5254ea80ffaae4b21edb50ddd39dc464cf5",
+						"watermarkProfile": "none",
+						"width": 400
+					},
+					{
+						"byteSize": 1920,
+						"format": "avif",
+						"height": 450,
+						"objectKey": "wide-tide/800w-94cac31c212315dcd351fefcf6c7ea1c2b62bcc0be0bbc6f2c5647f1f1842357.avif",
+						"privacyChecked": true,
+						"rightsEmbedded": false,
+						"sha256": "94cac31c212315dcd351fefcf6c7ea1c2b62bcc0be0bbc6f2c5647f1f1842357",
+						"watermarkProfile": "none",
+						"width": 800
+					},
+					{
+						"byteSize": 2752,
+						"format": "webp",
+						"height": 450,
+						"objectKey": "wide-tide/800w-40a6cbc34ed66e698cac44cc4030b37f7462ebb62c38fa746507e663d584279b.webp",
+						"privacyChecked": true,
+						"rightsEmbedded": false,
+						"sha256": "40a6cbc34ed66e698cac44cc4030b37f7462ebb62c38fa746507e663d584279b",
+						"watermarkProfile": "none",
+						"width": 800
+					},
+					{
+						"byteSize": 4649,
+						"format": "avif",
+						"height": 675,
+						"objectKey": "wide-tide/1200w-7a8085c8cd41e9f1cedf331eb6cbe75dffd2133fd1e3bae38c5bde58d90f6bc6.avif",
+						"privacyChecked": true,
+						"rightsEmbedded": false,
+						"sha256": "7a8085c8cd41e9f1cedf331eb6cbe75dffd2133fd1e3bae38c5bde58d90f6bc6",
+						"watermarkProfile": "watermark",
+						"width": 1200
+					},
+					{
+						"byteSize": 6664,
+						"format": "webp",
+						"height": 675,
+						"objectKey": "wide-tide/1200w-70940aa9600795ed2c14aeea2191ee9cfc99e2950541fbaaaad1190829a58633.webp",
+						"privacyChecked": true,
+						"rightsEmbedded": false,
+						"sha256": "70940aa9600795ed2c14aeea2191ee9cfc99e2950541fbaaaad1190829a58633",
+						"watermarkProfile": "watermark",
+						"width": 1200
+					},
+					{
+						"byteSize": 6645,
+						"format": "avif",
+						"height": 900,
+						"objectKey": "wide-tide/1600w-72ab4d7a2fd64036ad2490f39719ae46f1ac61cc650c2540eadcaf823ae20362.avif",
+						"privacyChecked": true,
+						"rightsEmbedded": false,
+						"sha256": "72ab4d7a2fd64036ad2490f39719ae46f1ac61cc650c2540eadcaf823ae20362",
+						"watermarkProfile": "watermark",
+						"width": 1600
+					},
+					{
+						"byteSize": 10482,
+						"format": "webp",
+						"height": 900,
+						"objectKey": "wide-tide/1600w-2e8943b2923b0dbd599849875b0a2209ea31ef7d8920f251159e351a7867aac5.webp",
+						"privacyChecked": true,
+						"rightsEmbedded": false,
+						"sha256": "2e8943b2923b0dbd599849875b0a2209ea31ef7d8920f251159e351a7867aac5",
+						"watermarkProfile": "watermark",
+						"width": 1600
+					},
+					{
+						"byteSize": 9476,
+						"format": "avif",
+						"height": 1125,
+						"objectKey": "wide-tide/2000w-70e2ffc917ce2bf9bd9460c961e7a7467317e41c5655e1cc71f6279c11a9e514.avif",
+						"privacyChecked": true,
+						"rightsEmbedded": false,
+						"sha256": "70e2ffc917ce2bf9bd9460c961e7a7467317e41c5655e1cc71f6279c11a9e514",
+						"watermarkProfile": "watermark",
+						"width": 2000
+					},
+					{
+						"byteSize": 15130,
+						"format": "webp",
+						"height": 1125,
+						"objectKey": "wide-tide/2000w-f72659fd8f82e7b482e18561ed72c2277569cb412a09e6e9b302e888db31963e.webp",
+						"privacyChecked": true,
+						"rightsEmbedded": false,
+						"sha256": "f72659fd8f82e7b482e18561ed72c2277569cb412a09e6e9b302e888db31963e",
+						"watermarkProfile": "watermark",
+						"width": 2000
+					}
+				],
+				"dominantColor": "#283868",
+				"masterSha256": "3932ee93be77b779cca0c0a338f295af3c2043cc8ade2f56d78426bf9624bcb5",
+				"orientation": 1,
+				"rightsId": "astrum-scena-demo",
+				"sourceHeight": 1350,
+				"sourceWidth": 2400
+			}
+		},
+		"schemaVersion": 3
+	},
+	"schemaVersion": 1
+}

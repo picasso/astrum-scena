@@ -1,0 +1,59 @@
+@import '../styles/layers.css';
+
+@layer components {
+	.social-icons {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	.social-icons.circle-shape .icon {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 40px;
+		height: 40px;
+		border-radius: 50%;
+		border: 2px solid currentColor;
+		background-color: color-mix(in srgb, var(--color-on-image) 10%, transparent);
+		transition:
+			color var(--duration-base) var(--ease-out),
+			background-color var(--duration-base) var(--ease-out),
+			border-color var(--duration-base) var(--ease-out);
+	}
+
+	.social-icons.circle-shape .icon svg {
+		width: 18px;
+		height: 18px;
+		display: block;
+	}
+
+	/* Kept here, not in fullscreen.css: it ties the hover/focus rule below on specificity, so both must
+	 * share one file to keep their order whatever order the chunks load in. */
+	.fs-social .social-icons .icon {
+		color: color-mix(in srgb, var(--color-on-image) 50%, transparent);
+	}
+
+	.social-icons.footer .icon {
+		color: var(--color-social);
+		background-color: transparent;
+	}
+
+	/* The background turns to the brand color and the icon (and its currentColor border) brightens.
+	   The brand colour comes per link from site.yaml `social[].hover` as --social-hover. */
+	.social-icons .icon:hover,
+	.social-icons .icon:focus-visible {
+		color: color-mix(in srgb, var(--color-on-image) 70%, transparent);
+		background-color: var(--social-hover);
+	}
+
+	@media (max-width: 1023px) {
+		.social-icons.circle-shape .icon {
+			width: 36px;
+			height: 36px;
+		}
+	}
+}

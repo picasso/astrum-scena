@@ -1,0 +1,10 @@
+/* GENERATED FILE — do not edit by hand.
+ * Source: site.yaml (layout.*). Regenerate with pnpm layout:tokens.
+ * Drift gate: pnpm check:layout-tokens (part of pnpm check). */
+
+:root {
+	--container-prose: 680px;
+	--container-medium: 960px;
+	--container-standard: 1200px;
+	--container-gallery: 1440px;
+}

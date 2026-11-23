@@ -1,0 +1,57 @@
+name: Release
+
+# a release is a version bump of the packages in main: this workflow publishes to npm what npm does not
+# have yet. Pull requests to main and runs on any other ref only go as far as `npm publish --dry-run`.
+on:
+    push:
+        branches: [main]
+    pull_request:
+        branches: [main]
+    workflow_dispatch:
+
+permissions:
+    contents: read
+
+# a running release is never cancelled; GitHub keeps one pending run per ref, so a newer pending run
+# replaces an older pending one
+concurrency:
+    group: release-${{ github.ref }}
+    cancel-in-progress: false
+
+jobs:
+    # trusted publishing: npm trades the OIDC token of this job for a publish token and adds provenance
+    # by itself, so no npm token lives in secrets or .npmrc
+    release:
+        runs-on: ubuntu-latest
+        permissions:
+            contents: read
+            id-token: write
+        steps:
+            - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+            - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+
+            - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+              with:
+                  node-version-file: .nvmrc
+                  cache: pnpm
+
+            - run: pnpm install --frozen-lockfile
+
+            - name: Build the packages
+              run: pnpm --filter './packages/*' run --if-present build
+
+            # the core tarball is the one the demo installs in CI; release.ts ignores tarballs of private
+            # packages
+            - name: Pack the packages
+              run: pnpm --filter './packages/*' pack --pack-destination "$GITHUB_WORKSPACE/.cache/release"
+
+            - name: Publish (dry run)
+              if: github.ref != 'refs/heads/main'
+              run: pnpm release --dry-run --pack-dir .cache/release
+
+            # `--dry-run` stays until the core repository goes public; dropping it is what turns
+            # publishing on
+            - name: Publish
+              if: github.ref == 'refs/heads/main'
+              run: pnpm release --dry-run --pack-dir .cache/release

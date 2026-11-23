@@ -1,0 +1,18 @@
+---
+import type { LogoReplacementProps } from '@picasso-ai/astrum-scena'
+
+// the demo's replacement of the `logo` point: a mark and the site title in place of the SVG logo
+// files. The core keeps the link around it, its label, the pinning and the icon swap; the mark takes
+// its height from the core's logo slot and its colors from the theme
+type Props = LogoReplacementProps
+
+const { placement, title } = Astro.props
+---
+
+<span class="demo-mark flex items-center gap-3" data-placement={placement}>
+	<svg viewBox="0 0 48 48" aria-hidden="true" focusable="false">
+		<circle cx="24" cy="24" r="20" fill="none" stroke="currentColor" stroke-width="3"></circle>
+		<path d="M24 8 L30 24 L24 40 L18 24 Z" class="fill-(--color-accent)"></path>
+	</svg>
+	<span class="text-lg font-medium whitespace-nowrap">{title}</span>
+</span>

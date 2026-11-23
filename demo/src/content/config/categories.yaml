@@ -1,0 +1,10 @@
+schemaVersion: 1
+categories:
+    - id: series
+      label:
+          en: Series
+          ru: Серии
+    - id: places
+      label:
+          en: Places
+          ru: Места

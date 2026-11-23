@@ -1,0 +1,19 @@
+{
+	"copyright": "© The Astrum Scena authors. CC0 1.0.",
+	"credit": "The Astrum Scena authors",
+	"ladder": {
+		"formats": [
+			"avif",
+			"webp"
+		],
+		"widths": [
+			200,
+			400,
+			800,
+			1200,
+			1600
+		]
+	},
+	"publicPath": "/media",
+	"schemaVersion": 1
+}

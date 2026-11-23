@@ -1,0 +1,97 @@
+@import '../styles/layers.css';
+
+@layer components {
+	/* Kept in this stylesheet, not an Astro scope: the enum↔CSS contract (src/config/menu.test.ts) reads
+	 * known files. Links are always visible: Astro sets no `body.ready` class for a reveal. Effect rules are
+	 * scoped to `nav[aria-label='Primary']` so the language/theme controls and the overlay do not inherit
+	 * them. */
+
+	.top-menu {
+		display: flex;
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	/* Metrics match the legacy menu; this density applies above 1280px (the bar is hidden below 1024). */
+	nav[aria-label='Primary'] .top-menu-link {
+		position: relative;
+		display: block;
+		padding: 0 10px;
+		color: var(--color-menulink);
+		font-size: 17px;
+		font-weight: var(--font-weight-semibold);
+		line-height: 1em;
+		letter-spacing: 0.5px;
+		text-transform: uppercase;
+		text-decoration: none;
+		text-shadow: 0 1px 3px color-mix(in srgb, var(--color-shade) 30%, transparent); /* dark only */
+		transition: color var(--duration-base) var(--ease-out);
+	}
+
+	[data-theme='light'] nav[aria-label='Primary'] .top-menu-link {
+		text-shadow: none;
+	}
+
+	/* (0,3,2) beats both the base rule and the density media query, so no override inside @media. */
+	nav[aria-label='Primary'] li:first-of-type .top-menu-link {
+		padding-left: 0;
+	}
+
+	nav[aria-label='Primary'] li:last-of-type .top-menu-link {
+		padding-right: 0;
+	}
+
+	/* data-current-section, not aria-current, so nested routes also look active. */
+	nav[aria-label='Primary'] .top-menu-link[data-current-section] {
+		color: var(--color-accent);
+	}
+
+	nav[aria-label='Primary'] .top-menu-link:hover,
+	nav[aria-label='Primary'] .top-menu-link:focus-visible {
+		color: var(--color-menulink-hover);
+	}
+
+	/* The outline is drawn outside the box, so the effect wrapper's `overflow: hidden` does not clip it. */
+	nav[aria-label='Primary'] .top-menu-link:focus-visible {
+		outline: 2px solid var(--color-menulink-hover);
+		outline-offset: 3px;
+	}
+
+	/* An explicit inclusive range, not Tailwind max-xl; 1024 matches the inline navbar breakpoint. */
+	@media (min-width: 1024px) and (max-width: 1280px) {
+		nav[aria-label='Primary'] .top-menu-link {
+			padding-left: 5px;
+			padding-right: 5px;
+			font-size: 14px;
+		}
+	}
+
+	/* Every non-`off` MENU_ANIMATIONS value has an `.anim-<name>` modifier (checked by
+	 * src/config/menu.test.ts). The decorative color is the menu link hover color at 30 % in both themes. */
+	nav[aria-label='Primary'].anim-links {
+		--menu-effect-color: color-mix(in srgb, var(--color-menulink-hover) 30%, transparent);
+	}
+
+	/* The effect box (height/overflow/padding) stays, otherwise the layout would differ by motion
+	 * preference. opacity-change gets an opaque link so no copy or decoration stays visible. The
+	 * hover/focus selectors match the effects' own specificity and win by order: site-nav.astro imports
+	 * the effect module before this file. */
+	@media (prefers-reduced-motion: reduce) {
+		nav[aria-label='Primary'].anim-links .top-menu-link,
+		nav[aria-label='Primary'].anim-links .top-menu-label,
+		nav[aria-label='Primary'].anim-links
+			.top-menu-link:is(:hover, :focus-visible)
+			.top-menu-label {
+			transition: none;
+			transform: none;
+		}
+
+		nav[aria-label='Primary'].anim-links .top-menu-link::before,
+		nav[aria-label='Primary'].anim-links .top-menu-link::after,
+		nav[aria-label='Primary'].anim-links .top-menu-label::before,
+		nav[aria-label='Primary'].anim-links .top-menu-label::after {
+			display: none;
+		}
+	}
+}

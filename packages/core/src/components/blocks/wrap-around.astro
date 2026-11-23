@@ -1,0 +1,114 @@
+---
+import '../../styles/image-frame.css'
+import '../../styles/blocks/wrap-around.css'
+import '../portfolio/album-photo.css'
+
+import { getCollection } from 'astro:content'
+
+import { defaultLocale, site } from '../../config/site.ts'
+import { siteRoot } from '../../config/site-root.ts'
+import { contentGapVar } from '../../lib/blocks/content-gap.ts'
+import { parseWrapAroundProps } from '../../lib/blocks/wrap-around/schema.ts'
+import { resolveWrapAround } from '../../lib/blocks/wrap-around/view-model.ts'
+import { loadTaxonomyConfig } from '../../lib/content/files.ts'
+import type { Locale } from '../../lib/content/schemas.ts'
+import { loadImageCatalog } from '../../lib/images/catalog.ts'
+import { indexById } from '../../lib/portfolio/publication.ts'
+import ResponsivePicture from '../portfolio/responsive-picture.astro'
+
+// typed MDX block (docs/blocks/wrap-around.md): the schema and view model own the data, this file
+// only renders static HTML. The lightbox reuses the album grid's `a.album-photo` + `data-pswp-*`
+// contract under `data-block-gallery`; without JS a lightbox anchor opens the image file itself.
+// MDX props carry no catalog, collections or locale, so they are loaded here at build time, as on
+// the portfolio pages
+
+const props = parseWrapAroundProps(Astro.props)
+const locale = (Astro.currentLocale ?? defaultLocale(site)) as Locale
+
+const [photos, albums, taxonomy] = await Promise.all([
+	getCollection('photos'),
+	getCollection('albums'),
+	loadTaxonomyConfig(siteRoot),
+])
+const catalog = loadImageCatalog(siteRoot)
+
+const vm = resolveWrapAround(props, {
+	catalog,
+	photos,
+	albums,
+	photosById: indexById(photos),
+	places: taxonomy.places,
+	locale,
+})
+
+// one lightbox group per page under a fixed id; set only when the block has lightbox items, so no
+// empty gallery roots appear
+const pageGroup = vm.lightboxScope === 'page' && vm.hasLightbox ? 'page' : undefined
+const style = [
+	`--wrap-width:${vm.width}%`,
+	`--wrap-outside:${vm.outside}cqw`,
+	`--wrap-text-gap:var(--wrap-text-gap-${vm.textGap})`,
+	`--wrap-image-gap:${contentGapVar(vm.imageGap)}`,
+].join(';')
+---
+
+<div
+	class:list={[
+		'wrap-around',
+		`wrap-around--${vm.position}`,
+		`image-frame--${vm.frame}`,
+		`image-frame--${vm.frameColor}`,
+		vm.outside > 0 && 'wrap-around--outside',
+		vm.multiple && 'wrap-around--multiple',
+	]}
+	style={style}
+	data-block-gallery={vm.hasLightbox ? '' : undefined}
+	data-block-gallery-group={pageGroup}
+>
+	{
+		vm.items.map((item) => (
+			<figure class="wrap-around__figure">
+				{item.action.kind === 'lightbox' ? (
+					<a
+						class="album-photo"
+						href={item.action.href}
+						aria-label={item.model.alt === '' ? item.action.label : undefined}
+						data-pswp-width={item.action.pswp.width}
+						data-pswp-height={item.action.pswp.height}
+						data-pswp-src={item.action.pswp.src}
+						data-pswp-srcset={item.action.pswp.srcset}
+						data-pswp-caption={item.action.pswp.caption}
+					>
+						<ResponsivePicture
+							model={item.model}
+							class="wrap-around__media"
+							imgClass="wrap-around__img image-frame__target"
+						/>
+					</a>
+				) : item.action.kind === 'link' ? (
+					<a
+						href={item.action.href}
+						target={item.action.target}
+						rel={item.action.rel}
+						aria-label={item.model.alt === '' ? item.action.label : undefined}
+					>
+						<ResponsivePicture
+							model={item.model}
+							class="wrap-around__media"
+							imgClass="wrap-around__img image-frame__target"
+						/>
+					</a>
+				) : (
+					<ResponsivePicture
+						model={item.model}
+						class="wrap-around__media"
+						imgClass="wrap-around__img image-frame__target"
+					/>
+				)}
+				{item.showCaption && item.caption ? (
+					<figcaption class="wrap-around__caption">{item.caption}</figcaption>
+				) : null}
+			</figure>
+		))
+	}
+</div>

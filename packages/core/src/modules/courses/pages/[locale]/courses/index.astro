@@ -1,0 +1,76 @@
+---
+import CardCollection from '../../../../../components/card-collection.astro'
+import type { Locale } from '../../../../../config/locale-schema.ts'
+import { site } from '../../../../../config/site.ts'
+import { useTranslations } from '../../../../../i18n/ui.ts'
+import Base from '../../../../../layouts/base.astro'
+import { resolveBanner } from '../../../../../lib/banner/build-data.ts'
+import { resolveDocumentCards } from '../../../../../lib/cards/build-data.ts'
+import { documentCardSurface } from '../../../../../lib/cards/select.ts'
+import { localizedStaticPaths } from '../../../../../lib/content/routes.ts'
+import {
+	bannerPhotoId,
+	cardPhotoIds,
+	footerPromoContext,
+} from '../../../../../lib/portfolio/footer-promo-build.ts'
+import { buildLocaleMeta } from '../../../../../lib/portfolio/page-meta.ts'
+import { loadListableCourses } from '../../../build-data.ts'
+import { coursesConfig } from '../../../config.ts'
+import { orderCourses } from '../../../documents.ts'
+import { COURSES_COLLECTION, COURSES_INDEX_SURFACE } from '../../../manifest.ts'
+import { courseHref } from '../../../routes.ts'
+
+// archived and open courses share one index with no section-wide archive notice; each card's badge
+// carries the status. The legacy layout was a list (thumbnail left, title and excerpt right), not the
+// Articles cards.
+export function getStaticPaths() {
+	return localizedStaticPaths(site.content.locales)
+}
+
+type Props = { locale: Locale }
+
+const { locale } = Astro.props
+const t = useTranslations(locale)
+const config = coursesConfig(site)
+const courses = orderCourses(
+	await loadListableCourses(site),
+	config,
+	locale,
+	site.content.referenceLocale,
+)
+const surface = config.surface
+const cards = await resolveDocumentCards(courses, locale, {
+	href: (slug) => courseHref(slug, locale),
+	surface: documentCardSurface(surface.kind),
+	collection: COURSES_COLLECTION,
+	ratio: surface.ratio,
+	siteConfig: site,
+})
+const banner = await resolveBanner(
+	{ kind: 'surface', surface: COURSES_INDEX_SURFACE },
+	locale,
+	site,
+)
+const meta = buildLocaleMeta(Astro.url.pathname, Astro.site!.href, site.content.locales)
+const footerPromo = footerPromoContext(
+	'surface:courses-index',
+	bannerPhotoId(banner),
+	cardPhotoIds(cards),
+)
+---
+
+<Base
+	footerPromo={footerPromo}
+	title={t('courses.title')}
+	canonical={meta.canonical}
+	alternates={meta.alternates}
+	width={surface.width}
+	heading={t('courses.title')}
+	banner={banner}
+>
+	<CardCollection
+		kind={surface.kind}
+		cards={cards}
+		more={site.listing.moreLink === 'on' ? t('listing.more') : undefined}
+	/>
+</Base>

@@ -1,0 +1,49 @@
+---
+import type { DocumentSurfaceKind } from '../config/site.ts'
+import type { CardPresentation } from '../config/variants.ts'
+import type { CardModel } from '../lib/cards/select.ts'
+import CardGrid from './card-grid.astro'
+import CardList from './card-list.astro'
+import CardMasonry from './card-masonry.astro'
+
+// every `surfaces.*.kind` value (grid, masonry, list) has a real layout over the same card model,
+// so changing it in site.yaml changes the page instead of being ignored at runtime
+type Props = {
+	kind: DocumentSurfaceKind
+	cards: readonly CardModel[]
+	// "read more" link label, passed only when `listing.moreLink: on`
+	more?: string
+	columns?: number
+	titleLevel?: 2 | 3
+	// ignored by list, whose cards are always rows; defaults to `details`
+	presentation?: CardPresentation
+	// grid/masonry gap in px; defaults to the layout's own
+	gap?: number
+}
+
+const { kind, cards, more, columns, titleLevel, presentation, gap } = Astro.props
+---
+
+{
+	kind === 'list' ? (
+		<CardList cards={cards} more={more} titleLevel={titleLevel} />
+	) : kind === 'grid' ? (
+		<CardGrid
+			cards={cards}
+			columns={columns!}
+			more={more}
+			titleLevel={titleLevel}
+			presentation={presentation}
+			gap={gap}
+		/>
+	) : (
+		<CardMasonry
+			cards={cards}
+			more={more}
+			columns={columns}
+			titleLevel={titleLevel}
+			presentation={presentation}
+			gap={gap}
+		/>
+	)
+}

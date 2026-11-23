@@ -1,0 +1,170 @@
+@import '../styles/layers.css';
+
+@layer components {
+	/* Full-bleed bar with width-limited content, like the legacy footer. The copyright is translucent;
+	 * light uses 0.6 because 0.3 is unreadable on white. */
+	.site-footer {
+		background-color: var(--color-surface);
+		color: var(--color-footer-text);
+		padding-block: 30px;
+		font-size: 15px;
+		line-height: 1.5;
+	}
+
+	.site-footer__wrap {
+		width: 100%;
+		max-width: var(--container-max);
+		margin-inline: auto;
+		padding-inline: var(--container-pad);
+	}
+
+	.site-footer__copyright {
+		margin: 0 0 0.5rem;
+	}
+
+	.site-footer__copyright span {
+		display: inline-block;
+		opacity: 0.3;
+	}
+
+	[data-theme='light'] .site-footer__copyright span {
+		opacity: 0.6;
+	}
+
+	/* Columns always stack below the layout break. A column with nothing visible is not rendered, so the
+	 * `--N` modifier already equals the number of visible columns. */
+	.footer-columns {
+		display: grid;
+		gap: 10px;
+		/* Our blocks sit flush, unlike the legacy widgets with their own spacing. */
+		padding-top: 30px;
+	}
+
+	@media (min-width: 1024px) {
+		.footer-columns {
+			column-gap: 5%;
+			align-items: start;
+		}
+
+		.footer-columns--2 {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+		}
+
+		.footer-columns--3 {
+			grid-template-columns: repeat(3, minmax(0, 1fr));
+		}
+
+		/* The menu aligns right only as the right column of a two-column grid (an even item): with three
+		 * columns it is the middle one, and without the first column it moves to the left. */
+		.footer-columns--2 .footer-columns__item--links:nth-child(2n) {
+			text-align: right;
+		}
+	}
+
+	.footer-menu {
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	.footer-menu a {
+		display: inline-block;
+		margin-bottom: 5px;
+		color: var(--color-link);
+		font-weight: var(--font-weight-medium);
+		text-decoration: none;
+		transition: color var(--duration-base) var(--ease-out);
+	}
+
+	.footer-menu a:hover,
+	.footer-menu a:focus-visible {
+		color: var(--color-link-hover);
+	}
+
+	.footer-legal {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.4rem 0.8rem;
+		margin-top: 0.75rem;
+		font-size: 0.875rem;
+	}
+
+	.footer-legal a {
+		color: var(--color-link);
+	}
+
+	.footer-legal a:hover,
+	.footer-legal a:focus-visible {
+		color: var(--color-link-hover);
+	}
+
+	/* Aligned left like the menu (owner decision); the rule starts at the column's left edge. */
+	.footer-columns__item--links .lang-switch {
+		margin-top: 30px;
+		border-top: 1px solid color-mix(in srgb, currentColor 20%, transparent);
+		padding-top: 12px;
+	}
+
+	.footer-quote {
+		margin: 0 0 1.75rem;
+		color: var(--color-footer-text);
+		font-size: 15px;
+		line-height: 1.5;
+		opacity: 0.85;
+	}
+
+	/* Small thumbnails, as on the legacy site, so the grid fits a column. No visible heading (owner
+	 * decision); the section's aria-label gives the accessible name. */
+	.footer-recent__grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(88px, 1fr));
+		gap: 8px;
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	.footer-recent__link {
+		display: block;
+		color: var(--color-footer-text);
+		text-decoration: none;
+	}
+
+	/* Ratio on <picture> to avoid clashing with the inline aspect-ratio on <img>. */
+	.footer-recent__media {
+		display: block;
+		aspect-ratio: 1 / 1;
+		overflow: hidden;
+		border: 1px solid color-mix(in srgb, currentColor 15%, transparent);
+	}
+
+	.footer-recent__img {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		transition: opacity var(--duration-base) var(--ease-out);
+	}
+
+	.footer-recent__title {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		margin: -1px;
+		padding: 0;
+		border: 0;
+		overflow: hidden;
+		clip-path: inset(50%);
+		white-space: nowrap;
+	}
+
+	.footer-recent__link:focus-visible {
+		outline: 2px solid var(--color-accent);
+		outline-offset: 3px;
+	}
+
+	@media (hover: hover) {
+		.footer-recent__link:hover .footer-recent__img {
+			opacity: 0.7;
+		}
+	}
+}

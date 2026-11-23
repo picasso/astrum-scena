@@ -1,0 +1,524 @@
+{
+	"Gallery": {
+		"additionalProperties": false,
+		"properties": {
+			"action": {
+				"anyOf": [
+					{
+						"const": "none",
+						"type": "string"
+					},
+					{
+						"const": "lightbox",
+						"type": "string"
+					},
+					{
+						"const": "photo",
+						"type": "string"
+					},
+					{
+						"additionalProperties": false,
+						"properties": {
+							"albumId": {
+								"minLength": 1,
+								"type": "string"
+							},
+							"type": {
+								"const": "album",
+								"type": "string"
+							}
+						},
+						"required": [
+							"albumId",
+							"type"
+						],
+						"type": "object"
+					},
+					{
+						"additionalProperties": false,
+						"properties": {
+							"href": {
+								"minLength": 1,
+								"type": "string"
+							},
+							"newTab": {
+								"type": "boolean"
+							},
+							"type": {
+								"const": "custom",
+								"type": "string"
+							}
+						},
+						"required": [
+							"href",
+							"type"
+						],
+						"type": "object"
+					}
+				],
+				"default": "lightbox"
+			},
+			"albumId": {
+				"minLength": 1,
+				"type": "string"
+			},
+			"columns": {
+				"anyOf": [
+					{
+						"const": 1,
+						"type": "number"
+					},
+					{
+						"const": 2,
+						"type": "number"
+					},
+					{
+						"const": 3,
+						"type": "number"
+					},
+					{
+						"const": 4,
+						"type": "number"
+					},
+					{
+						"const": 5,
+						"type": "number"
+					}
+				],
+				"default": 3
+			},
+			"exclude": {
+				"default": [],
+				"items": {
+					"minLength": 1,
+					"type": "string"
+				},
+				"type": "array"
+			},
+			"frame": {
+				"default": "thin",
+				"enum": [
+					"medium",
+					"none",
+					"thick",
+					"thin"
+				],
+				"type": "string"
+			},
+			"frameColor": {
+				"default": "default",
+				"enum": [
+					"alt",
+					"default"
+				],
+				"type": "string"
+			},
+			"gap": {
+				"default": "small",
+				"enum": [
+					"large",
+					"medium",
+					"none",
+					"small",
+					"tiny"
+				],
+				"type": "string"
+			},
+			"imageSetId": {
+				"minLength": 1,
+				"type": "string"
+			},
+			"images": {
+				"items": {
+					"additionalProperties": false,
+					"properties": {
+						"action": {
+							"anyOf": [
+								{
+									"const": "none",
+									"type": "string"
+								},
+								{
+									"const": "lightbox",
+									"type": "string"
+								},
+								{
+									"const": "photo",
+									"type": "string"
+								},
+								{
+									"additionalProperties": false,
+									"properties": {
+										"albumId": {
+											"minLength": 1,
+											"type": "string"
+										},
+										"type": {
+											"const": "album",
+											"type": "string"
+										}
+									},
+									"required": [
+										"albumId",
+										"type"
+									],
+									"type": "object"
+								},
+								{
+									"additionalProperties": false,
+									"properties": {
+										"href": {
+											"minLength": 1,
+											"type": "string"
+										},
+										"newTab": {
+											"type": "boolean"
+										},
+										"type": {
+											"const": "custom",
+											"type": "string"
+										}
+									},
+									"required": [
+										"href",
+										"type"
+									],
+									"type": "object"
+								}
+							]
+						},
+						"alt": {
+							"type": "string"
+						},
+						"caption": {
+							"anyOf": [
+								{
+									"type": "string"
+								},
+								{
+									"const": false,
+									"type": "boolean"
+								}
+							]
+						},
+						"focalPoint": {
+							"additionalProperties": false,
+							"properties": {
+								"x": {
+									"maximum": 100,
+									"minimum": 0,
+									"type": "number"
+								},
+								"y": {
+									"maximum": 100,
+									"minimum": 0,
+									"type": "number"
+								}
+							},
+							"required": [
+								"x",
+								"y"
+							],
+							"type": "object"
+						},
+						"imageId": {
+							"minLength": 1,
+							"type": "string"
+						}
+					},
+					"required": [
+						"imageId"
+					],
+					"type": "object",
+					"x-transforms": [
+						"cf8ff99764b2"
+					]
+				},
+				"minItems": 1,
+				"type": "array"
+			},
+			"inlineCaption": {
+				"default": false,
+				"type": "boolean"
+			},
+			"layout": {
+				"default": "rect",
+				"enum": [
+					"justified",
+					"rect",
+					"square"
+				],
+				"type": "string"
+			},
+			"lightboxCaption": {
+				"default": true,
+				"type": "boolean"
+			},
+			"lightboxScope": {
+				"default": "page",
+				"enum": [
+					"block",
+					"page"
+				],
+				"type": "string"
+			},
+			"mobileFirstOnly": {
+				"default": true,
+				"type": "boolean"
+			},
+			"outside": {
+				"default": 0,
+				"maximum": 60,
+				"minimum": 0,
+				"type": "integer"
+			},
+			"randomCount": {
+				"exclusiveMinimum": 0,
+				"maximum": 9007199254740991,
+				"type": "integer"
+			}
+		},
+		"type": "object",
+		"x-refinements": [
+			"f7ec71a3fea5"
+		]
+	},
+	"PrivacyController": {
+		"additionalProperties": false,
+		"properties": {},
+		"type": "object"
+	},
+	"WrapAround": {
+		"additionalProperties": false,
+		"properties": {
+			"action": {
+				"anyOf": [
+					{
+						"const": "none",
+						"type": "string"
+					},
+					{
+						"const": "lightbox",
+						"type": "string"
+					},
+					{
+						"const": "photo",
+						"type": "string"
+					},
+					{
+						"additionalProperties": false,
+						"properties": {
+							"albumId": {
+								"minLength": 1,
+								"type": "string"
+							},
+							"type": {
+								"const": "album",
+								"type": "string"
+							}
+						},
+						"required": [
+							"albumId",
+							"type"
+						],
+						"type": "object"
+					},
+					{
+						"additionalProperties": false,
+						"properties": {
+							"href": {
+								"minLength": 1,
+								"type": "string"
+							},
+							"newTab": {
+								"type": "boolean"
+							},
+							"type": {
+								"const": "custom",
+								"type": "string"
+							}
+						},
+						"required": [
+							"href",
+							"type"
+						],
+						"type": "object"
+					}
+				],
+				"default": "lightbox"
+			},
+			"frame": {
+				"default": "thick",
+				"enum": [
+					"medium",
+					"none",
+					"thick",
+					"thin"
+				],
+				"type": "string"
+			},
+			"frameColor": {
+				"default": "default",
+				"enum": [
+					"alt",
+					"default"
+				],
+				"type": "string"
+			},
+			"imageGap": {
+				"default": "small",
+				"enum": [
+					"large",
+					"medium",
+					"none",
+					"small",
+					"tiny"
+				],
+				"type": "string"
+			},
+			"imageId": {
+				"minLength": 1,
+				"type": "string"
+			},
+			"images": {
+				"items": {
+					"additionalProperties": false,
+					"properties": {
+						"action": {
+							"anyOf": [
+								{
+									"const": "none",
+									"type": "string"
+								},
+								{
+									"const": "lightbox",
+									"type": "string"
+								},
+								{
+									"const": "photo",
+									"type": "string"
+								},
+								{
+									"additionalProperties": false,
+									"properties": {
+										"albumId": {
+											"minLength": 1,
+											"type": "string"
+										},
+										"type": {
+											"const": "album",
+											"type": "string"
+										}
+									},
+									"required": [
+										"albumId",
+										"type"
+									],
+									"type": "object"
+								},
+								{
+									"additionalProperties": false,
+									"properties": {
+										"href": {
+											"minLength": 1,
+											"type": "string"
+										},
+										"newTab": {
+											"type": "boolean"
+										},
+										"type": {
+											"const": "custom",
+											"type": "string"
+										}
+									},
+									"required": [
+										"href",
+										"type"
+									],
+									"type": "object"
+								}
+							]
+						},
+						"alt": {
+							"type": "string"
+						},
+						"caption": {
+							"anyOf": [
+								{
+									"type": "string"
+								},
+								{
+									"const": false,
+									"type": "boolean"
+								}
+							]
+						},
+						"imageId": {
+							"minLength": 1,
+							"type": "string"
+						}
+					},
+					"required": [
+						"imageId"
+					],
+					"type": "object"
+				},
+				"minItems": 1,
+				"type": "array"
+			},
+			"inlineCaption": {
+				"default": false,
+				"type": "boolean"
+			},
+			"lightboxCaption": {
+				"default": true,
+				"type": "boolean"
+			},
+			"lightboxScope": {
+				"default": "page",
+				"enum": [
+					"block",
+					"page"
+				],
+				"type": "string"
+			},
+			"outside": {
+				"default": 0,
+				"maximum": 60,
+				"minimum": 0,
+				"type": "integer"
+			},
+			"position": {
+				"default": "left",
+				"enum": [
+					"left",
+					"right"
+				],
+				"type": "string"
+			},
+			"textGap": {
+				"default": "small",
+				"enum": [
+					"large",
+					"medium",
+					"none",
+					"small",
+					"tiny"
+				],
+				"type": "string"
+			},
+			"width": {
+				"maximum": 80,
+				"minimum": 20,
+				"type": "integer"
+			}
+		},
+		"type": "object",
+		"x-refinements": [
+			"7da7c1810ce0"
+		],
+		"x-transforms": [
+			"95922873fc00"
+		]
+	}
+}

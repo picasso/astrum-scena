@@ -1,0 +1,24 @@
+---
+import { type CollectionEntry, render } from 'astro:content'
+
+import GalleryLoader from '../blocks/gallery-loader.astro'
+import PhotoSwipeLoader from '../portfolio/photoswipe-loader.astro'
+import { MDX_COMPONENTS } from './mdx-components.ts'
+
+// static render of a document body: an empty body renders nothing rather than a placeholder. Block
+// components come from the shared registry, so documents need no imports. The PhotoSwipe loader
+// lives here because a block's lightbox must work on every document route and those routes share
+// no other place
+type Props = {
+	entry: CollectionEntry<'articles'> | CollectionEntry<'pages'> | CollectionEntry<'courses'>
+}
+
+const { entry } = Astro.props
+const { Content } = await render(entry)
+// documents without a gallery do not ship the coordinator
+const hasGallery = entry.body?.includes('<Gallery') ?? false
+---
+
+<Content components={MDX_COMPONENTS} />
+{hasGallery && <GalleryLoader />}
+<PhotoSwipeLoader />

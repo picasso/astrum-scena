@@ -1,0 +1,25 @@
+---
+import { logoLayers } from './logo-layers.ts'
+
+type Props = {
+	src: string
+	variant: 'brand' | 'menu'
+}
+
+// the layers come from the site's own file at build time (logo-layers.ts), so any set of ids draws
+const sources = import.meta.glob<string>('/src/assets/brand/*.svg', {
+	query: '?raw',
+	import: 'default',
+	eager: true,
+})
+
+const { src, variant } = Astro.props
+const file = `src/assets/brand/${variant}-logo.svg`
+const svg = sources[`/${file}`]
+if (svg === undefined) throw new Error(`${file}: missing`)
+const { viewBox, ids } = logoLayers(svg, file)
+---
+
+<svg viewBox={viewBox} aria-hidden="true" focusable="false">
+	{ids.map((id) => <use href={`${src}#${id}`} />)}
+</svg>

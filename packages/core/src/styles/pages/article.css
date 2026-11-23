@@ -1,0 +1,9 @@
+@import '../layers.css';
+
+@layer components {
+	.content-rights {
+		margin: 2rem 0 0;
+		color: var(--color-foreground);
+		font-size: 13px;
+	}
+}

@@ -1,0 +1,38 @@
+# dependencies
+node_modules/
+.pnpm-store/
+
+# build output
+dist/
+.astro/
+*.tgz
+
+# env & secrets
+.env
+.env.*
+!.env.example
+# personal BMAD answers (user name); the shared values live in _bmad/*/config.yaml
+_bmad/config.user.toml
+# owner strings for check:identity (the CI copy is the IDENTITY_DENYLIST secret)
+.identity-denylist
+
+# logs & caches
+*.log
+coverage/
+.cache/
+
+# playwright (baselines in e2e/__screenshots__ are committed; reports and artifacts are not)
+playwright-report/
+test-results/
+/playwright/.cache/
+
+# os
+.DS_Store
+
+# other package managers (the committed lockfile is pnpm-lock.yaml)
+package-lock.json
+yarn.lock
+
+# agent planning artifacts (Claude Code + Codex)
+.claude/plan/
+.codex/plan/

@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="ru">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>Astrum Scena — векторная реконструкция</title>
+		<style>
+			* {
+				box-sizing: border-box;
+			}
+			body {
+				margin: 0;
+				padding: 32px;
+				width: 800px;
+				background: #eee;
+				color: #222;
+				font:
+					14px Arial,
+					sans-serif;
+			}
+			h1 {
+				font-size: 20px;
+				font-weight: 500;
+				margin: 0 0 24px;
+			}
+			h2 {
+				font-size: 13px;
+				font-weight: 400;
+				margin: 0 0 12px;
+				color: #555;
+			}
+			.comparison {
+				display: grid;
+				grid-template-columns: repeat(2, 356px);
+				gap: 24px;
+			}
+			.large {
+				width: 356px;
+				height: 356px;
+				background: white;
+				position: relative;
+				overflow: hidden;
+			}
+			.large > img {
+				display: block;
+				width: 100%;
+				height: 100%;
+			}
+			.large.raster > img {
+				position: absolute;
+				width: 145.814%;
+				height: 145.814%;
+				max-width: none;
+				left: -22.791%;
+				top: -19.651%;
+			}
+			.sizes {
+				display: grid;
+				grid-template-columns: repeat(5, 1fr);
+				height: 120px;
+				align-items: start;
+				background: white;
+			}
+			.sample {
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				gap: 16px;
+				padding-top: 12px;
+			}
+			.sample span {
+				font-size: 12px;
+				color: #666;
+			}
+			.sample img,
+			.sample svg {
+				width: 100%;
+				height: 100%;
+				display: block;
+			}
+			.dark {
+				background: #161616;
+			}
+			.dark span {
+				color: #aaa;
+			}
+			.caption {
+				margin: 24px 0 12px;
+				color: #555;
+				font-size: 13px;
+			}
+			.note {
+				margin: 16px 0 0;
+				color: #555;
+				font-size: 12px;
+				line-height: 1.5;
+			}
+		</style>
+	</head>
+	<body>
+		<h1>Astrum Scena · реконструкция кривыми Безье</h1>
+		<div class="comparison">
+			<section>
+				<h2>Утверждённый PNG · v4</h2>
+				<div class="large raster">
+					<img src="mark-approved.png" alt="Утверждённый растровый эскиз" />
+				</div>
+			</section>
+			<section>
+				<h2>SVG · три чистых контура</h2>
+				<div class="large"><img src="mark.svg" alt="Векторная реконструкция" /></div>
+			</section>
+		</div>
+		<p class="caption">SVG · фактические размеры в пикселях</p>
+		<div class="sizes">
+			<div class="sample">
+				<span>16 px</span>
+				<div style="width: 16px; height: 16px">
+					<img src="mark.svg" alt="Знак 16 пикселей" width="16" height="16" />
+				</div>
+			</div>
+			<div class="sample">
+				<span>24 px</span>
+				<div style="width: 24px; height: 24px">
+					<img src="mark.svg" alt="Знак 24 пикселей" width="24" height="24" />
+				</div>
+			</div>
+			<div class="sample">
+				<span>32 px</span>
+				<div style="width: 32px; height: 32px">
+					<img src="mark.svg" alt="Знак 32 пикселей" width="32" height="32" />
+				</div>
+			</div>
+			<div class="sample">
+				<span>48 px</span>
+				<div style="width: 48px; height: 48px">
+					<img src="mark.svg" alt="Знак 48 пикселей" width="48" height="48" />
+				</div>
+			</div>
+			<div class="sample">
+				<span>64 px</span>
+				<div style="width: 64px; height: 64px">
+					<img src="mark.svg" alt="Знак 64 пикселей" width="64" height="64" />
+				</div>
+			</div>
+		</div>
+		<p class="caption">Проверка на тёмном фоне · светлая рамка, алый центр</p>
+		<div class="sizes dark">
+			<div class="sample">
+				<span>16 px</span>
+				<div style="width: 16px; height: 16px">
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						viewBox="196 169 860 860"
+						aria-hidden="true"
+					>
+						<g fill="#F5F5F5">
+							<path
+								d="M258 407H620C642 363 659 307 668 263C677 308 693 363 715 407H996V885L898 813V487H725C700 456 681 419 667 379C653 419 634 456 608 487H357V813L258 885Z"
+							/>
+							<path d="M378 836H877L1007 934H247Z" />
+						</g>
+						<path
+							fill="#EE112D"
+							d="M666 473C704 548 750 579 882 595C718 613 682 648 659 802C643 651 609 618 428 595C577 578 629 547 666 473Z"
+						/>
+					</svg>
+				</div>
+			</div>
+			<div class="sample">
+				<span>24 px</span>
+				<div style="width: 24px; height: 24px">
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						viewBox="196 169 860 860"
+						aria-hidden="true"
+					>
+						<g fill="#F5F5F5">
+							<path
+								d="M258 407H620C642 363 659 307 668 263C677 308 693 363 715 407H996V885L898 813V487H725C700 456 681 419 667 379C653 419 634 456 608 487H357V813L258 885Z"
+							/>
+							<path d="M378 836H877L1007 934H247Z" />
+						</g>
+						<path
+							fill="#EE112D"
+							d="M666 473C704 548 750 579 882 595C718 613 682 648 659 802C643 651 609 618 428 595C577 578 629 547 666 473Z"
+						/>
+					</svg>
+				</div>
+			</div>
+			<div class="sample">
+				<span>32 px</span>
+				<div style="width: 32px; height: 32px">
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						viewBox="196 169 860 860"
+						aria-hidden="true"
+					>
+						<g fill="#F5F5F5">
+							<path
+								d="M258 407H620C642 363 659 307 668 263C677 308 693 363 715 407H996V885L898 813V487H725C700 456 681 419 667 379C653 419 634 456 608 487H357V813L258 885Z"
+							/>
+							<path d="M378 836H877L1007 934H247Z" />
+						</g>
+						<path
+							fill="#EE112D"
+							d="M666 473C704 548 750 579 882 595C718 613 682 648 659 802C643 651 609 618 428 595C577 578 629 547 666 473Z"
+						/>
+					</svg>
+				</div>
+			</div>
+			<div class="sample">
+				<span>48 px</span>
+				<div style="width: 48px; height: 48px">
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						viewBox="196 169 860 860"
+						aria-hidden="true"
+					>
+						<g fill="#F5F5F5">
+							<path
+								d="M258 407H620C642 363 659 307 668 263C677 308 693 363 715 407H996V885L898 813V487H725C700 456 681 419 667 379C653 419 634 456 608 487H357V813L258 885Z"
+							/>
+							<path d="M378 836H877L1007 934H247Z" />
+						</g>
+						<path
+							fill="#EE112D"
+							d="M666 473C704 548 750 579 882 595C718 613 682 648 659 802C643 651 609 618 428 595C577 578 629 547 666 473Z"
+						/>
+					</svg>
+				</div>
+			</div>
+			<div class="sample">
+				<span>64 px</span>
+				<div style="width: 64px; height: 64px">
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						viewBox="196 169 860 860"
+						aria-hidden="true"
+					>
+						<g fill="#F5F5F5">
+							<path
+								d="M258 407H620C642 363 659 307 668 263C677 308 693 363 715 407H996V885L898 813V487H725C700 456 681 419 667 379C653 419 634 456 608 487H357V813L258 885Z"
+							/>
+							<path d="M378 836H877L1007 934H247Z" />
+						</g>
+						<path
+							fill="#EE112D"
+							d="M666 473C704 548 750 579 882 595C718 613 682 648 659 802C643 651 609 618 428 595C577 578 629 547 666 473Z"
+						/>
+					</svg>
+				</div>
+			</div>
+		</div>
+		<p class="note">
+			Внешние поля одинаковые. На тёмном фоне изменён только цвет рамки.<br />Векторная версия
+			принята; утверждённый PNG сохранён как образец.
+		</p>
+	</body>
+</html>

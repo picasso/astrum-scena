@@ -1,0 +1,17 @@
+@import '../../styles/layers.css';
+
+@layer components {
+	.album-photo__img {
+		display: block;
+		width: 100%;
+		height: auto;
+	}
+
+	.album-photo,
+	.album-photo__media,
+	.album-photo__img {
+		display: block;
+		width: 100%;
+		height: auto;
+	}
+}

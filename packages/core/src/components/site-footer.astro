@@ -1,0 +1,194 @@
+---
+import './site-footer.css'
+
+import { getCollection } from 'astro:content'
+import { overrides } from 'virtual:astrum-scena/overrides'
+
+import { switcherDisplay } from '../config/language-switcher.ts'
+import { localizedLabel } from '../config/localized-label.ts'
+import { site } from '../config/site.ts'
+import { siteRoot } from '../config/site-root.ts'
+import { type Lang, localizedHref, useTranslations } from '../i18n/ui'
+import { pageHref, photoHref } from '../lib/content/routes.ts'
+import { loadImageCatalog } from '../lib/images/catalog.ts'
+import { buildPictureModel } from '../lib/images/media.ts'
+import { footerColumnCount } from '../lib/portfolio/footer-columns.ts'
+import {
+	buildPromoCandidates,
+	type FooterPromoContext,
+	selectFooterPromo,
+} from '../lib/portfolio/footer-promo.ts'
+import { resolvePhotoAlt } from '../lib/portfolio/locale.ts'
+import { SURFACE_SIZES } from '../lib/portfolio/sizes.ts'
+import { hasSurfaceMedia, resolveSurfaceMedia } from '../lib/portfolio/surface.ts'
+import FooterCurve from './footer-curve.astro'
+import LanguageSwitcher from './language-switcher.astro'
+import ResponsivePicture from './portfolio/responsive-picture.astro'
+import SocialIcons from './social-icons.astro'
+
+type Props = {
+	lang: Lang
+	// a language-neutral page (`/rights/`) has no other language version to switch to
+	localeNeutral?: boolean
+	hidePrivacyLinks?: boolean
+	// the route supplies its key and the photos it already shows; the footer cannot infer them
+	promo: FooterPromoContext
+}
+
+const { lang, localeNeutral = false, hidePrivacyLinks = false, promo } = Astro.props
+const t = useTranslations(lang)
+const year = new Date().getFullYear()
+const { copyright } = site.identity
+const copyrightHolder = localizedLabel(copyright.holder, lang)
+const rights = t('home.copyright.rights')
+const notice = `Copyright © ${copyright.since}-${year} ${copyrightHolder}.`
+// a site's `footer-copyright` replacement fills the line; the element itself stays the core's
+const Copyright = overrides['footer-copyright']
+
+// port of the legacy theme's footer (`includes/structure/traits/footer.php` + `_footer.scss`): the
+// curve, then a full-width footer band whose content alone is width-limited (legacy `.wrap`). The
+// copyright line comes before the widget columns because the legacy theme printed it in `do_footer`
+// and hooked the columns in after it. The three columns follow the legacy `sidebars_widgets`:
+// footer-1 is the quote with the social icons below it, footer-2 the menu and language switcher, and
+// footer-3 the gallery, where a promo grid (lib/portfolio/footer-promo.ts) replaces the legacy fixed
+// curated set.
+const curve = site.footer.curve
+const quoteOn = site.footer.quote === 'on'
+// footer.social toggles only the footer icons; the home overlay keeps the shared `site.social` list
+const socialOn = site.footer.social === 'on' && site.social.length > 0
+// a language-neutral page overrides `footer.lang`
+const langDisplay = switcherDisplay(site.footer.lang, localeNeutral)
+const recentWorks = site.footer.recentWorks
+// a language-neutral page links every locale's privacy page, the reference locale first
+const privacyLocales = [
+	site.content.referenceLocale,
+	...site.content.locales.filter((locale) => locale !== site.content.referenceLocale),
+]
+const menuLinks = site.menu.items.map((item) => ({
+	href: localizedHref(lang, item.segment),
+	label: localizedLabel(item.label, lang),
+}))
+
+// a photo without a footer thumbnail is dropped before slot selection rather than failing: this block
+// is on every page, so one missing derivative must not break the whole build, unlike on the photo and
+// album routes. Each link goes to the photo page in the photo's first published album; draft
+// memberships are skipped.
+type RecentItem = { href: string; media: ReturnType<typeof buildPictureModel>; title: string }
+let recentItems: RecentItem[] = []
+if (recentWorks !== 'off') {
+	const [albums, photos] = await Promise.all([getCollection('albums'), getCollection('photos')])
+	const catalog = loadImageCatalog(siteRoot)
+	const candidates = buildPromoCandidates(albums, photos, (photoId) =>
+		hasSurfaceMedia(catalog.manifest, photoId, 'footerThumb'),
+	)
+	recentItems = selectFooterPromo(candidates, promo, recentWorks).map(({ photo, albumId }) => ({
+		href: photoHref(albumId, photo.id, lang),
+		media: buildPictureModel(resolveSurfaceMedia(catalog.manifest, photo.id, 'footerThumb'), {
+			originBase: catalog.originBase,
+			alt: resolvePhotoAlt(photo.data, lang),
+			sizes: SURFACE_SIZES.footerThumb,
+		}),
+		title: photo.data.title[lang],
+	}))
+}
+const showRecent = recentItems.length > 0
+// the grid shrinks to the visible columns (the menu is always there), so a disabled block leaves no
+// empty gap
+const showFirst = quoteOn || socialOn
+const columns = footerColumnCount(site.footer.columns, 1 + Number(showFirst) + Number(showRecent))
+---
+
+{curve !== 'off' && <FooterCurve shape={curve.shape} height={curve.height} />}
+<footer class="site-footer">
+	<div class="site-footer__wrap">
+		<p class="site-footer__copyright">
+			{
+				Copyright ? (
+					<Copyright
+						lang={lang}
+						since={copyright.since}
+						year={year}
+						holder={copyrightHolder}
+						rights={rights}
+					/>
+				) : (
+					<>
+						<span>{notice}</span> <span>{rights}</span>
+					</>
+				)
+			}
+		</p>
+
+		{/* the legacy footer-1/2/3 widget columns; `footer.columns` caps their number */}
+		<div class:list={['footer-columns', `footer-columns--${columns}`]}>
+			{
+				showFirst && (
+					<div class="footer-columns__item">
+						{quoteOn && (
+							<blockquote class="footer-quote">{t('footer.quote')}</blockquote>
+						)}
+						{socialOn && <SocialIcons lang={lang} variant="footer" />}
+					</div>
+				)
+			}
+
+			<div class="footer-columns__item footer-columns__item--links">
+				<nav aria-label={t('nav.footer.label')}>
+					<ul class="footer-menu">
+						{
+							menuLinks.map(({ href, label }) => (
+								<li>
+									<a href={href}>{label}</a>
+								</li>
+							))
+						}
+					</ul>
+				</nav>
+				{langDisplay && <LanguageSwitcher lang={lang} display={langDisplay} />}
+				{
+					!hidePrivacyLinks && (
+						<nav class="footer-legal" aria-label={t('footer.privacy')}>
+							{localeNeutral ? (
+								privacyLocales.map((locale) => (
+									<a
+										href={pageHref('privacy', locale)}
+										lang={locale}
+										hreflang={locale}
+									>
+										{`${useTranslations(locale)('footer.privacy')} (${locale.toUpperCase()})`}
+									</a>
+								))
+							) : (
+								<a href={pageHref('privacy', lang)}>{t('footer.privacy')}</a>
+							)}
+						</nav>
+					)
+				}
+			</div>
+
+			{
+				showRecent && (
+					<div class="footer-columns__item">
+						<section class="footer-recent" aria-label={t('footer.recentWorks')}>
+							<ul class="footer-recent__grid">
+								{recentItems.map((item) => (
+									<li>
+										<a class="footer-recent__link" href={item.href}>
+											<ResponsivePicture
+												model={item.media}
+												class="footer-recent__media"
+												imgClass="footer-recent__img"
+												fetchpriority="low"
+											/>
+											<span class="footer-recent__title">{item.title}</span>
+										</a>
+									</li>
+								))}
+							</ul>
+						</section>
+					</div>
+				)
+			}
+		</div>
+	</div>
+</footer>

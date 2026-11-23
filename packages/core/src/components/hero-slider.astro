@@ -1,0 +1,118 @@
+---
+import './hero-slider.css'
+
+import { getCollection } from 'astro:content'
+
+import { localizedLabel } from '../config/localized-label'
+import { site } from '../config/site'
+import { siteRoot } from '../config/site-root.ts'
+import { type Lang, useTranslations } from '../i18n/ui'
+import { deriveExcerpt } from '../lib/content/excerpt'
+import type { ContentSnapshot } from '../lib/content/model'
+import type { FeaturedConfig } from '../lib/content/schemas'
+import { resolveFeaturedSlides } from '../lib/featured'
+import type { HeroSlideView } from '../lib/hero-types'
+import { loadImageCatalog } from '../lib/images/catalog'
+import { buildPictureModel } from '../lib/images/media'
+import { SURFACE_SIZES } from '../lib/portfolio/sizes.ts'
+import { resolveSurfaceMedia } from '../lib/portfolio/surface.ts'
+import { HeroSlider } from '../ui/hero-slider'
+
+type Props = {
+	lang: Lang
+	// loaded by the route through lib (loadFeaturedHome); the component never reads files
+	featured: FeaturedConfig
+}
+
+const { lang, featured: config } = Astro.props
+const t = useTranslations(lang)
+
+const [albums, photos, articles, pages] = await Promise.all([
+	getCollection('albums'),
+	getCollection('photos'),
+	getCollection('articles'),
+	getCollection('pages'),
+])
+
+const snapshot: ContentSnapshot = {
+	albums: albums.map((entry) => ({ id: entry.id, data: entry.data })),
+	photos: photos.map((entry) => ({ id: entry.id, data: entry.data })),
+	articles: articles.map((entry) => ({ id: entry.id, data: entry.data })),
+	pages: pages.map((entry) => ({ id: entry.id, data: entry.data })),
+	// a slide targets albums, articles and pages only
+	courses: [],
+	categories: [],
+	places: [],
+	tags: [],
+}
+
+// document excerpts are derived here, where entry.body is available, by the same function the cards use
+const documentBodies = new Map<string, { excerpt?: string; body?: string }>()
+for (const entry of articles) {
+	documentBodies.set(`articles:${entry.data.slug}:${entry.data.locale}`, {
+		excerpt: entry.data.excerpt,
+		body: entry.body,
+	})
+}
+for (const entry of pages) {
+	documentBodies.set(`pages:${entry.data.slug}:${entry.data.locale}`, {
+		excerpt: entry.data.excerpt,
+		body: entry.body,
+	})
+}
+
+const catalog = loadImageCatalog(siteRoot)
+
+const heroCtaLabel = (linkKind: 'album' | 'page') =>
+	linkKind === 'album' ? t('hero.cta.album') : t('hero.cta.page')
+
+// featured slide media comes from the active manifest through the bannerHero surface.
+const resolved = resolveFeaturedSlides(snapshot, config, lang, heroCtaLabel, {
+	resolvePhotoMedia: (photoId) => resolveSurfaceMedia(catalog.manifest, photoId, 'bannerHero'),
+	resolveDocumentExcerpt: (target, locale) => {
+		const doc = documentBodies.get(`${target.collection}:${target.slug}:${locale}`)
+		return doc ? deriveExcerpt(doc.excerpt, doc.body) : undefined
+	},
+	truncateBudget: site.slider.truncateBudget,
+	albumAccent: site.hero.galleryAccent,
+	referenceLocale: site.content.referenceLocale,
+	genericAlt: localizedLabel(site.identity.photoAlt, lang),
+})
+
+// one picture model per slide, built the same way as in top-section
+const slides: HeroSlideView[] = resolved.map((slide) => {
+	const model = buildPictureModel(slide.media, {
+		originBase: catalog.originBase,
+		alt: slide.alt,
+		sizes: SURFACE_SIZES.bannerHero,
+	})
+	return {
+		id: slide.id,
+		align: slide.align,
+		accent: slide.accent,
+		sources: model.sources.map((source) => ({ type: source.type, srcset: source.srcset })),
+		fallbackSrc: model.fallback.src,
+		width: model.width,
+		height: model.height,
+		sizes: model.sizes,
+		dominantColor: slide.media.dominantColor,
+		title: slide.title,
+		desc: slide.desc,
+		alt: slide.alt,
+		link: slide.link,
+	}
+})
+---
+
+<section class="hero-section" aria-label={localizedLabel(site.identity.title, lang)}>
+	<HeroSlider
+		client:idle
+		slides={slides}
+		nextLabel={t('hero.slide.next')}
+		prevLabel={t('hero.slide.prev')}
+		pauseLabel={t('hero.slide.pause')}
+		playLabel={t('hero.slide.play')}
+		speed={site.slider.speed}
+		autoplayDelay={site.slider.autoplayDelay}
+	/>
+</section>

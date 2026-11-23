@@ -1,0 +1,111 @@
+/*
+ * Rendered by src/components/blocks/WrapAround.astro (docs/blocks/wrap-around.md); frames use the shared
+ * image-frame.css scale. Layout needs no client JS; only lightbox items do.
+ *
+ * Width percentages and outside offsets resolve against the `.prose` query container declared in prose.css.
+ */
+@import '../layers.css';
+
+@layer components {
+	:root {
+		/* Keep the legacy wrap spacing rhythm separate from compact shared gaps. */
+		--wrap-text-gap-none: 0;
+		--wrap-text-gap-tiny: 0.5em;
+		--wrap-text-gap-small: 1em;
+		--wrap-text-gap-medium: 1.5em;
+		--wrap-text-gap-large: 2em;
+	}
+
+	.wrap-around {
+		/* Calibration values, not API. */
+		--wrap-min-media: 160px;
+		/* Outside is capped by the safe space between the prose edge and the viewport. As that space
+		 * shrinks, the breakout smoothly returns to the ordinary in-column layout. */
+		--wrap-outside-available: max(0px, calc(50vw - 50cqw - var(--container-pad)));
+		--wrap-outside-effective: min(var(--wrap-outside, 0cqw), var(--wrap-outside-available));
+
+		width: var(--wrap-width, 45%);
+		max-width: 80%;
+		min-width: max(20%, calc(var(--wrap-min-media) - var(--wrap-outside-effective)));
+		margin-block: 0.4em;
+		/* A bottom margin would widen the float area and leave an empty line under the image; textGap
+		 * applies only after the switch to the full-width block. */
+		margin-bottom: 0;
+	}
+
+	/* While outside closes, the float slot may grow only to the larger of 50% and its original width.
+	 * This preserves the author's wide-screen composition without letting the text column get narrower
+	 * during viewport contraction; beyond the cap, the media itself shrinks. */
+	.wrap-around--outside {
+		--wrap-outside-safe-slot: max(50%, calc(var(--wrap-width) - var(--wrap-outside, 0cqw)));
+
+		width: min(
+			calc(var(--wrap-width) - var(--wrap-outside-effective)),
+			var(--wrap-outside-safe-slot)
+		);
+	}
+
+	.wrap-around--left {
+		float: left;
+		margin-right: var(--wrap-text-gap, var(--wrap-text-gap-medium));
+	}
+
+	.wrap-around--right {
+		float: right;
+		margin-left: var(--wrap-text-gap, var(--wrap-text-gap-medium));
+	}
+
+	.wrap-around__figure {
+		margin: 0;
+	}
+
+	/* The float owns only the in-column slot; every figure retains the requested visual width. Left
+	 * media aligns to the slot's right edge, right media to its left edge, so overflow is always outer. */
+	.wrap-around--outside .wrap-around__figure {
+		width: calc(100% + var(--wrap-outside-effective));
+	}
+
+	.wrap-around--outside.wrap-around--left .wrap-around__figure {
+		margin-left: calc(0px - var(--wrap-outside-effective));
+	}
+
+	.wrap-around__figure + .wrap-around__figure {
+		margin-top: var(--wrap-image-gap, var(--content-gap-small));
+	}
+
+	.wrap-around__media,
+	.wrap-around__img {
+		display: block;
+		width: 100%;
+		height: auto;
+	}
+
+	.wrap-around__caption {
+		margin-top: 0.4em;
+		font-size: 0.85em;
+		font-style: italic;
+		color: var(--color-foreground);
+		opacity: 0.5;
+	}
+
+	/* Below `.prose a`, as it ranked when both shipped in one stylesheet; equal specificity would let the
+	 * chunk order after a View Transition decide. */
+	:where(.wrap-around) a {
+		display: block;
+		text-decoration: none;
+	}
+
+	/* Too narrow for the media and a readable line, so the block goes full width without float. The
+	 * threshold is calibrated with the typography. */
+	@container prose (max-width: 480px) {
+		.wrap-around {
+			--wrap-outside-effective: 0px;
+
+			float: none;
+			width: 100%;
+			max-width: 100%;
+			margin-inline: 0;
+			margin-bottom: var(--wrap-text-gap, var(--wrap-text-gap-medium));
+		}
+	}
+}

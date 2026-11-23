@@ -1,0 +1,7 @@
+interface:
+    display_name: 'Sync MDX'
+    short_description: 'Synchronize the MDX block structure of the locales of a document'
+    default_prompt: 'Use $sync-mdx to compare and synchronize the MDX structure of one document.'
+
+policy:
+    allow_implicit_invocation: false

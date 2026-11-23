@@ -1,0 +1,42 @@
+---
+import './card-grid.css'
+
+import { site } from '../config/site.ts'
+import type { CardPresentation } from '../config/variants.ts'
+import { type CardModel, excerptHiddenClass } from '../lib/cards/select.ts'
+import Card from './card.astro'
+
+type Props = {
+	cards: readonly CardModel[]
+	columns: number
+	more?: string
+	titleLevel?: 2 | 3
+	// defaults to `details`
+	presentation?: CardPresentation
+	// gap between cards in px; the CSS default is 1rem
+	gap?: number
+}
+
+const { cards, columns, more, titleLevel, presentation, gap } = Astro.props
+// the `.card-grid-frame` wrapper is the query container because an element cannot query its own width
+---
+
+<div class="card-grid-frame">
+	<ul
+		class:list={['card-grid', excerptHiddenClass(site.listing.excerptHiddenBelow)]}
+		style={`--card-grid-columns:${columns};${gap === undefined ? '' : ` --card-grid-gap:${gap}px;`}`}
+	>
+		{
+			cards.map((card) => (
+				<li class="card-grid__item">
+					<Card
+						card={card}
+						more={more}
+						titleLevel={titleLevel}
+						presentation={presentation}
+					/>
+				</li>
+			))
+		}
+	</ul>
+</div>
