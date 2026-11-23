@@ -50,8 +50,6 @@ jobs:
               if: github.ref != 'refs/heads/main'
               run: pnpm release --dry-run --pack-dir .cache/release
 
-            # `--dry-run` stays until the core repository goes public; dropping it is what turns
-            # publishing on
             - name: Publish
               if: github.ref == 'refs/heads/main'
-              run: pnpm release --dry-run --pack-dir .cache/release
+              run: pnpm release --pack-dir .cache/release

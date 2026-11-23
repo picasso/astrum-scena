@@ -7,6 +7,10 @@ The versions below are the repository's `1.<epic>.<story>` versions; the npm pac
 
 ## [Unreleased]
 
+### Changed
+
+- The `Release` workflow publishes to npm from `main`: the core is public, its first version went out by hand and the trusted publisher is set, so the `main` step runs without `--dry-run`; pull requests and other refs still stop at `npm publish --dry-run`.
+
 ## [1.6.9] - 2026-11-22
 
 ### Added
