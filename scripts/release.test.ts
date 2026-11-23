@@ -303,11 +303,14 @@ describe('release.yml', () => {
 		expect(allDryRun(steps[0]!), steps[0]!.name).toBe(true)
 	})
 
-	// removed when the core goes public and the workflow drops `--dry-run` from the main step
-	it('passes a literal --dry-run to every publish step until story 6.9', () => {
-		const steps = publishSteps(workflow)
-		expect(steps.length).toBeGreaterThan(0)
-		for (const step of steps) expect(allDryRun(step), step.name).toBe(true)
+	it('publishes from main without --dry-run, and no other workflow publishes', () => {
+		const steps = publishSteps(workflow).filter(
+			(step) => step.if === "github.ref == 'refs/heads/main'",
+		)
+		expect(steps).toHaveLength(1)
+		const commands = publishCommands(steps[0]!.run ?? '')
+		expect(commands, steps[0]!.name).toHaveLength(1)
+		expect(DRY_RUN.test(commands[0]!), steps[0]!.name).toBe(false)
 		for (const file of workflowFiles.filter((name) => name !== 'release.yml'))
 			expect(publishSteps(readWorkflow(file)), file).toEqual([])
 	})
