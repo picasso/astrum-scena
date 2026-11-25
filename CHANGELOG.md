@@ -7,6 +7,8 @@ The versions below are the repository's `1.<epic>.<story>` versions; the npm pac
 
 ## [Unreleased]
 
+## [1.6.10] - 2026-11-25
+
 ### Added
 
 - `pnpm demo:packed` also builds the demo with its reference locale only, without the other locale's texts, documents and dictionary, and checks that the build has every page of that locale, no other locale's pages, no `hreflang` and no translation freshness on `/status/`.
