@@ -16,10 +16,9 @@ import type { AstroIntegration, AstroUserConfig, InjectedRoute } from 'astro'
 import { afterAll, describe, expect, it, vi } from 'vitest'
 import { parse } from 'yaml'
 
-import { buildSiteConfig } from './config/fixtures/site-config.ts'
+import { buildSiteConfig, contentConfig } from './config/fixtures/site-config.ts'
 import { writeSiteFiles } from './config/fixtures/site-files.ts'
-import { SITE_LOCK_ENV } from './config/loader.ts'
-import { SUPPORTED_LOCALES } from './config/locale-schema.ts'
+import { loadSiteSection, SITE_LOCK_ENV } from './config/loader.ts'
 import { SITE_LOCK_PATH } from './config/lock.ts'
 import { siteRoot } from './config/site-root.ts'
 import { CORE_ROOT } from './core-root.ts'
@@ -162,7 +161,7 @@ describe('astrumScena integration', () => {
 		expect(addWatchFile.mock.calls).toEqual([[path.resolve(siteRoot, SITE_LOCK_PATH)]])
 	})
 
-	it("watches the lock and the site's dictionary of every catalog locale from the i18n module", async () => {
+	it("watches the lock and the site's dictionary of every locale it builds from the i18n module", async () => {
 		const { plugins } = await setUp(siteRoot)
 		const plugin = plugins.find(
 			(candidate) => candidate.name === 'astrum-scena:config-yaml-dependency',
@@ -177,7 +176,7 @@ describe('astrumScena integration', () => {
 
 		expect(addWatchFile.mock.calls).toEqual([
 			[path.resolve(siteRoot, SITE_LOCK_PATH)],
-			...SUPPORTED_LOCALES.map((locale) => [
+			...loadSiteSection(siteRoot, 'content').locales.map((locale) => [
 				path.resolve(siteRoot, siteDictionaryPath(locale)),
 			]),
 		])
@@ -244,10 +243,10 @@ describe('astrumScena integration', () => {
 			(await renderer.render(source, { fileURL: new URL('file:///docs/x.en.md') })).code
 		const note = await render(':::note{claim="prod-d602206b:64cf2f9d"}\nBody.\n:::')
 		expect(note).toContain('>Since then<')
-		expect(note).not.toContain(CORE_DICTIONARIES.en['note.title'])
+		expect(note).not.toContain(CORE_DICTIONARIES.en!['note.title'])
 		const links = await render(':::links\n- [a](https://a.example)\n:::')
 		expect(links).toContain('>Further reading<')
-		expect(links).not.toContain(`>${CORE_DICTIONARIES.en['links.title']}<`)
+		expect(links).not.toContain(`>${CORE_DICTIONARIES.en!['links.title']}<`)
 	})
 
 	it("serves the site's replacement components from src/overrides", async () => {
@@ -347,7 +346,7 @@ describe('astro config', () => {
 	// the demo content has no `about` page for the fixture's menu item
 	const site = buildSiteConfig({
 		origin: 'https://other.test',
-		content: { locales: ['ru', 'en'], referenceLocale: 'en' },
+		content: contentConfig(['ru', 'en'], 'en'),
 		menu: { ...base.menu, items: base.menu.items.filter((item) => item.segment !== 'about') },
 	})
 
@@ -414,7 +413,7 @@ describe('astro config', () => {
 		const { code } = await renderer.render(':::links\n- [a](https://a.example)\n:::', {
 			fileURL: new URL('file:///docs/x.en.md'),
 		})
-		expect(code).toContain(`>${CORE_DICTIONARIES.en['links.title']}<`)
+		expect(code).toContain(`>${CORE_DICTIONARIES.en!['links.title']}<`)
 	})
 })
 

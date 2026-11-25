@@ -1,6 +1,6 @@
 import { z } from 'astro/zod'
 
-import { localeSchema } from '../../config/locale-schema.ts'
+import { localeCodeSchema } from '../../config/locale-schema.ts'
 
 // one schema for the island and the Pages Function, and the server re-validates everything;
 // `astro/zod` is a thin re-export of `zod/v4`, so the worker bundle gets zod, not the Astro runtime
@@ -33,7 +33,7 @@ z.config({ jitless: true })
 // every string field is trimmed before its checks
 export const contactSubmissionSchema = z
 	.object({
-		locale: localeSchema,
+		locale: localeCodeSchema,
 		name: z
 			.string()
 			.transform((value) => value.trim())

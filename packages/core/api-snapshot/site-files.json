@@ -722,21 +722,50 @@
 					"content": {
 						"additionalProperties": false,
 						"properties": {
+							"catalog": {
+								"additionalProperties": {
+									"additionalProperties": false,
+									"properties": {
+										"charWidthPx": {
+											"exclusiveMinimum": 0,
+											"type": "number"
+										},
+										"intl": {
+											"type": "string",
+											"x-refinements": [
+												"014e51dec5f8"
+											]
+										},
+										"ogLocale": {
+											"pattern": "^[a-z]{2,3}_[A-Z]{2}$",
+											"type": "string"
+										},
+										"script": {
+											"enum": [
+												"cyrillic",
+												"latin"
+											],
+											"type": "string"
+										}
+									},
+									"type": "object"
+								},
+								"default": {},
+								"propertyNames": {
+									"pattern": "^[a-z]{2,3}$",
+									"type": "string"
+								},
+								"type": "object"
+							},
 							"locales": {
 								"items": {
-									"enum": [
-										"en",
-										"ru"
-									],
+									"pattern": "^[a-z]{2,3}$",
 									"type": "string"
 								},
 								"minItems": 1,
 								"prefixItems": [
 									{
-										"enum": [
-											"en",
-											"ru"
-										],
+										"pattern": "^[a-z]{2,3}$",
 										"type": "string"
 									}
 								],
@@ -746,20 +775,22 @@
 								]
 							},
 							"referenceLocale": {
-								"enum": [
-									"en",
-									"ru"
-								],
+								"pattern": "^[a-z]{2,3}$",
 								"type": "string"
 							}
 						},
 						"required": [
+							"catalog",
 							"locales",
 							"referenceLocale"
 						],
 						"type": "object",
 						"x-refinements": [
-							"3fc3333f7d27"
+							"3fc3333f7d27",
+							"b585029ddcaf"
+						],
+						"x-transforms": [
+							"a0a483518163"
 						]
 					},
 					"factcheck": {
@@ -949,10 +980,7 @@
 											]
 										},
 										"propertyNames": {
-											"enum": [
-												"en",
-												"ru"
-											],
+											"pattern": "^[a-z]{2,3}$",
 											"type": "string"
 										},
 										"type": "object"
@@ -978,10 +1006,7 @@
 									]
 								},
 								"propertyNames": {
-									"enum": [
-										"en",
-										"ru"
-									],
+									"pattern": "^[a-z]{2,3}$",
 									"type": "string"
 								},
 								"type": "object"
@@ -995,10 +1020,7 @@
 									]
 								},
 								"propertyNames": {
-									"enum": [
-										"en",
-										"ru"
-									],
+									"pattern": "^[a-z]{2,3}$",
 									"type": "string"
 								},
 								"type": "object"
@@ -1504,10 +1526,7 @@
 												]
 											},
 											"propertyNames": {
-												"enum": [
-													"en",
-													"ru"
-												],
+												"pattern": "^[a-z]{2,3}$",
 												"type": "string"
 											},
 											"type": "object"
@@ -2317,10 +2336,7 @@
 											]
 										},
 										"propertyNames": {
-											"enum": [
-												"en",
-												"ru"
-											],
+											"pattern": "^[a-z]{2,3}$",
 											"type": "string"
 										},
 										"type": "object"
@@ -2354,10 +2370,7 @@
 									]
 								},
 								"propertyNames": {
-									"enum": [
-										"en",
-										"ru"
-									],
+									"pattern": "^[a-z]{2,3}$",
 									"type": "string"
 								},
 								"type": "object"
@@ -2433,10 +2446,7 @@
 										]
 									},
 									"propertyNames": {
-										"enum": [
-											"en",
-											"ru"
-										],
+										"pattern": "^[a-z]{2,3}$",
 										"type": "string"
 									},
 									"type": "object"
@@ -3173,21 +3183,50 @@
 			"content": {
 				"additionalProperties": false,
 				"properties": {
+					"catalog": {
+						"additionalProperties": {
+							"additionalProperties": false,
+							"properties": {
+								"charWidthPx": {
+									"exclusiveMinimum": 0,
+									"type": "number"
+								},
+								"intl": {
+									"type": "string",
+									"x-refinements": [
+										"014e51dec5f8"
+									]
+								},
+								"ogLocale": {
+									"pattern": "^[a-z]{2,3}_[A-Z]{2}$",
+									"type": "string"
+								},
+								"script": {
+									"enum": [
+										"cyrillic",
+										"latin"
+									],
+									"type": "string"
+								}
+							},
+							"type": "object"
+						},
+						"default": {},
+						"propertyNames": {
+							"pattern": "^[a-z]{2,3}$",
+							"type": "string"
+						},
+						"type": "object"
+					},
 					"locales": {
 						"items": {
-							"enum": [
-								"en",
-								"ru"
-							],
+							"pattern": "^[a-z]{2,3}$",
 							"type": "string"
 						},
 						"minItems": 1,
 						"prefixItems": [
 							{
-								"enum": [
-									"en",
-									"ru"
-								],
+								"pattern": "^[a-z]{2,3}$",
 								"type": "string"
 							}
 						],
@@ -3197,10 +3236,7 @@
 						]
 					},
 					"referenceLocale": {
-						"enum": [
-							"en",
-							"ru"
-						],
+						"pattern": "^[a-z]{2,3}$",
 						"type": "string"
 					}
 				},
@@ -3210,7 +3246,11 @@
 				],
 				"type": "object",
 				"x-refinements": [
-					"3fc3333f7d27"
+					"3fc3333f7d27",
+					"b585029ddcaf"
+				],
+				"x-transforms": [
+					"a0a483518163"
 				]
 			},
 			"factcheck": {
@@ -3377,10 +3417,7 @@
 									]
 								},
 								"propertyNames": {
-									"enum": [
-										"en",
-										"ru"
-									],
+									"pattern": "^[a-z]{2,3}$",
 									"type": "string"
 								},
 								"type": "object"
@@ -3406,10 +3443,7 @@
 							]
 						},
 						"propertyNames": {
-							"enum": [
-								"en",
-								"ru"
-							],
+							"pattern": "^[a-z]{2,3}$",
 							"type": "string"
 						},
 						"type": "object"
@@ -3423,10 +3457,7 @@
 							]
 						},
 						"propertyNames": {
-							"enum": [
-								"en",
-								"ru"
-							],
+							"pattern": "^[a-z]{2,3}$",
 							"type": "string"
 						},
 						"type": "object"
@@ -3901,10 +3932,7 @@
 										]
 									},
 									"propertyNames": {
-										"enum": [
-											"en",
-											"ru"
-										],
+										"pattern": "^[a-z]{2,3}$",
 										"type": "string"
 									},
 									"type": "object"
@@ -4665,10 +4693,7 @@
 									]
 								},
 								"propertyNames": {
-									"enum": [
-										"en",
-										"ru"
-									],
+									"pattern": "^[a-z]{2,3}$",
 									"type": "string"
 								},
 								"type": "object"
@@ -4702,10 +4727,7 @@
 							]
 						},
 						"propertyNames": {
-							"enum": [
-								"en",
-								"ru"
-							],
+							"pattern": "^[a-z]{2,3}$",
 							"type": "string"
 						},
 						"type": "object"
@@ -4776,10 +4798,7 @@
 								]
 							},
 							"propertyNames": {
-								"enum": [
-									"en",
-									"ru"
-								],
+								"pattern": "^[a-z]{2,3}$",
 								"type": "string"
 							},
 							"type": "object"
@@ -5163,10 +5182,7 @@
 					"type": "string"
 				},
 				"propertyNames": {
-					"enum": [
-						"en",
-						"ru"
-					],
+					"pattern": "^[a-z]{2,3}$",
 					"type": "string"
 				},
 				"type": "object",
@@ -5179,10 +5195,7 @@
 					"type": "string"
 				},
 				"propertyNames": {
-					"enum": [
-						"en",
-						"ru"
-					],
+					"pattern": "^[a-z]{2,3}$",
 					"type": "string"
 				},
 				"type": "object",
@@ -5232,10 +5245,7 @@
 					"type": "string"
 				},
 				"propertyNames": {
-					"enum": [
-						"en",
-						"ru"
-					],
+					"pattern": "^[a-z]{2,3}$",
 					"type": "string"
 				},
 				"type": "object",
@@ -5275,10 +5285,7 @@
 				"type": "string"
 			},
 			"locale": {
-				"enum": [
-					"en",
-					"ru"
-				],
+				"pattern": "^[a-z]{2,3}$",
 				"type": "string"
 			},
 			"master": {
@@ -5411,10 +5418,7 @@
 								"type": "string"
 							},
 							"propertyNames": {
-								"enum": [
-									"en",
-									"ru"
-								],
+								"pattern": "^[a-z]{2,3}$",
 								"type": "string"
 							},
 							"type": "object",
@@ -5588,10 +5592,7 @@
 								"type": "string"
 							},
 							"propertyNames": {
-								"enum": [
-									"en",
-									"ru"
-								],
+								"pattern": "^[a-z]{2,3}$",
 								"type": "string"
 							},
 							"type": "object",
@@ -5654,10 +5655,7 @@
 								"type": "string"
 							},
 							"propertyNames": {
-								"enum": [
-									"en",
-									"ru"
-								],
+								"pattern": "^[a-z]{2,3}$",
 								"type": "string"
 							},
 							"type": "object",
@@ -5704,10 +5702,7 @@
 				"type": "string"
 			},
 			"locale": {
-				"enum": [
-					"en",
-					"ru"
-				],
+				"pattern": "^[a-z]{2,3}$",
 				"type": "string"
 			},
 			"master": {
@@ -5847,10 +5842,7 @@
 										"type": "string"
 									},
 									"propertyNames": {
-										"enum": [
-											"en",
-											"ru"
-										],
+										"pattern": "^[a-z]{2,3}$",
 										"type": "string"
 									},
 									"type": "object",
@@ -5863,10 +5855,7 @@
 										"type": "string"
 									},
 									"propertyNames": {
-										"enum": [
-											"en",
-											"ru"
-										],
+										"pattern": "^[a-z]{2,3}$",
 										"type": "string"
 									},
 									"type": "object",
@@ -6001,10 +5990,7 @@
 				"type": "string"
 			},
 			"locale": {
-				"enum": [
-					"en",
-					"ru"
-				],
+				"pattern": "^[a-z]{2,3}$",
 				"type": "string"
 			},
 			"master": {
@@ -6126,10 +6112,7 @@
 					"type": "string"
 				},
 				"propertyNames": {
-					"enum": [
-						"en",
-						"ru"
-					],
+					"pattern": "^[a-z]{2,3}$",
 					"type": "string"
 				},
 				"type": "object",
@@ -6142,10 +6125,7 @@
 					"type": "string"
 				},
 				"propertyNames": {
-					"enum": [
-						"en",
-						"ru"
-					],
+					"pattern": "^[a-z]{2,3}$",
 					"type": "string"
 				},
 				"type": "object",
@@ -6169,10 +6149,7 @@
 					"type": "string"
 				},
 				"propertyNames": {
-					"enum": [
-						"en",
-						"ru"
-					],
+					"pattern": "^[a-z]{2,3}$",
 					"type": "string"
 				},
 				"type": "object",
@@ -6320,10 +6297,7 @@
 					"type": "string"
 				},
 				"propertyNames": {
-					"enum": [
-						"en",
-						"ru"
-					],
+					"pattern": "^[a-z]{2,3}$",
 					"type": "string"
 				},
 				"type": "object",

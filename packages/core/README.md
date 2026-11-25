@@ -281,7 +281,14 @@ differs, and the effective config is the defaults with those overrides merged in
   URL of the `/rights/` page on it, so the domain is written once. A written value overrides the
   derivation: a site that moves to another domain may keep the old values in the XMP instead of
   re-encoding its derivatives, since a changed value changes `configDigest`; the old URL must then
-  keep serving the rights page or redirect to it.
+  keep serving the rights page or redirect to it;
+- `content.catalog` describes each locale: its font `script` (`latin` or `cyrillic`, the scripts the
+  core has fonts for), `ogLocale`, the Intl tag `intl` of its dates and `charWidthPx`, the mean glyph
+  width that sizes the album header. The core has entries for `en` and `ru`, which a site overrides
+  field by field (`catalog: { en: { ogLocale: en_GB } }`); a locale of `content.locales` (two or
+  three lowercase letters) without an entry fails with its path, and a new code needs every field.
+  The lock holds the entries of the site's locales and of `en`, the language of `/status/`. The core
+  ships UI texts and language names for `en` and `ru` only.
 
 A default left in place is checked by the same cross-field rules as a written value, so changing one
 side of a coupled pair means writing the other too: `surfaces.articlesIndex: { kind: grid }` keeps the

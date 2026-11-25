@@ -56,7 +56,7 @@ const catalog: ImageCatalog = {
 }
 
 const places: Place[] = [
-	{ id: 'northland', name: { en: 'Northland', ru: 'Северный край' } } as Place,
+	{ id: 'northland', kind: 'country', name: { en: 'Northland', ru: 'Северный край' } },
 ]
 
 function photoEntry(data: Partial<PhotoData> = {}): PhotoEntry {

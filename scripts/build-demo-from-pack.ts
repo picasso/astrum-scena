@@ -22,6 +22,7 @@ import { R2_ENV_VARS } from '../packages/core/src/cli/images/r2-env.ts'
 import { BIN, GATES, IMAGE_COMMANDS } from '../packages/core/src/cli/registry.ts'
 import { writeSiteFiles } from '../packages/core/src/config/fixtures/site-files.ts'
 import { loadSiteConfig, loadSiteSection } from '../packages/core/src/config/loader.ts'
+import { effectiveCatalog } from '../packages/core/src/config/locale-schema.ts'
 import type { SiteConfig } from '../packages/core/src/config/site-schema.ts'
 import { type CoreManifest, declaredSpecifiers } from '../packages/core/src/eslint.ts'
 
@@ -574,7 +575,7 @@ const filesUnder = (site: string, dir: string): string[] =>
 		: []
 
 export function withOneLocale<T>(site: string, action: () => T): T {
-	const { locales, referenceLocale } = loadSiteSection(site, 'content')
+	const { locales, referenceLocale, catalog } = loadSiteSection(site, 'content')
 	const others = locales.filter((locale) => locale !== referenceLocale)
 	const contentFiles = filesUnder(site, CONTENT_DIR)
 	const yamlFiles = contentFiles.filter((file) => YAML_FILE.test(file))
@@ -599,7 +600,12 @@ export function withOneLocale<T>(site: string, action: () => T): T {
 		const config = keepLocale(loadSiteConfig(site), locales, referenceLocale) as SiteConfig
 		writeSiteFiles(site, {
 			...config,
-			content: { ...config.content, locales: [referenceLocale] },
+			// the catalog keeps the service copy's language, which need not be the reference locale
+			content: {
+				locales: [referenceLocale],
+				referenceLocale,
+				catalog: effectiveCatalog([referenceLocale], catalog),
+			},
 		})
 		for (const file of yamlFiles) writeFileSync(join(site, file), oneLocale(saved.get(file)!))
 		for (const file of dropped) rmSync(join(site, file))

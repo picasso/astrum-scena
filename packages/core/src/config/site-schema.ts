@@ -16,7 +16,13 @@ import {
 import { deriveImageRights, imageConfigSchema, type ImageRights } from './images-schema.ts'
 import { LANGUAGE_SWITCHER_MODES } from './language-switcher.ts'
 import { layoutSchema } from './layout.ts'
-import { type Locale, localeSchema } from './locale-schema.ts'
+import {
+	catalogIssues,
+	effectiveCatalog,
+	type Locale,
+	localeCatalogEntrySchema,
+	localeCodeSchema,
+} from './locale-schema.ts'
 import { type LocalizedLabel, localizedLabelSchema } from './localized-label.ts'
 import { isLocalizedRouteTemplate } from './localized-route.ts'
 import { localeCoverageIssues } from './localized-text.ts'
@@ -462,24 +468,34 @@ const viewerSchema = z
 	.strict()
 	.prefault({})
 
-// `locales` is the site's active subset of the catalog; its order is the language switcher order and its
-// first entry the default locale (x-default, Astro `defaultLocale`). The reference locale (ADR-0013) is
-// the only source of Tier-1 document-level fields (coverId, publishedAt, source, kind).
+// `locales` lists the site's locales; its order is the language switcher order and its first entry the
+// default locale (x-default, Astro `defaultLocale`). The reference locale (ADR-0013) is the only source
+// of Tier-1 document-level fields (coverId, publishedAt, source, kind). `catalog` overrides fields of
+// the core's locale defaults and adds the codes the core has no default for, each with every field;
+// the lock holds the effective entry of each locale the site builds and of the service copy's language.
 const contentConfigSchema = z
 	.object({
 		// a tuple with a rest element types the list as non-empty
 		locales: z
-			.tuple([localeSchema], localeSchema)
+			.tuple([localeCodeSchema], localeCodeSchema)
 			.refine((locales) => new Set(locales).size === locales.length, {
 				message: 'content.locales must not repeat a locale',
 			}),
-		referenceLocale: localeSchema,
+		referenceLocale: localeCodeSchema,
+		catalog: z.record(localeCodeSchema, localeCatalogEntrySchema.partial()).default({}),
 	})
 	.strict()
 	.refine((value) => value.locales.includes(value.referenceLocale), {
 		message: 'content.referenceLocale must be one of content.locales',
 		path: ['referenceLocale'],
 	})
+	.superRefine((value, context) => {
+		for (const issue of catalogIssues(value)) context.addIssue({ code: 'custom', ...issue })
+	})
+	.transform(({ catalog, ...value }) => ({
+		...value,
+		catalog: effectiveCatalog(value.locales, catalog),
+	}))
 
 // the canonical production origin (`site`, canonical URLs, sitemap, robots.txt): an https origin with
 // nothing after the host, so `new URL(path, origin)` never drops or doubles a segment

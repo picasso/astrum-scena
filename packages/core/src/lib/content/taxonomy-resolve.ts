@@ -90,17 +90,21 @@ function resolveName(name: string, entries: readonly NamedEntry[]): NameResoluti
 	return { status: 'new' }
 }
 
+// a localized text holds only the site's locales, so no value is actually missing
+const texts = (text: Readonly<Record<string, string | undefined>>): string[] =>
+	Object.values(text).filter((value) => value !== undefined)
+
 function placeKeys(place: Place): NamedEntry {
 	return {
 		id: place.id,
-		keys: [place.id, ...Object.values(place.name).map(normalizeName)],
+		keys: [place.id, ...texts(place.name).map(normalizeName)],
 	}
 }
 
 function tagKeys(tag: Tag): NamedEntry {
 	return {
 		id: tag.id,
-		keys: [tag.id, ...Object.values(tag.label).map(normalizeName)],
+		keys: [tag.id, ...texts(tag.label).map(normalizeName)],
 	}
 }
 

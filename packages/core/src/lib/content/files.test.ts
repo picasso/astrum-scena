@@ -88,7 +88,7 @@ describe('content files', () => {
 		])
 		const snapshot = await loadContentSnapshot(root, [], BILINGUAL)
 		expect(snapshot.albums[0]?.id).toBe('nested/album')
-		const result = validateContentSnapshot(snapshot, 'ru')
+		const result = validateContentSnapshot(snapshot, 'ru', BILINGUAL)
 		expect(result.success).toBe(false)
 		if (!result.success) {
 			expect(result.errors).toEqual([

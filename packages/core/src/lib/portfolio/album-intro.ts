@@ -1,6 +1,3 @@
-import { LOCALE_CATALOG } from '../../config/locale-schema.ts'
-import type { Locale } from '../content/schemas.ts'
-
 // album page description header: a decorative mosaic of all album photos beside the description
 // text; rendered by album-intro.astro
 
@@ -21,8 +18,8 @@ export const MOSAIC_TILE_MAX_PX = 88
 export const MOSAIC_TILE_MIN_PX = 24
 
 // desktop header geometry: `.gallery-aside` is 1024px wide at 1440, 2rem column gap, 16px / 1.5
-// text, 1em paragraph gap; the mean Ubuntu 16px glyph width per locale (LOCALE_CATALOG) was measured
-// on a real description, and +5 % covers word-wrap loss
+// text, 1em paragraph gap; the mean Ubuntu 16px glyph width per locale (`charWidthPx` of the site's
+// `content.catalog`) was measured on a real description, and +5 % covers word-wrap loss
 const HEADER_WIDTH_PX = 1024
 const COLUMN_GAP_PX = 32
 const LINE_HEIGHT_PX = 24
@@ -56,9 +53,9 @@ function mosaicSize(count: number, columns: number, tile: number) {
 export function estimateTextHeight(
 	paragraphs: readonly string[],
 	textWidth: number,
-	locale: Locale,
+	charWidthPx: number,
 ): number {
-	const perLine = LOCALE_CATALOG[locale].charWidthPx * WRAP_LOSS
+	const perLine = charWidthPx * WRAP_LOSS
 	const lines = paragraphs.reduce(
 		(sum, paragraph) => sum + Math.max(1, Math.ceil((paragraph.length * perLine) / textWidth)),
 		0,
@@ -69,7 +66,7 @@ export function estimateTextHeight(
 export function mosaicLayout(
 	count: number,
 	paragraphs: readonly string[],
-	locale: Locale,
+	charWidthPx: number,
 ): MosaicLayout {
 	const photos = Math.max(1, count)
 	type Candidate = MosaicLayout & { fits: boolean; overshoot: number; rows: number }
@@ -96,7 +93,7 @@ export function mosaicLayout(
 			const textHeight = estimateTextHeight(
 				paragraphs,
 				HEADER_WIDTH_PX - COLUMN_GAP_PX - size.width,
-				locale,
+				charWidthPx,
 			)
 			const fits = size.height <= textHeight
 			if (fits || tile === MOSAIC_TILE_MIN_PX) {

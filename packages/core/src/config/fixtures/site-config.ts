@@ -1,5 +1,5 @@
 import { REQUIRED_DENIED_FIELDS } from '../images-schema.ts'
-import { SUPPORTED_LOCALES } from '../locale-schema.ts'
+import { DEFAULT_LOCALE_CATALOG, effectiveCatalog, type Locale } from '../locale-schema.ts'
 import type { SiteConfig } from '../site-schema.ts'
 
 // a complete, valid site config built for tests; it never follows the real site.yaml, so a test that
@@ -7,6 +7,12 @@ import type { SiteConfig } from '../site-schema.ts'
 export function buildSiteConfig(overrides: Partial<SiteConfig> = {}): SiteConfig {
 	return { ...structuredClone(SITE_CONFIG), ...overrides }
 }
+
+// the `content` section a site.yaml with these locales and no catalog resolves to
+export const contentConfig = (
+	locales: [Locale, ...Locale[]],
+	referenceLocale: Locale,
+): SiteConfig['content'] => ({ locales, referenceLocale, catalog: effectiveCatalog(locales, {}) })
 
 const SITE_CONFIG: SiteConfig = {
 	schemaVersion: 4,
@@ -28,10 +34,7 @@ const SITE_CONFIG: SiteConfig = {
 			since: 2001,
 		},
 	},
-	content: {
-		locales: ['en', 'ru'],
-		referenceLocale: 'ru',
-	},
+	content: contentConfig(['en', 'ru'], 'ru'),
 	factcheck: {
 		ownHosts: ['old-site.test'],
 	},
@@ -367,8 +370,7 @@ const SITE_CONFIG: SiteConfig = {
 const isLocalizedText = (value: object): boolean =>
 	Object.keys(value).length > 0 &&
 	Object.entries(value).every(
-		([key, text]) =>
-			(SUPPORTED_LOCALES as readonly string[]).includes(key) && typeof text === 'string',
+		([key, text]) => Object.hasOwn(DEFAULT_LOCALE_CATALOG, key) && typeof text === 'string',
 	)
 
 // a config (or any part of one) whose texts keep only `locales`, as a site with those

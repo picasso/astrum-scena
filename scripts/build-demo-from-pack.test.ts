@@ -17,6 +17,7 @@ import { describe, expect, it } from 'vitest'
 
 import { GATES, IMAGE_COMMANDS } from '../packages/core/src/cli/registry.ts'
 import { loadSiteConfig, loadSiteSection } from '../packages/core/src/config/loader.ts'
+import { SERVICE_COPY_LOCALE } from '../packages/core/src/config/locale-schema.ts'
 import { type CoreManifest, declaredSpecifiers } from '../packages/core/src/eslint.ts'
 import { slugCollisions } from '../packages/core/src/modules/collisions.ts'
 import { coursesModule } from '../packages/core/src/modules/courses/manifest.ts'
@@ -670,13 +671,19 @@ describe('the demo with one locale', () => {
 			withOneLocale(site, () => {
 				const config = loadSiteConfig(site)
 				expect(config.content.locales).toEqual([referenceLocale])
+				// the catalog also keeps the language of the service pages
+				expect(Object.keys(config.content.catalog)).toEqual([
+					...new Set([referenceLocale, SERVICE_COPY_LOCALE]),
+				])
 				expect(config.identity.title).toEqual({
 					[referenceLocale]: expect.any(String),
 				})
 				const tags = readFileSync(join(site, 'src/content/config/tags.yaml'), 'utf8')
 				expect(tags).toContain(`${referenceLocale}:`)
 				for (const locale of others) {
-					expect(JSON.stringify(config)).not.toContain(`"${locale}":`)
+					expect(JSON.stringify({ ...config, content: undefined })).not.toContain(
+						`"${locale}":`,
+					)
 					expect(tags).not.toMatch(new RegExp(`^\\s*${locale}:`, 'm'))
 					expect(files(site).filter((file) => file.includes(`.${locale}.md`))).toEqual([])
 					expect(existsSync(join(site, 'src/i18n', `${locale}.yaml`))).toBe(false)

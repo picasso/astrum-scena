@@ -24,6 +24,17 @@ export type PublishedDocument<E extends DocumentEntry> = {
 
 export type DocumentLocales = { locales: readonly Locale[]; referenceLocale: Locale }
 
+// the entry of a locale the document holds; asking for another one is a caller's error, never a
+// fallback to some other locale's entry
+export function documentIn<E>(
+	document: { byLocale: Readonly<Record<Locale, E>> },
+	locale: Locale,
+): E {
+	if (!Object.hasOwn(document.byLocale, locale))
+		throw new Error(`the document has no "${locale}" entry`)
+	return document.byLocale[locale]!
+}
+
 // reference-locale fields (ADR-0013, `TIER1_FIELDS` in integrity.ts) exist only in the reference
 // file, so callers pass these accessors that file's data; the reference locale comes from config
 // (`content.referenceLocale`) and is a parameter, never hardcoded
@@ -85,10 +96,9 @@ function resolvePair<E extends DocumentEntry>(
 		pair[locale] = entry
 	}
 
-	const reference = pair[referenceLocale]
+	const reference = documentIn({ byLocale: pair }, referenceLocale)
 	for (const locale of locales) {
-		const entry = pair[locale]
-		if (entry.data.slug !== reference.data.slug) {
+		if (documentIn({ byLocale: pair }, locale).data.slug !== reference.data.slug) {
 			throw new Error(`published document "${translationKey}" has locale-specific slugs`)
 		}
 	}
@@ -112,7 +122,7 @@ export function collectPublishedDocuments<E extends DocumentEntry>(
 		if (!include(reference.data)) continue
 		const byLocale = resolvePair(translationKey, group, content)
 		if (!byLocale) continue
-		const slug = byLocale[referenceLocale].data.slug
+		const slug = documentIn({ byLocale }, referenceLocale).data.slug
 		const owner = translationKeyBySlug.get(slug)
 		if (owner) {
 			throw new Error(
@@ -132,7 +142,7 @@ export function selectListableDocuments<E extends DocumentEntry>(
 	referenceLocale: Locale,
 ): PublishedDocument<E>[] {
 	return documents.filter(
-		(document) => !documentUnlisted(document.byLocale[referenceLocale].data),
+		(document) => !documentUnlisted(documentIn(document, referenceLocale).data),
 	)
 }
 
@@ -142,8 +152,8 @@ export function orderByPublishedAt<E extends DocumentEntry>(
 	referenceLocale: Locale,
 ): PublishedDocument<E>[] {
 	return [...documents].sort((left, right) => {
-		const leftDate = documentPublishedAt(left.byLocale[referenceLocale].data) ?? ''
-		const rightDate = documentPublishedAt(right.byLocale[referenceLocale].data) ?? ''
+		const leftDate = documentPublishedAt(documentIn(left, referenceLocale).data) ?? ''
+		const rightDate = documentPublishedAt(documentIn(right, referenceLocale).data) ?? ''
 		if (leftDate !== rightDate) return rightDate.localeCompare(leftDate)
 		return left.slug.localeCompare(right.slug)
 	})
@@ -158,8 +168,8 @@ export function orderDocuments<E extends DocumentEntry>(
 ): PublishedDocument<E>[] {
 	if (order === 'newest') return orderByPublishedAt(documents, referenceLocale)
 	return [...documents].sort((left, right) => {
-		const byTitle = left.byLocale[locale].data.title.localeCompare(
-			right.byLocale[locale].data.title,
+		const byTitle = documentIn(left, locale).data.title.localeCompare(
+			documentIn(right, locale).data.title,
 			locale,
 		)
 		return byTitle !== 0 ? byTitle : left.slug.localeCompare(right.slug)

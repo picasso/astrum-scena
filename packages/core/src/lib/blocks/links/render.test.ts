@@ -16,7 +16,7 @@ beforeAll(async () => {
 	renderer = (await createSatteriMarkdownProcessor({
 		features: { directive: true },
 		mdastPlugins: [
-			linksMdastPlugin((locale) => CORE_DICTIONARIES[locale]['links.title']) as never,
+			linksMdastPlugin((locale) => CORE_DICTIONARIES[locale]?.['links.title']) as never,
 		],
 	})) as unknown as Renderer
 })

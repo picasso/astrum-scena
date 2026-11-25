@@ -1,6 +1,7 @@
 ---
 import './album-intro.css'
 
+import { localeEntry } from '../../config/locale-schema.ts'
 import { site } from '../../config/site.ts'
 import type { Locale } from '../../lib/content/schemas.ts'
 import type { ImageCatalog } from '../../lib/images/catalog.ts'
@@ -47,7 +48,11 @@ const tiles =
 			})
 		: []
 // tile size follows the text length to keep the mosaic within the text height
-const layout = mosaicLayout(tiles.length, paragraphs, locale)
+const layout = mosaicLayout(
+	tiles.length,
+	paragraphs,
+	localeEntry(site.content.catalog, locale).charWidthPx,
+)
 const introStyle = `--mosaic-tile:${layout.tile}px; --mosaic-gap:${layout.gap}px; --mosaic-radius:${layout.radius}px;`
 ---
 

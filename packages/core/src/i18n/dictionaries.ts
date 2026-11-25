@@ -34,7 +34,19 @@ type Dictionaries = Readonly<Partial<Record<Locale, PartialDictionary>>>
 // keys
 export const UI_KEYS = Object.keys(en) as CoreUIKey[]
 
-export const CORE_DICTIONARIES: Readonly<Record<Locale, PartialDictionary>> = { en, ru }
+const isCoreUIKey = (key: string): key is CoreUIKey => (UI_KEYS as readonly string[]).includes(key)
+
+// the key of a language's name (`language.<code>`); the core names the languages it has dictionaries
+// for, and a code without its key fails rather than renders a key or another language's name
+export function languageKey(code: Locale): CoreUIKey {
+	const key = `language.${code}`
+	if (!isCoreUIKey(key)) throw new Error(`i18n: the core has no "${key}" text`)
+	return key
+}
+
+// the locales the core ships texts for; a site locale without one gets every key from the site's own
+// dictionary, or fails with the missing keys
+export const CORE_DICTIONARIES: Dictionaries = { en, ru }
 
 // a module's key set is every key of its dictionaries, so a key one locale lacks is reported missing
 export const moduleKeys = (module: ModuleManifest): UIKey[] =>
@@ -53,7 +65,7 @@ export const uiKeys = (modules: readonly ModuleManifest[]): UIKey[] => [
 // the core's dictionaries with those of the given modules, per locale
 export const coreDictionaries = (modules: readonly ModuleManifest[]): Dictionaries =>
 	Object.fromEntries(
-		(Object.keys(CORE_DICTIONARIES) as Locale[]).map((locale) => [
+		Object.keys(CORE_DICTIONARIES).map((locale) => [
 			locale,
 			Object.assign(
 				{},

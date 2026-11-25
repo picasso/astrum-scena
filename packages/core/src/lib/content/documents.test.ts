@@ -5,6 +5,7 @@ import {
 	collectPublishedDocuments,
 	documentCourseStatus,
 	type DocumentEntry,
+	documentIn,
 	type DocumentLocales,
 	documentStaticPaths,
 	findPublishedDocument,
@@ -99,8 +100,8 @@ describe('published document collection', () => {
 			CONTENT,
 		)
 		expect(documents.map((document) => document.slug)).toEqual(['glass-and-light'])
-		expect(documents[0]?.byLocale.en.id).toBe('glass-and-light-en')
-		expect(documents[0]?.byLocale.ru.id).toBe('glass-and-light-ru')
+		expect(documents[0]?.byLocale.en?.id).toBe('glass-and-light-en')
+		expect(documents[0]?.byLocale.ru?.id).toBe('glass-and-light-ru')
 	})
 
 	// filtering each entry would drop the en file, which has no reference-only field (ADR-0013)
@@ -111,8 +112,8 @@ describe('published document collection', () => {
 			(data) => 'courseStatus' in data && data.courseStatus !== undefined,
 		)
 		expect(documents.map((entry) => entry.slug)).toEqual(['paper-lanterns'])
-		expect(documents[0]?.byLocale.en.id).toBe('paper-lanterns-en')
-		expect(documents[0]?.byLocale.ru.id).toBe('paper-lanterns-ru')
+		expect(documents[0]?.byLocale.en?.id).toBe('paper-lanterns-en')
+		expect(documents[0]?.byLocale.ru?.id).toBe('paper-lanterns-ru')
 	})
 
 	it('collects a one-locale site from its single active locale', () => {
@@ -128,7 +129,17 @@ describe('published document collection', () => {
 			locales: ['en'],
 			referenceLocale: 'en',
 		})
-		expect(enOnly[0]?.byLocale.en.id).toBe('about-en')
+		expect(enOnly[0]?.byLocale.en?.id).toBe('about-en')
+	})
+
+	// the core keeps no list of locales: a site's catalog may add any code
+	it('collects a site in a locale the core has no default for, and reads no other locale', () => {
+		const [document] = collectPublishedDocuments([article('solo', 'de')], {
+			locales: ['de'],
+			referenceLocale: 'de',
+		})
+		expect(documentIn(document!, 'de').id).toBe('solo-de')
+		expect(() => documentIn(document!, 'en')).toThrow('the document has no "en" entry')
 	})
 
 	it('rejects a published document that exists in one locale only', () => {

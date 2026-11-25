@@ -27,6 +27,17 @@ site:
             - en
             - ru
         referenceLocale: en
+        catalog:
+            en:
+                script: latin
+                ogLocale: en_US
+                intl: en-US
+                charWidthPx: 7.1
+            ru:
+                script: cyrillic
+                ogLocale: ru_RU
+                intl: ru-RU
+                charWidthPx: 8.1
     factcheck:
         ownHosts: []
     privacy:

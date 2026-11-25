@@ -62,7 +62,7 @@ export const catalog: ImageCatalog = {
 }
 
 export const places: Place[] = [
-	{ id: 'northland', name: { en: 'Northland', ru: 'Северный край' } } as Place,
+	{ id: 'northland', kind: 'country', name: { en: 'Northland', ru: 'Северный край' } },
 ]
 
 function photo(id: string, data: Partial<PhotoData> = {}): PhotoEntry {

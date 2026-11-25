@@ -44,24 +44,33 @@ const dynamicImport = (pattern, message) => [
 	{ selector: `ImportExpression Literal[value=${pattern}]`, message },
 	{ selector: `ImportExpression TemplateElement[value.cooked=${pattern}]`, message },
 ]
-// the locale set and its roles come from site.yaml `content`, and locale metadata from the catalog
-// in the core's config/locale-schema.ts
+// the locale set and its roles come from site.yaml `content`, and locale metadata from its effective
+// `content.catalog` in the lock
 const localeLiterals = [
 	{
 		selector:
 			':matches(Literal[value=/^(en|ru)$/], TemplateLiteral[expressions.length=0] > TemplateElement[value.cooked=/^(en|ru)$/])',
 		message:
-			'Do not hardcode a locale: take it from site.yaml `content` (locales, referenceLocale, defaultLocale()) or LOCALE_CATALOG.',
+			'Do not hardcode a locale: take it from site.yaml `content` (locales, referenceLocale, defaultLocale()) or its `content.catalog`.',
 	},
 	// a record keyed or read by a fixed locale is a text of a two-locale site: localized data holds
-	// exactly `content.locales`, and locale metadata lives in LOCALE_CATALOG
+	// exactly `content.locales`, and locale metadata lives in `content.catalog`
 	{
 		selector:
 			':matches(Property > Identifier.key[name=/^(en|ru)$/], Property > Literal.key[value=/^(en|ru)$/], MemberExpression[computed=false] > Identifier.property[name=/^(en|ru)$/])',
 		message:
-			'Do not key or read a record by a fixed locale: index it by a locale of site.yaml `content`, or put locale metadata into LOCALE_CATALOG.',
+			'Do not key or read a record by a fixed locale: index it by a locale of site.yaml `content`, or put locale metadata into `content.catalog`.',
 	},
 ]
+// the core's default catalog is only what resolve merges the site's `content.catalog` into; code
+// outside the config layer reads the effective catalog, so a site's override reaches every consumer;
+// a member read catches the namespace import (`locales.DEFAULT_LOCALE_CATALOG`)
+const CATALOG_NAMES = '/^(DEFAULT_LOCALE_CATALOG|LOCALE_CATALOG|SUPPORTED_LOCALES)$/'
+const catalogImport = {
+	selector: `:matches(ImportSpecifier[imported.name=${CATALOG_NAMES}], MemberExpression[computed=false] > Identifier.property[name=${CATALOG_NAMES}])`,
+	message:
+		"Do not import the core's default locale catalog: read the effective `content.catalog` of the site config.",
+}
 
 // the derivative engine runs on sharp at prepare time; reached from runtime code, even through
 // another lib module, it would pull sharp into the site build. `lib/images/build` is the core's only
@@ -80,7 +89,7 @@ const configLoaderImport = {
 }
 
 // besides the config layer, the declarations of the dictionaries the core ships: one JSON per
-// catalog locale, imported by name
+// locale of the default catalog, imported by name
 const LOCALE_EXEMPT = [
 	`${CORE}/config/**`,
 	`${CORE}/i18n/dictionaries.ts`,
@@ -154,15 +163,17 @@ const boundaries = (files, patterns, extra = NO_EXTRA) => {
 		}
 	}
 	const base = rulesFor(patterns)
+	const inCore = files.every((file) => file.startsWith(`${CORE}/`))
+	const localeBans = inCore ? [...localeLiterals, catalogImport] : localeLiterals
 	const objects = [
 		{ files, rules: { ...base.imports, 'no-restricted-syntax': ['error', ...base.syntax] } },
 		{
 			files,
 			ignores: LOCALE_EXEMPT,
-			rules: { 'no-restricted-syntax': ['error', ...base.syntax, ...localeLiterals] },
+			rules: { 'no-restricted-syntax': ['error', ...base.syntax, ...localeBans] },
 		},
 	]
-	if (!files.every((file) => file.startsWith(`${CORE}/`))) return objects
+	if (!inCore) return objects
 	const build = rulesFor([...patterns, imageBuildImport])
 	return [
 		...objects,
@@ -174,7 +185,7 @@ const boundaries = (files, patterns, extra = NO_EXTRA) => {
 		{
 			files,
 			ignores: [...LOCALE_EXEMPT, ...IMAGE_BUILD_EXEMPT],
-			rules: { 'no-restricted-syntax': ['error', ...build.syntax, ...localeLiterals] },
+			rules: { 'no-restricted-syntax': ['error', ...build.syntax, ...localeBans] },
 		},
 	]
 }
@@ -237,7 +248,9 @@ export default defineConfig(
 	// unit tests included, names a locale
 	{
 		files: ['e2e/**', 'playwright.config.ts'],
-		rules: { 'no-restricted-syntax': ['error', enumDeclaration, ...localeLiterals] },
+		rules: {
+			'no-restricted-syntax': ['error', enumDeclaration, ...localeLiterals, catalogImport],
+		},
 	},
 	// core files resolve from the package and site files from the site root; only the bin's entry reads
 	// the current directory, to resolve `--root` against it

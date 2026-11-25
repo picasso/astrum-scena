@@ -9,7 +9,7 @@ import tailwindcss from '@tailwindcss/vite'
 import type { AstroIntegration } from 'astro'
 
 import { loadSiteConfig, siteLockPath } from './config/loader.ts'
-import { SUPPORTED_LOCALES } from './config/locale-schema.ts'
+import type { Locale } from './config/locale-schema.ts'
 import { siteConfigError } from './config/lock.ts'
 import { defaultLocale, type SiteConfig } from './config/site-schema.ts'
 import { CORE_ROOT } from './core-root.ts'
@@ -94,13 +94,11 @@ function siteSources(siteRoot: string) {
 // the config modules read site.lock.yaml from disk, which Vite cannot see. Registering it as a watch
 // file of each module restores the dependency `?raw` gave, so a resolved lock takes Vite's normal HMR
 // path; an edit of site.yaml reaches the site only through `astrum-scena config resolve`. The
-// dictionaries module reads the site's `src/i18n/<locale>.yaml` the same way, one per catalog locale,
-// since a file may appear for any of them
-function configYamlDependency(siteRoot: string) {
+// dictionaries module reads the site's `src/i18n/<locale>.yaml` the same way, one per locale of
+// `content.locales`; a file for another locale fails the build when it starts
+function configYamlDependency(siteRoot: string, locales: readonly Locale[]) {
 	const lock = path.resolve(siteRoot, siteLockPath())
-	const dictionaries = SUPPORTED_LOCALES.map((locale) =>
-		path.resolve(siteRoot, siteDictionaryPath(locale)),
-	)
+	const dictionaries = locales.map((locale) => path.resolve(siteRoot, siteDictionaryPath(locale)))
 	const watched = new Map([
 		[path.join(CORE_SRC, 'config', 'site.ts'), [lock]],
 		[path.join(CORE_SRC, 'config', 'seo.ts'), [lock]],
@@ -242,7 +240,7 @@ export default function astrumScena(): AstroIntegration {
 							siteSources(siteRoot),
 							themeTokensPlugin(siteRoot),
 							tailwindcss(),
-							configYamlDependency(siteRoot),
+							configYamlDependency(siteRoot, content.locales),
 							variantCssPlugin({
 								coreRoot: CORE_ROOT,
 								siteRoot,

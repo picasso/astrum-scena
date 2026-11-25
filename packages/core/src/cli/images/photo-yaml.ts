@@ -1,11 +1,10 @@
 import { isMap, isScalar, parseDocument } from 'yaml'
 
-import { SUPPORTED_LOCALES } from '../../config/locale-schema.ts'
 import { photoSchemaFor } from '../../lib/content/schemas.ts'
 import type { ColorMode } from './colormode.ts'
 
-// the key order does not depend on the locales
-const PHOTO_KEY_ORDER = Object.keys(photoSchemaFor(SUPPORTED_LOCALES).shape)
+// the key order does not depend on the locales, so the schema is built with none
+const PHOTO_KEY_ORDER = Object.keys(photoSchemaFor([]).shape)
 const COLOR_MODE_INDEX = PHOTO_KEY_ORDER.indexOf('colorMode')
 
 export type SetColorModeResult = { output: string; previous: ColorMode | undefined }

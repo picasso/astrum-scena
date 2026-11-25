@@ -89,6 +89,7 @@ development_status:
   6-10-localized-data-shapes-from-config: in-progress
   6-10a-localized-data-shapes: review
   6-10b-single-locale-site: review
+  6-10c-locale-catalog-from-config: review
   6-11-domain-enumerations-from-config: backlog
   6-12-generated-demo-photos: backlog
   6-13-core-written-files-and-the-site-formatter: backlog

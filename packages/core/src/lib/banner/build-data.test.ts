@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import type { BannersConfig } from '../../config/banners.ts'
-import { buildSiteConfig } from '../../config/fixtures/site-config.ts'
+import { buildSiteConfig, contentConfig } from '../../config/fixtures/site-config.ts'
 import type { Locale } from '../content/schemas.ts'
 import { type Manifest, parseManifest } from '../images/manifest.ts'
 import type { BannerSiteConfig } from './build-data.ts'
@@ -87,7 +87,7 @@ async function loadModule(fixture: Fixture) {
 		banners: fixture.banners,
 		modules: fixture.modules ?? {},
 		topSection: { accent: { album: 'accent', section: 'alt' } },
-		content: { locales: ['en', 'ru'], referenceLocale: 'ru' },
+		content: contentConfig(['en', 'ru'], 'ru'),
 	}
 	const module = await import('./build-data.ts')
 	return {
@@ -229,7 +229,7 @@ describe('assertBannerAssignments', () => {
 		await expect(
 			module.assertBannerAssignments({
 				...config,
-				content: { locales: ['en', 'ru'], referenceLocale: 'en' },
+				content: contentConfig(['en', 'ru'], 'en'),
 			}),
 		).rejects.toThrow(/document "pages\/about" references unknown photo "ghost"/)
 	})

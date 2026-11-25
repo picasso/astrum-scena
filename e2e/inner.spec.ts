@@ -1,6 +1,6 @@
 import { expect, type Locator, type Page, test } from '@playwright/test'
 
-import { LOCALE_CATALOG } from '../packages/core/src/config/locale-schema.ts'
+import { localeEntry } from '../packages/core/src/config/locale-schema.ts'
 import { articlesIndexHref } from '../packages/core/src/lib/content/routes.ts'
 import { coursesIndexHref } from '../packages/core/src/modules/courses/routes.ts'
 import { documents, draftCourseSlugs, firstDocument } from './content.ts'
@@ -97,7 +97,9 @@ test.describe('courses section', () => {
 // any Cyrillic on a page of a latin-script locale means a fallback to another locale or an
 // untranslated body
 test.describe('no untranslated public entry', () => {
-	const latinLocales = locales.filter((lang) => LOCALE_CATALOG[lang].script === 'latin')
+	const latinLocales = locales.filter(
+		(lang) => localeEntry(demoConfig.content.catalog, lang).script === 'latin',
+	)
 	for (const lang of latinLocales) {
 		for (const document of documents) {
 			test(`${document.href(lang)} has no Cyrillic in its main content`, async ({ page }) => {

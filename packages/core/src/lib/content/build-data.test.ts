@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
+import { contentConfig } from '../../config/fixtures/site-config.ts'
 import type { ContentSiteConfig } from './build-data.ts'
 
 // the loaders read Tier-1 fields from the reference locale passed in the config, so `unlisted` lives
@@ -26,7 +27,7 @@ const pages = [
 ]
 
 const config: ContentSiteConfig = {
-	content: { locales: ['en', 'ru'], referenceLocale: 'en' },
+	content: contentConfig(['en', 'ru'], 'en'),
 }
 
 async function loadModule() {

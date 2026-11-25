@@ -479,6 +479,7 @@ legacy-аудиты, авторский голос, CSS-бюджет и заме
 - source_spec: `_bmad-output/implementation-artifacts/spec-6-10a-localized-data-shapes.md`
   summary: 6.10c — каталог локалей из конфига: `LOCALE_CATALOG` (script, ogLocale, intl), `CHAR_WIDTH_PX` и `SERVICE_COPY_LOCALE` — умолчания ядра с переопределением и дополнением в `site.yaml`, тип `Locale`, `localeSchema` и регулярки путей от конфига, тест `lib` с локалью вне en/ru (критерий 6.10 №2 и часть №5).
   evidence: решение владельца 2026-11-23 при планировании 6.10: тип `Locale` из `keyof LOCALE_CATALOG` используется примерно в 70 файлах ядра — самый широкий рефакторинг истории, от 6.10a и 6.10b не зависит.
+  closed_by: spec-6-10c-locale-catalog-from-config.md
 - source_spec: `_bmad-output/implementation-artifacts/spec-6-10a-localized-data-shapes.md`
   summary: Заголовки записей `UPGRADING.md` и пункт `**Breaking:**` в `CHANGELOG.md` для 6.10a — списки ~60 имён снапшота (`title.(keys)`, `site.privacy.controller.name.en` …), нечитаемые для владельца сайта; нужен гейт `check:api-breaking`, принимающий префикс или шаблон (`title.*`), либо имена отдельным списком под человеческим заголовком; оценка — medium.
   evidence: ревью 6.10a (blind #6); `scripts/check-api-breaking.ts` (`unnamedBreaking`, `unannouncedBreaking`) сверяет точные имена изменений снапшота с заголовками `### <names>`, а смена `{en, ru}` на запись по локалям даёт по три-четыре имени на каждое поле.

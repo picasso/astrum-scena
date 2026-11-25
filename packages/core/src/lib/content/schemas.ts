@@ -1,12 +1,12 @@
 import { z } from 'astro/zod'
 
 import { KEBAB_CASE_PATTERN } from '../../config/kebab-case.ts'
-import { type Locale, localeSchema } from '../../config/locale-schema.ts'
+import { type Locale, localeCodeSchema } from '../../config/locale-schema.ts'
 import { type LocalizedText, localizedText } from '../../config/localized-text.ts'
 import { sha256HexSchema } from '../../config/sha256-schema.ts'
 import { ALBUM_LAYOUTS } from '../../config/variants.ts'
 
-export { type Locale, localeSchema, type LocalizedText, sha256HexSchema }
+export { type Locale, localeCodeSchema, type LocalizedText, sha256HexSchema }
 
 const ISO_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}(?:T\d{2}:\d{2}:\d{2}(?:\.\d{3})?Z)?$/
 // capture date is `YYYY` or `YYYY-MM` only: the year comes from the archive folder, and day, time
@@ -277,7 +277,7 @@ export const albumSchemaFor = (locales: readonly Locale[]) =>
 export const localizedDocumentBaseSchema = z
 	.object({
 		translationKey: kebabIdSchema,
-		locale: localeSchema,
+		locale: localeCodeSchema,
 		slug: kebabIdSchema,
 		title: z.string().trim().min(1),
 		excerpt: z.string().optional(),

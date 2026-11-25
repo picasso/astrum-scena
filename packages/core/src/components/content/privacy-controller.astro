@@ -1,11 +1,10 @@
 ---
-import { LOCALE_PATH_PREFIX } from '../../config/locale-schema.ts'
+import { localePathPrefix } from '../../config/locale-schema.ts'
 import { site } from '../../config/site.ts'
 import { useTranslations } from '../../i18n/ui'
 import { privacyControllerModel } from '../../lib/privacy/controller.ts'
 
-const prefix = Astro.url.pathname.match(LOCALE_PATH_PREFIX)?.[1]
-const locale = site.content.locales.find((code) => code === prefix)
+const locale = Astro.url.pathname.match(localePathPrefix(site.content.locales))?.[1]
 if (!locale || !Astro.url.pathname.startsWith(`/${locale}/`))
 	throw new Error('PrivacyController requires a localized route')
 const controller = privacyControllerModel(site.privacy.controller, locale)

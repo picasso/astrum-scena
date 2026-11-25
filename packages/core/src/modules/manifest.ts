@@ -26,7 +26,8 @@ export type ModuleManifest<Id extends string = string, Config extends z.ZodType 
 	segments: readonly string[]
 	// the schema of `modules.<id>`, with the module's defaults; `{}` enables it with all of them
 	config: Config
-	// every key starts with `<namespace>.`; a dictionary per catalog locale, complete like the core's
+	// every key starts with `<namespace>.`; a dictionary per locale of the default catalog, complete
+	// like the core's
 	i18n: { namespace: string; dictionaries: Readonly<Partial<Record<Locale, ModuleDictionary>>> }
 	mdx: readonly string[]
 	directives: readonly string[]

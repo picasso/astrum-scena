@@ -201,6 +201,75 @@ builds (`astro build`), which is what reads `src/content/featured/home.yaml`; on
 `git diff` shows only the version lines, the site builds the same pages with the same markup as
 before, and its visual baselines, if it has any, pass unchanged.
 
+### `content`, `content.locales[]`, `content.locales[0]`, `content.referenceLocale`, `identity.title.(keys)`, `identity.photoAlt.(keys)`, `identity.copyright.holder.(keys)`, `menu.items[].label.(keys)`, `social[].label.(keys)`, `site.content`, `site.content.catalog`, `site.content.locales[]`, `site.content.locales[0]`, `site.content.referenceLocale`, `site.identity.title.(keys)`, `site.identity.photoAlt.(keys)`, `site.identity.copyright.holder.(keys)`, `site.menu.items[].label.(keys)`, `site.social[].label.(keys)`, `locale`
+
+**Before:** A locale is one of the codes the core lists (`en`, `ru`), with the core's fixed `og:locale`,
+Intl tag, font script and glyph width; `site.yaml` cannot change them, and `site.lock.yaml` holds
+only the list and the reference locale:
+
+```yaml
+# site.lock.yaml (excerpt)
+site:
+    content:
+        locales:
+            - en
+            - ru
+        referenceLocale: en
+```
+
+**After:** A locale is any code of two or three lowercase letters that has an entry in the catalog:
+the core's defaults for `en` and `ru`, overridden field by field and extended with new codes in
+`site.yaml` `content.catalog` (optional; a new code needs `script`, `ogLocale`, `intl` and
+`charWidthPx`, and `script` is `latin` or `cyrillic`). A locale without an entry fails with
+`site.yaml: content.locales.0: "de" has no entry in the catalog; add content.catalog.de`, a malformed
+code with `expected a locale code of two or three lowercase letters`. The lock holds the effective
+entry of each locale of `content.locales` and of `en`, the language of `/status/`; a lock without it
+fails with `site.lock.yaml: site.content.catalog: missing; run astrum-scena config resolve`. A
+content file's `locale` and the keys of the config texts accept any code of that format, and the
+loader still checks them against `content.locales`. A site that keeps the defaults edits nothing:
+
+```yaml
+# site.lock.yaml (excerpt)
+site:
+    content:
+        locales:
+            - en
+            - ru
+        referenceLocale: en
+        catalog:
+            en:
+                script: latin
+                ogLocale: en_US
+                intl: en-US
+                charWidthPx: 7.1
+            ru:
+                script: cyrillic
+                ogLocale: ru_RU
+                intl: ru-RU
+                charWidthPx: 8.1
+```
+
+```yaml
+# site.yaml (excerpt), a site that announces British English
+content:
+    locales:
+        - en
+    referenceLocale: en
+    catalog:
+        en:
+            ogLocale: en_GB
+```
+
+**Order:** After the entries above, before the first build with this release: run
+`astrum-scena config resolve`, which writes `site.content.catalog` into `site.lock.yaml`. Do not
+rerun the image pipeline: the image digests do not read the catalog.
+
+**Writers:** `astrum-scena config resolve` of this release.
+
+**Verify:** `astrum-scena check config-lock` passes; `git diff site.lock.yaml` adds only
+`site.content.catalog`, and a site without `content.catalog` in `site.yaml` builds the same pages
+with the same markup as before.
+
 ## [0.6.9]
 
 ### `schemaVersion` in every site file the core reads, `version` of `config/images.yaml`, `src/content/config/image-sets.yaml`

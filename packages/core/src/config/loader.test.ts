@@ -6,7 +6,7 @@ import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest
 import { parse, stringify } from 'yaml'
 
 import { withCoursesModule } from './fixtures/courses-module-upgrade.ts'
-import { buildSiteConfig } from './fixtures/site-config.ts'
+import { buildSiteConfig, contentConfig } from './fixtures/site-config.ts'
 import { writeSiteConfig, writeSiteFiles } from './fixtures/site-files.ts'
 import {
 	loadSeoConfig,
@@ -15,9 +15,10 @@ import {
 	SITE_LOCK_ENV,
 	siteLockPath,
 } from './loader.ts'
+import { effectiveCatalog } from './locale-schema.ts'
 import { COLLECTION_VERSIONS, RETIRED_CONFIG_FILES, SITE_LOCK_PATH } from './lock.ts'
 import { siteRoot } from './site-root.ts'
-import { siteSchema } from './site-schema.ts'
+import { type SiteConfig, siteSchema } from './site-schema.ts'
 
 // loadImageConfig of lib/images/build is this slice; config tests do not import lib
 const loadImageConfig = (root: string) => loadSiteSection(root, 'images')
@@ -83,7 +84,7 @@ describe('config loader', () => {
 
 	it('loads the effective config resolved from the site config at the given root', () => {
 		const fixture = buildSiteConfig({
-			content: { locales: ['ru', 'en'], referenceLocale: 'en' },
+			content: contentConfig(['ru', 'en'], 'en'),
 		})
 		const root = writeSiteFiles(makeRoot(), fixture)
 
@@ -302,11 +303,14 @@ describe('upgrade from the three-file shape', () => {
 
 		const site = without(loadSiteConfig(root), 'schemaVersion', 'seo', 'images') as {
 			theme: Record<string, unknown>
+			content: SiteConfig['content']
 		}
-		// a default the core gained after the merge is not in the old file
+		// defaults the core gained after the merge are not in the old file
 		const { favicon, ...theme } = site.theme
 		expect(favicon).toEqual({ background: '#1b1b1f', foreground: '#fcbf00' })
-		expect({ ...site, theme }).toEqual(
+		const { catalog, ...content } = site.content
+		expect(catalog).toEqual(effectiveCatalog(content.locales, {}))
+		expect({ ...site, theme, content }).toEqual(
 			without(withCoursesModule(unversioned('src/config/site.yaml')), 'schemaVersion'),
 		)
 		expect(seo).toEqual(unversioned('src/config/seo.yaml'))

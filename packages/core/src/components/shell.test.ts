@@ -7,8 +7,8 @@ import { experimental_AstroContainer as AstroContainer } from 'astro/container'
 import type { z } from 'astro/zod'
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { buildSiteConfig } from '../config/fixtures/site-config.ts'
-import type { Locale } from '../config/locale-schema.ts'
+import { buildSiteConfig, contentConfig } from '../config/fixtures/site-config.ts'
+import { DEFAULT_LOCALE_CATALOG, type Locale } from '../config/locale-schema.ts'
 import type { seoSchema } from '../config/seo-schema.ts'
 import { siteRoot } from '../config/site-root.ts'
 import { defaultLocale, type SiteConfig } from '../config/site-schema.ts'
@@ -119,7 +119,7 @@ describe('LanguageSwitcher', () => {
 	})
 
 	const renderWithLocales = async (locales: SiteConfig['content']['locales']) => {
-		config.site = buildSiteConfig({ content: { locales, referenceLocale: locales[0]! } })
+		config.site = buildSiteConfig({ content: contentConfig(locales, locales[0]!) })
 		return container.renderToString(LanguageSwitcher, { props: { lang: locales[0]! } })
 	}
 
@@ -254,6 +254,18 @@ describe('HtmlShell metadata API', () => {
 		)
 	})
 
+	it("takes og:locale from the site's catalog", async () => {
+		const { catalog } = config.site.content
+		config.site.content = {
+			...config.site.content,
+			catalog: { ...catalog, en: { ...catalog.en!, ogLocale: 'en_GB' } },
+		}
+		const html = await container.renderToString(HtmlShell, { props: { lang: 'en' }, slots })
+		expect(html.match(/<meta property="og:locale" content="[^"]*">/g)).toEqual([
+			'<meta property="og:locale" content="en_GB">',
+		])
+	})
+
 	it('renders canonical and alternate hreflang links when provided', async () => {
 		const html = await container.renderToString(HtmlShell, {
 			props: {
@@ -306,14 +318,27 @@ describe('HtmlShell fonts by locale script', () => {
 		'marks the %s page with its script and preloads that subset',
 		async (lang) => {
 			const html = await renderShell(lang)
-			expect(html).toMatch(new RegExp(`<html[^>]*data-script="${localeScript(lang)}"`))
-			expect(preloads(html)).toEqual(fontPreloads(localeScript(lang)))
+			const script = localeScript(config.site.content.catalog, lang)
+			expect(html).toMatch(new RegExp(`<html[^>]*data-script="${script}"`))
+			expect(preloads(html)).toEqual(fontPreloads(script))
 		},
 	)
 
+	it("follows a script the site's catalog overrides", async () => {
+		const { catalog } = config.site.content
+		config.site.content = {
+			...config.site.content,
+			catalog: { ...catalog, en: { ...catalog.en!, script: 'cyrillic' } },
+		}
+		const html = await renderShell('en')
+		expect(html).toMatch(/<html[^>]*data-script="cyrillic"/)
+		expect(preloads(html)).toEqual(fontPreloads('cyrillic'))
+	})
+
 	it('maps en to latin and ru to cyrillic and preloads only the regular and 700 faces', () => {
-		expect(localeScript('en')).toBe('latin')
-		expect(localeScript('ru')).toBe('cyrillic')
+		expect(localeScript(DEFAULT_LOCALE_CATALOG, 'en')).toBe('latin')
+		expect(localeScript(DEFAULT_LOCALE_CATALOG, 'ru')).toBe('cyrillic')
+		expect(() => localeScript(DEFAULT_LOCALE_CATALOG, 'de')).toThrow(/no entry for locale "de"/)
 		for (const script of ['latin', 'cyrillic'] as const) {
 			const files = fontPreloads(script)
 			expect(files).toHaveLength(2)
@@ -334,7 +359,7 @@ describe('one-locale site', () => {
 			path.join(demoRoot, IMAGES_PUBLIC_RELATIVE_PATH),
 			path.join(root.override, IMAGES_PUBLIC_RELATIVE_PATH),
 		)
-		config.site = buildSiteConfig({ content: { locales: ['en'], referenceLocale: 'en' } })
+		config.site = buildSiteConfig({ content: contentConfig(['en'], 'en') })
 		config.site.footer = { ...config.site.footer, recentWorks: 'off' }
 	})
 	afterEach(() => {
@@ -428,7 +453,7 @@ describe('site dictionary overrides', () => {
 		for (const lang of ['en', 'ru'] as const) {
 			const file = siteDictionaryPath(lang)
 			const quote = (readYaml(siteRoot, file) as Record<string, string>)['footer.quote']!
-			expect(quote, file).not.toBe(CORE_DICTIONARIES[lang]['footer.quote'])
+			expect(quote, file).not.toBe(CORE_DICTIONARIES[lang]!['footer.quote'])
 			const html = await container.renderToString(SiteFooter, {
 				props: { lang, promo: footerPromo },
 				request: new Request(`https://site.test/${lang}/about/`),

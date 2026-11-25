@@ -179,6 +179,67 @@ describe('eslint.config.mjs style rules', () => {
 			expect(await ruleIds(literal, file), file).toContain(rule)
 	})
 
+	it("bans importing the core's default locale catalog outside the config layer and tests", async () => {
+		const catalogImport = (name: string, from: string) =>
+			`import { ${name} } from '${from}'\nexport const catalog = ${name}\n`
+		const banned = (messages: Awaited<ReturnType<typeof messagesOf>>) =>
+			messages.some((message) => message.message.includes('default locale catalog'))
+		for (const name of ['DEFAULT_LOCALE_CATALOG', 'LOCALE_CATALOG', 'SUPPORTED_LOCALES'])
+			for (const file of [
+				`${CORE}/lib/probe.ts`,
+				`${CORE}/theme/probe.ts`,
+				`${CORE}/lib/images/build/probe.ts`,
+				'e2e/probe.spec.ts',
+			])
+				expect(
+					banned(
+						await messagesOf(catalogImport(name, '../config/locale-schema.ts'), file),
+					),
+					`${name} in ${file}`,
+				).toBe(true)
+		for (const file of [`${CORE}/lib/probe.ts`, 'e2e/probe.spec.ts'])
+			expect(
+				banned(
+					await messagesOf(
+						"import * as locales from '../config/locale-schema.ts'\nexport const c = locales.DEFAULT_LOCALE_CATALOG\n",
+						file,
+					),
+				),
+				`namespace import in ${file}`,
+			).toBe(true)
+		expect(
+			banned(
+				await messagesOf(
+					"---\nimport { DEFAULT_LOCALE_CATALOG } from '../config/locale-schema.ts'\nconst c = DEFAULT_LOCALE_CATALOG\n---\n<p>{c}</p>\n",
+					`${CORE}/layouts/probe.astro`,
+				),
+			),
+		).toBe(true)
+		for (const file of [
+			`${CORE}/config/probe.ts`,
+			`${CORE}/i18n/dictionaries.ts`,
+			`${CORE}/lib/probe.test.ts`,
+			`${CORE}/config/fixtures/probe.ts`,
+		])
+			expect(
+				banned(
+					await messagesOf(
+						catalogImport('DEFAULT_LOCALE_CATALOG', './locale-schema.ts'),
+						file,
+					),
+				),
+				file,
+			).toBe(false)
+		expect(
+			banned(
+				await messagesOf(
+					"import { localeEntry } from '../config/locale-schema.ts'\nexport const e = localeEntry\n",
+					`${CORE}/lib/probe.ts`,
+				),
+			),
+		).toBe(false)
+	})
+
 	it('lowercases comments except ids and acronyms', async () => {
 		const comment = async (text: string) =>
 			ruleIds(`${text}\nexport const a = 1\n`, `${CORE}/probe.ts`)

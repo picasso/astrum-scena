@@ -23,7 +23,7 @@ import { BIN, cliSurface } from '../../packages/core/src/cli/registry.ts'
 import { MDX_COMPONENT_PROPS } from '../../packages/core/src/components/content/mdx-component-props.ts'
 import { COLLECTION_SOURCES } from '../../packages/core/src/config/collection-sources.ts'
 import { DERIVED_FROM_KEYWORD } from '../../packages/core/src/config/images-schema.ts'
-import { SUPPORTED_LOCALES } from '../../packages/core/src/config/locale-schema.ts'
+import { DEFAULT_LOCALE_CATALOG } from '../../packages/core/src/config/locale-schema.ts'
 import {
 	SITE_CONFIG_PATH,
 	SITE_LOCK_PATH,
@@ -118,23 +118,26 @@ type Schema = {
 const collectionFiles = ({ base, pattern }: { base: string; pattern: string }, part = ''): string =>
 	`${path.posix.join(base, pattern)}${part}`
 
-// keyed by the site file a schema validates, not by the schema's name; a schema built from the site's
-// `content.locales` is taken with every supported locale, the widest set a site may write
+// a schema built from the site's `content.locales` is taken with the codes of the core's default
+// catalog
+const CATALOG_LOCALES = Object.keys(DEFAULT_LOCALE_CATALOG)
+
+// keyed by the site file a schema validates, not by the schema's name
 const SITE_FILE_SCHEMAS: Record<string, Schema> = {
 	// the whole tree, its `seo` and `images` sections included
 	[SITE_CONFIG_PATH]: siteSchema,
 	// the effective config resolve writes from it, with the versions of the content collections
 	[SITE_LOCK_PATH]: siteLockSchema,
-	[collectionFiles(COLLECTION_SOURCES.albums)]: albumSchemaFor(SUPPORTED_LOCALES),
-	[collectionFiles(COLLECTION_SOURCES.photos)]: photoSchemaFor(SUPPORTED_LOCALES),
+	[collectionFiles(COLLECTION_SOURCES.albums)]: albumSchemaFor(CATALOG_LOCALES),
+	[collectionFiles(COLLECTION_SOURCES.photos)]: photoSchemaFor(CATALOG_LOCALES),
 	[collectionFiles(COLLECTION_SOURCES.articles, ' frontmatter')]: articleSchema,
 	[collectionFiles(COLLECTION_SOURCES.pages, ' frontmatter')]: pageSchema,
 	[collectionFiles(COLLECTION_SOURCES.legal, ' frontmatter')]: legalSchema,
-	[CATEGORIES_CONFIG_PATH]: categoriesConfigSchemaFor(SUPPORTED_LOCALES),
-	[PLACES_CONFIG_PATH]: placesConfigSchemaFor(SUPPORTED_LOCALES),
-	[TAGS_CONFIG_PATH]: tagsConfigSchemaFor(SUPPORTED_LOCALES),
+	[CATEGORIES_CONFIG_PATH]: categoriesConfigSchemaFor(CATALOG_LOCALES),
+	[PLACES_CONFIG_PATH]: placesConfigSchemaFor(CATALOG_LOCALES),
+	[TAGS_CONFIG_PATH]: tagsConfigSchemaFor(CATALOG_LOCALES),
 	[IMAGE_SETS_CONFIG_PATH]: imageSetsFileSchema,
-	[FEATURED_HOME_PATH]: featuredConfigSchemaFor(SUPPORTED_LOCALES),
+	[FEATURED_HOME_PATH]: featuredConfigSchemaFor(CATALOG_LOCALES),
 	[IMAGES_PUBLIC_RELATIVE_PATH]: imagePublicConfigSchema,
 	[RELEASE_DESCRIPTOR_RELATIVE_PATH]: releaseDescriptorSchema,
 	// read by the image commands only

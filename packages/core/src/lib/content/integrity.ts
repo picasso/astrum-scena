@@ -1,5 +1,4 @@
 import { KEBAB_CASE_PATTERN } from '../../config/kebab-case.ts'
-import { SUPPORTED_LOCALES } from '../../config/locale-schema.ts'
 import type { CourseData } from '../../modules/courses/schema.ts'
 import type { ContentEntry, ContentSnapshot } from './model.ts'
 import type { ArticleData, Locale, PageData } from './schemas.ts'
@@ -246,11 +245,11 @@ function checkPlaces(snapshot: ContentSnapshot, errors: IntegrityError[]): void 
 	}
 }
 
-// `locales` defaults to the whole catalog for callers outside the site config (the migration zone)
+// `locales` is the site's `content.locales`
 export function validateContentSnapshot(
 	snapshot: ContentSnapshot,
 	referenceLocale: Locale,
-	locales: readonly Locale[] = SUPPORTED_LOCALES,
+	locales: readonly Locale[],
 ): IntegrityResult {
 	const errors: IntegrityError[] = []
 	checkUniqueEntryIds('albums', snapshot.albums, errors)

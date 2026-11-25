@@ -1,6 +1,6 @@
 import { z } from 'astro/zod'
 
-import { type Locale, localeSchema } from './locale-schema.ts'
+import { type Locale, localeCodeSchema } from './locale-schema.ts'
 
 // a site text per locale: its keys are exactly the active `content.locales`, so a one-locale
 // site writes one text and a site never carries dead text of a locale it does not build. Reading
@@ -32,7 +32,7 @@ export function localeCoverageIssues(
 // a content text per active locale; `required` rejects a blank text in any of them (a title), the
 // others may be empty (a description not written yet)
 export const localizedText = (locales: readonly Locale[], { required = false } = {}) =>
-	z.partialRecord(localeSchema, z.string()).superRefine((value, context) => {
+	z.partialRecord(localeCodeSchema, z.string()).superRefine((value, context) => {
 		for (const issue of localeCoverageIssues(value, locales))
 			context.addIssue({ code: 'custom', ...issue })
 		if (required)

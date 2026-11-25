@@ -1,9 +1,9 @@
-import { type Locale, LOCALE_PATH_PREFIX } from '../config/locale-schema.ts'
+import { type Locale, localePathPrefix } from '../config/locale-schema.ts'
 import type { MenuIcon } from '../config/menu.ts'
 import { site } from '../config/site.ts'
 import { siteRoot } from '../config/site-root.ts'
 import { enabledModules } from '../modules/registry.ts'
-import { loadDictionaries, type UIKey } from './dictionaries.ts'
+import { languageKey, loadDictionaries, type UIKey } from './dictionaries.ts'
 
 export type Lang = Locale
 export type { UIKey }
@@ -35,7 +35,7 @@ export function useTranslations(lang: Lang) {
 
 // a language name in the language of the page it sits on, so an English page never shows Cyrillic
 export function languageName(lang: Lang, code: Locale): string {
-	return useTranslations(lang)(`language.${code}`)
+	return useTranslations(lang)(languageKey(code))
 }
 
 // the section icon for the current page: the index icon on the exact section index (isActive), the
@@ -75,14 +75,14 @@ export function isCurrentSection(pathname: string, lang: Lang, segment: string):
 
 // a path without a locale prefix (`/rights/`) has no other language version to switch to
 export function isLocaleNeutralPath(pathname: string): boolean {
-	return !LOCALE_PATH_PREFIX.test(pathname)
+	return !localePathPrefix(site.content.locales).test(pathname)
 }
 
 // keeps the current section and its trailing slash as is; a language-neutral path is returned
 // unchanged, otherwise the link would lead to a missing /{lang}/… route
 export function switchLocalePath(pathname: string, target: Lang): string {
 	if (isLocaleNeutralPath(pathname)) return pathname
-	const rest = pathname.replace(LOCALE_PATH_PREFIX, '')
+	const rest = pathname.replace(localePathPrefix(site.content.locales), '')
 	const normalized = rest === '' ? '/' : rest
 	return `/${target}${normalized === '/' ? '/' : normalized}`
 }
