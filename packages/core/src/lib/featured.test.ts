@@ -8,7 +8,7 @@ import type { ContentEntry, ContentSnapshot } from './content/model'
 import {
 	type ArticleData,
 	type FeaturedConfig,
-	featuredConfigSchema,
+	featuredConfigSchemaFor,
 	type Locale,
 	type PageData,
 } from './content/schemas'
@@ -22,6 +22,7 @@ import { resolvePhotoMedia } from './images/media'
 
 const REFERENCE: Locale = 'ru'
 const LOCALES: Locale[] = ['en', 'ru']
+const featuredConfigSchema = featuredConfigSchemaFor(LOCALES)
 
 const readFixture = (name: string) =>
 	readFileSync(new URL(`./content/__fixtures__/${name}`, import.meta.url), 'utf8')
@@ -118,7 +119,7 @@ function documentSlide(
 	mediaSource: FeaturedConfig['slides'][number]['mediaSource'],
 ): FeaturedConfig {
 	return {
-		schemaVersion: 1,
+		schemaVersion: 2,
 		slides: [
 			{
 				id: `${slug}-slide`,
@@ -143,7 +144,7 @@ function albumSlide(
 	slide: Partial<FeaturedConfig['slides'][number]> = {},
 ): FeaturedConfig {
 	return {
-		schemaVersion: 1,
+		schemaVersion: 2,
 		slides: [
 			{
 				id: `${slug}-slide`,
@@ -162,7 +163,7 @@ function articleSlide(
 	slide: Partial<FeaturedConfig['slides'][number]>,
 ): FeaturedConfig {
 	return {
-		schemaVersion: 1,
+		schemaVersion: 2,
 		slides: [
 			{
 				...documentSlide('articles', slug, 'target').slides[0]!,
@@ -406,7 +407,7 @@ describe('featured resolver', () => {
 	})
 })
 
-describe('featuredConfigSchema', () => {
+describe('featuredConfigSchemaFor', () => {
 	const item = {
 		id: 'item',
 		align: 'left' as const,
@@ -425,25 +426,25 @@ describe('featuredConfigSchema', () => {
 
 	it('accepts inline copy on any target and rejects it otherwise', () => {
 		expect(() =>
-			featuredConfigSchema.parse({ schemaVersion: 1, slides: [inline] }),
+			featuredConfigSchema.parse({ schemaVersion: 2, slides: [inline] }),
 		).not.toThrow()
 		expect(() =>
 			featuredConfigSchema.parse({
-				schemaVersion: 1,
+				schemaVersion: 2,
 				slides: [{ ...item, copySource: 'inline' }],
 			}),
 		).toThrow()
 		// a copy block without copySource:inline
 		expect(() =>
 			featuredConfigSchema.parse({
-				schemaVersion: 1,
+				schemaVersion: 2,
 				slides: [{ ...inline, copySource: 'target' }],
 			}),
 		).toThrow()
 		// the inline title is required in both locales
 		expect(() =>
 			featuredConfigSchema.parse({
-				schemaVersion: 1,
+				schemaVersion: 2,
 				slides: [
 					{
 						...inline,
@@ -457,7 +458,7 @@ describe('featuredConfigSchema', () => {
 	it('accepts a document with copySource:media and an explicit photoSlug', () => {
 		expect(() =>
 			featuredConfigSchema.parse({
-				schemaVersion: 1,
+				schemaVersion: 2,
 				slides: [
 					{
 						id: 'doc-media',
@@ -473,7 +474,7 @@ describe('featuredConfigSchema', () => {
 
 	it('rejects duplicate slide ids', () => {
 		expect(() =>
-			featuredConfigSchema.parse({ schemaVersion: 1, slides: [item, item] }),
+			featuredConfigSchema.parse({ schemaVersion: 2, slides: [item, item] }),
 		).toThrow(/Featured slide IDs must be unique/)
 	})
 })

@@ -88,7 +88,7 @@ if (recentWorks !== 'off') {
 			alt: resolvePhotoAlt(photo.data, lang),
 			sizes: SURFACE_SIZES.footerThumb,
 		}),
-		title: photo.data.title[lang],
+		title: localizedLabel(photo.data.title, lang),
 	}))
 }
 const showRecent = recentItems.length > 0

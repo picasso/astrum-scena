@@ -13,6 +13,7 @@ import { SUPPORTED_LOCALES } from './config/locale-schema.ts'
 import { siteConfigError } from './config/lock.ts'
 import { defaultLocale, type SiteConfig } from './config/site-schema.ts'
 import { CORE_ROOT } from './core-root.ts'
+import { loadDictionaries } from './i18n/dictionaries.ts'
 import { siteDictionaryPath } from './i18n/site-dictionary-path.ts'
 import {
 	CORE_SRC,
@@ -175,11 +176,13 @@ export default function astrumScena(): AstroIntegration {
 				// segments are checked here, before anything compiles
 				const modules = enabledModules(site)
 				await assertModuleContent(siteRoot, modules)
-				const snapshot = await loadContentSnapshot(siteRoot, modules)
+				const snapshot = await loadContentSnapshot(siteRoot, modules, content.locales)
 				assertNoCollisions(site, modules, snapshot)
 				assertMenuSegments(site, modules, snapshot)
 				// unlisted documents, albums and photos are built but kept out of the sitemap (ADR-0010)
 				const { unlisted } = buildRedirectRouteSets(snapshot, content, modules)
+				// the default titles of the directive blocks come from the site's dictionaries
+				const dictionaries = loadDictionaries(siteRoot, content.locales, modules)
 
 				// every locale is prefixed (/{locale}/…); the production root redirect to the default
 				// locale is appended to `_redirects` at build time (siteFiles)
@@ -212,8 +215,8 @@ export default function astrumScena(): AstroIntegration {
 							features: { directive: true },
 							mdastPlugins: [
 								calloutMdastPlugin,
-								noteMdastPlugin,
-								linksMdastPlugin,
+								noteMdastPlugin((locale) => dictionaries[locale]?.['note.title']),
+								linksMdastPlugin((locale) => dictionaries[locale]?.['links.title']),
 								coreImportsMdastPlugin(),
 							],
 						}),

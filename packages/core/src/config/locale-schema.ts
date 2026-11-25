@@ -3,11 +3,16 @@ import { z } from 'astro/zod'
 // the only declaration of the supported locales (each has a UI dictionary in src/i18n); a site picks
 // its active subset in site.yaml `content.locales`. Config, content and the contact Worker import it.
 // `script` picks the font family and preloads (src/theme/fonts.ts); language names live in the UI
-// dictionaries (`language.<code>`), so each page names languages in its own language.
+// dictionaries (`language.<code>`), so each page names languages in its own language. `charWidthPx` is
+// the mean width of a 16px glyph of the locale's text, which sizes the album header mosaic
+// (lib/portfolio/album-intro.ts).
 export const LOCALE_CATALOG = {
-	en: { script: 'latin', ogLocale: 'en_US', intl: 'en-US' },
-	ru: { script: 'cyrillic', ogLocale: 'ru_RU', intl: 'ru-RU' },
-} as const satisfies Record<string, { script: LocaleScript; ogLocale: string; intl: string }>
+	en: { script: 'latin', ogLocale: 'en_US', intl: 'en-US', charWidthPx: 7.1 },
+	ru: { script: 'cyrillic', ogLocale: 'ru_RU', intl: 'ru-RU', charWidthPx: 8.1 },
+} as const satisfies Record<
+	string,
+	{ script: LocaleScript; ogLocale: string; intl: string; charWidthPx: number }
+>
 
 export type LocaleScript = 'latin' | 'cyrillic'
 

@@ -1,14 +1,16 @@
+import { localizedTextIn } from '../../config/localized-text.ts'
 import type { AlbumData, Locale, LocalizedText, PhotoData, Place } from '../content/schemas.ts'
 import { cleanText, firstSentence } from '../text.ts'
 
-// presentation receives plain strings for one locale, never {en, ru} pairs
+// presentation receives plain strings for one locale, never a record of locales; a text without the
+// locale fails instead of borrowing another locale's
 
 export function pickLocale(text: LocalizedText, locale: Locale): string {
-	return text[locale]
+	return localizedTextIn(text, locale)
 }
 
 function pickOptional(text: LocalizedText | undefined, locale: Locale): string | undefined {
-	return text ? text[locale] : undefined
+	return text ? localizedTextIn(text, locale) : undefined
 }
 
 export type LocalizedPhotoText = {
@@ -24,7 +26,7 @@ export function resolvePhotoAlt(photo: PhotoData, locale: Locale): string {
 	const explicit = pickOptional(photo.alt, locale)?.trim()
 	if (explicit) return explicit
 
-	const title = cleanText(photo.title[locale])
+	const title = cleanText(pickLocale(photo.title, locale))
 	const description = pickOptional(photo.description, locale)
 	const sentence = description ? firstSentence(cleanText(description)) : ''
 	if (sentence && sentence !== title) {
@@ -37,7 +39,7 @@ export function resolvePhotoAlt(photo: PhotoData, locale: Locale): string {
 
 export function projectPhotoText(photo: PhotoData, locale: Locale): LocalizedPhotoText {
 	return {
-		title: photo.title[locale],
+		title: pickLocale(photo.title, locale),
 		description: pickOptional(photo.description, locale),
 		caption: pickOptional(photo.caption, locale),
 		alt: resolvePhotoAlt(photo, locale),
@@ -52,10 +54,11 @@ function computePlaceYear(
 	places: readonly Place[],
 ): string | undefined {
 	const place = photo.placeId
-		? places.find((entry) => entry.id === photo.placeId)?.name[locale].trim()
+		? places.find((entry) => entry.id === photo.placeId)?.name
 		: undefined
+	const name = place ? pickLocale(place, locale).trim() : undefined
 	const year = photo.capturedAt?.slice(0, 4)
-	return place && year ? `${place}, ${year}` : undefined
+	return name && year ? `${name}, ${year}` : undefined
 }
 
 // an authored caption overrides the computed one (ADR-0010) and is returned untrimmed so the output
@@ -78,7 +81,7 @@ export function resolvePhotoDisplayName(
 	locale: Locale,
 	places: readonly Place[],
 ): string {
-	const title = photo.title?.[locale]
+	const title = pickOptional(photo.title, locale)
 	if (title && title.trim()) return title
 	return resolvePhotoCaption(photo, locale, places) ?? ''
 }
@@ -86,11 +89,13 @@ export function resolvePhotoDisplayName(
 export type LocalizedAlbumText = {
 	title: string
 	description: string
+	excerpt?: string
 }
 
 export function projectAlbumText(album: AlbumData, locale: Locale): LocalizedAlbumText {
 	return {
-		title: album.title[locale],
-		description: album.description[locale],
+		title: pickLocale(album.title, locale),
+		description: pickLocale(album.description, locale),
+		excerpt: pickOptional(album.excerpt, locale),
 	}
 }

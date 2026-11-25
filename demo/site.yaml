@@ -1,5 +1,5 @@
 # synthetic config of the demo site: its own data only, every behaviour section is the core's default
-schemaVersion: 3
+schemaVersion: 4
 origin: https://demo.example.com
 identity:
     title:
@@ -20,7 +20,6 @@ content:
     referenceLocale: en
 privacy:
     controller:
-        # the schema still requires both texts here, whatever content.locales holds
         name:
             en: The Astrum Scena authors
             ru: Авторы Astrum Scena
@@ -65,7 +64,6 @@ social:
       icon: contacts
       hover: '#5b9a68'
 seo:
-    # the schema still requires both descriptions, whatever content.locales holds
     description:
         en: A synthetic photography site that exercises the Astrum Scena core.
         ru: Синтетический фотосайт для проверки ядра Astrum Scena.

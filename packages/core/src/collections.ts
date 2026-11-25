@@ -7,21 +7,23 @@ import { loadSiteSection } from './config/loader.ts'
 import { siteRoot } from './config/site-root.ts'
 import { localizedDocumentLoader } from './lib/content/localized-glob.ts'
 import {
-	albumSchema,
+	type AlbumSchema,
+	albumSchemaFor,
 	articleSchema,
 	legalSchema,
 	pageSchema,
-	photoSchema,
+	type PhotoSchema,
+	photoSchemaFor,
 } from './lib/content/schemas.ts'
 import type { courseSchema } from './modules/courses/schema.ts'
 import { enabledModules, moduleCollections } from './modules/registry.ts'
 
 export type CoreCollections = {
-	albums: CollectionConfig<typeof albumSchema>
+	albums: CollectionConfig<AlbumSchema>
 	articles: CollectionConfig<typeof articleSchema>
 	legal: CollectionConfig<typeof legalSchema>
 	pages: CollectionConfig<typeof pageSchema>
-	photos: CollectionConfig<typeof photoSchema>
+	photos: CollectionConfig<PhotoSchema>
 }
 
 // the collections of every module, typed for the core's own code; a build defines only those of the
@@ -33,9 +35,11 @@ export type ModuleCollections = {
 // the site's `src/content.config.ts` is one line: `export const collections = defineCoreCollections()`.
 // Loader bases are relative to the site root, which Astro resolves them against. The enabled modules
 // come from the site's lock, so enabling one is an edit of site.yaml and
-// `astrum-scena config resolve`.
+// `astrum-scena config resolve`. The albums and photos have a text per locale of the lock's
+// `content.locales`.
 export function defineCoreCollections(): CoreCollections & ModuleCollections {
 	const modules = enabledModules({ modules: loadSiteSection(siteRoot, 'modules') })
+	const { locales } = loadSiteSection(siteRoot, 'content')
 	const moduleEntries = Object.entries(moduleCollections(modules)).map(([name, collection]) => [
 		name,
 		defineCollection({
@@ -49,7 +53,7 @@ export function defineCoreCollections(): CoreCollections & ModuleCollections {
 	return {
 		albums: defineCollection({
 			loader: glob({ ...COLLECTION_SOURCES.albums }),
-			schema: albumSchema,
+			schema: albumSchemaFor(locales),
 		}),
 		articles: defineCollection({
 			loader: localizedDocumentLoader(COLLECTION_SOURCES.articles),
@@ -65,7 +69,7 @@ export function defineCoreCollections(): CoreCollections & ModuleCollections {
 		}),
 		photos: defineCollection({
 			loader: glob({ ...COLLECTION_SOURCES.photos }),
-			schema: photoSchema,
+			schema: photoSchemaFor(locales),
 		}),
 		...(Object.fromEntries(moduleEntries) as ModuleCollections),
 	}

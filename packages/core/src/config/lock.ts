@@ -63,9 +63,14 @@ const CORE_COLLECTION_NAMES = Object.keys(COLLECTION_SOURCES)
 // the shapes of each content collection the core reads, the last one current: the core's own and
 // those of every module. Resolve keeps the version a lock already holds and writes the current one
 // only for a collection the lock lacks, so a new shape reaches a site through the upgrade step that
-// raises its version, never through resolve
+// raises its version, never through resolve. Version 2 of albums and photos has a text per active
+// locale instead of an `{en, ru}` pair
+const CORE_COLLECTION_VERSIONS: Readonly<Record<string, Versions>> = { albums: [2], photos: [2] }
+
 export const COLLECTION_VERSIONS: Readonly<Record<string, Versions>> = {
-	...Object.fromEntries(CORE_COLLECTION_NAMES.map((name) => [name, [1] as const])),
+	...Object.fromEntries(
+		CORE_COLLECTION_NAMES.map((name) => [name, CORE_COLLECTION_VERSIONS[name] ?? [1]]),
+	),
 	...Object.fromEntries(
 		Object.entries(moduleCollections(MODULES)).map(([name, { versions }]) => [name, versions]),
 	),

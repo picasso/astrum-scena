@@ -347,7 +347,7 @@
 				"additionalProperties": false,
 				"properties": {
 					"albums": {
-						"const": 1,
+						"const": 2,
 						"type": "number"
 					},
 					"articles": {
@@ -367,7 +367,7 @@
 						"type": "number"
 					},
 					"photos": {
-						"const": 1,
+						"const": 2,
 						"type": "number"
 					}
 				},
@@ -2309,27 +2309,20 @@
 										"type": "object"
 									},
 									"name": {
-										"additionalProperties": false,
-										"properties": {
-											"en": {
-												"minLength": 1,
-												"type": "string",
-												"x-transforms": [
-													"da06e05e67eb"
-												]
-											},
-											"ru": {
-												"minLength": 1,
-												"type": "string",
-												"x-transforms": [
-													"da06e05e67eb"
-												]
-											}
+										"additionalProperties": {
+											"minLength": 1,
+											"type": "string",
+											"x-transforms": [
+												"da06e05e67eb"
+											]
 										},
-										"required": [
-											"en",
-											"ru"
-										],
+										"propertyNames": {
+											"enum": [
+												"en",
+												"ru"
+											],
+											"type": "string"
+										},
 										"type": "object"
 									}
 								},
@@ -2346,34 +2339,27 @@
 						"type": "object"
 					},
 					"schemaVersion": {
-						"const": 3,
+						"const": 4,
 						"type": "number"
 					},
 					"seo": {
 						"additionalProperties": false,
 						"properties": {
 							"description": {
-								"additionalProperties": false,
-								"properties": {
-									"en": {
-										"minLength": 1,
-										"type": "string",
-										"x-transforms": [
-											"da06e05e67eb"
-										]
-									},
-									"ru": {
-										"minLength": 1,
-										"type": "string",
-										"x-transforms": [
-											"da06e05e67eb"
-										]
-									}
+								"additionalProperties": {
+									"minLength": 1,
+									"type": "string",
+									"x-transforms": [
+										"da06e05e67eb"
+									]
 								},
-								"required": [
-									"en",
-									"ru"
-								],
+								"propertyNames": {
+									"enum": [
+										"en",
+										"ru"
+									],
+									"type": "string"
+								},
 								"type": "object"
 							},
 							"socialImage": {
@@ -2886,7 +2872,7 @@
 				],
 				"type": "object",
 				"x-refinements": [
-					"6912d02c8068"
+					"6a362df84611"
 				],
 				"x-transforms": [
 					"b968fb9b5d5e"
@@ -4671,27 +4657,20 @@
 								"type": "object"
 							},
 							"name": {
-								"additionalProperties": false,
-								"properties": {
-									"en": {
-										"minLength": 1,
-										"type": "string",
-										"x-transforms": [
-											"da06e05e67eb"
-										]
-									},
-									"ru": {
-										"minLength": 1,
-										"type": "string",
-										"x-transforms": [
-											"da06e05e67eb"
-										]
-									}
+								"additionalProperties": {
+									"minLength": 1,
+									"type": "string",
+									"x-transforms": [
+										"da06e05e67eb"
+									]
 								},
-								"required": [
-									"en",
-									"ru"
-								],
+								"propertyNames": {
+									"enum": [
+										"en",
+										"ru"
+									],
+									"type": "string"
+								},
 								"type": "object"
 							}
 						},
@@ -4708,34 +4687,27 @@
 				"type": "object"
 			},
 			"schemaVersion": {
-				"const": 3,
+				"const": 4,
 				"type": "number"
 			},
 			"seo": {
 				"additionalProperties": false,
 				"properties": {
 					"description": {
-						"additionalProperties": false,
-						"properties": {
-							"en": {
-								"minLength": 1,
-								"type": "string",
-								"x-transforms": [
-									"da06e05e67eb"
-								]
-							},
-							"ru": {
-								"minLength": 1,
-								"type": "string",
-								"x-transforms": [
-									"da06e05e67eb"
-								]
-							}
+						"additionalProperties": {
+							"minLength": 1,
+							"type": "string",
+							"x-transforms": [
+								"da06e05e67eb"
+							]
 						},
-						"required": [
-							"en",
-							"ru"
-						],
+						"propertyNames": {
+							"enum": [
+								"en",
+								"ru"
+							],
+							"type": "string"
+						},
 						"type": "object"
 					},
 					"socialImage": {
@@ -5166,7 +5138,7 @@
 		],
 		"type": "object",
 		"x-refinements": [
-			"6912d02c8068"
+			"6a362df84611"
 		],
 		"x-transforms": [
 			"b968fb9b5d5e"
@@ -5187,36 +5159,36 @@
 				"type": "string"
 			},
 			"description": {
-				"additionalProperties": false,
-				"properties": {
-					"en": {
-						"type": "string"
-					},
-					"ru": {
-						"type": "string"
-					}
+				"additionalProperties": {
+					"type": "string"
 				},
-				"required": [
-					"en",
-					"ru"
-				],
-				"type": "object"
+				"propertyNames": {
+					"enum": [
+						"en",
+						"ru"
+					],
+					"type": "string"
+				},
+				"type": "object",
+				"x-refinements": [
+					"d6b7290780a4"
+				]
 			},
 			"excerpt": {
-				"additionalProperties": false,
-				"properties": {
-					"en": {
-						"type": "string"
-					},
-					"ru": {
-						"type": "string"
-					}
+				"additionalProperties": {
+					"type": "string"
 				},
-				"required": [
-					"en",
-					"ru"
-				],
-				"type": "object"
+				"propertyNames": {
+					"enum": [
+						"en",
+						"ru"
+					],
+					"type": "string"
+				},
+				"type": "object",
+				"x-refinements": [
+					"d6b7290780a4"
+				]
 			},
 			"layout": {
 				"enum": [
@@ -5256,22 +5228,19 @@
 				"type": "string"
 			},
 			"title": {
-				"additionalProperties": false,
-				"properties": {
-					"en": {
-						"type": "string"
-					},
-					"ru": {
-						"type": "string"
-					}
+				"additionalProperties": {
+					"type": "string"
 				},
-				"required": [
-					"en",
-					"ru"
-				],
+				"propertyNames": {
+					"enum": [
+						"en",
+						"ru"
+					],
+					"type": "string"
+				},
 				"type": "object",
 				"x-refinements": [
-					"c313ab772a1f"
+					"d6b7290780a4"
 				]
 			},
 			"unlisted": {
@@ -5438,20 +5407,20 @@
 							"type": "string"
 						},
 						"label": {
-							"additionalProperties": false,
-							"properties": {
-								"en": {
-									"type": "string"
-								},
-								"ru": {
-									"type": "string"
-								}
+							"additionalProperties": {
+								"type": "string"
 							},
-							"required": [
-								"en",
-								"ru"
-							],
-							"type": "object"
+							"propertyNames": {
+								"enum": [
+									"en",
+									"ru"
+								],
+								"type": "string"
+							},
+							"type": "object",
+							"x-refinements": [
+								"d6b7290780a4"
+							]
 						}
 					},
 					"required": [
@@ -5463,7 +5432,7 @@
 				"type": "array"
 			},
 			"schemaVersion": {
-				"const": 1,
+				"const": 2,
 				"type": "number"
 			}
 		},
@@ -5615,20 +5584,20 @@
 							"type": "string"
 						},
 						"name": {
-							"additionalProperties": false,
-							"properties": {
-								"en": {
-									"type": "string"
-								},
-								"ru": {
-									"type": "string"
-								}
+							"additionalProperties": {
+								"type": "string"
 							},
-							"required": [
-								"en",
-								"ru"
-							],
-							"type": "object"
+							"propertyNames": {
+								"enum": [
+									"en",
+									"ru"
+								],
+								"type": "string"
+							},
+							"type": "object",
+							"x-refinements": [
+								"d6b7290780a4"
+							]
 						},
 						"parentId": {
 							"pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
@@ -5645,7 +5614,7 @@
 				"type": "array"
 			},
 			"schemaVersion": {
-				"const": 1,
+				"const": 2,
 				"type": "number"
 			}
 		},
@@ -5659,7 +5628,7 @@
 		"additionalProperties": false,
 		"properties": {
 			"schemaVersion": {
-				"const": 1,
+				"const": 2,
 				"type": "number"
 			},
 			"tags": {
@@ -5681,20 +5650,20 @@
 							"type": "string"
 						},
 						"label": {
-							"additionalProperties": false,
-							"properties": {
-								"en": {
-									"type": "string"
-								},
-								"ru": {
-									"type": "string"
-								}
+							"additionalProperties": {
+								"type": "string"
 							},
-							"required": [
-								"en",
-								"ru"
-							],
-							"type": "object"
+							"propertyNames": {
+								"enum": [
+									"en",
+									"ru"
+								],
+								"type": "string"
+							},
+							"type": "object",
+							"x-refinements": [
+								"d6b7290780a4"
+							]
 						}
 					},
 					"required": [
@@ -5856,7 +5825,7 @@
 		"additionalProperties": false,
 		"properties": {
 			"schemaVersion": {
-				"const": 1,
+				"const": 2,
 				"type": "number"
 			},
 			"slides": {
@@ -5874,38 +5843,35 @@
 							"additionalProperties": false,
 							"properties": {
 								"description": {
-									"additionalProperties": false,
-									"properties": {
-										"en": {
-											"type": "string"
-										},
-										"ru": {
-											"type": "string"
-										}
+									"additionalProperties": {
+										"type": "string"
 									},
-									"required": [
-										"en",
-										"ru"
-									],
-									"type": "object"
-								},
-								"title": {
-									"additionalProperties": false,
-									"properties": {
-										"en": {
-											"type": "string"
-										},
-										"ru": {
-											"type": "string"
-										}
+									"propertyNames": {
+										"enum": [
+											"en",
+											"ru"
+										],
+										"type": "string"
 									},
-									"required": [
-										"en",
-										"ru"
-									],
 									"type": "object",
 									"x-refinements": [
-										"c313ab772a1f"
+										"d6b7290780a4"
+									]
+								},
+								"title": {
+									"additionalProperties": {
+										"type": "string"
+									},
+									"propertyNames": {
+										"enum": [
+											"en",
+											"ru"
+										],
+										"type": "string"
+									},
+									"type": "object",
+									"x-refinements": [
+										"d6b7290780a4"
 									]
 								}
 							},
@@ -6156,36 +6122,36 @@
 		"additionalProperties": false,
 		"properties": {
 			"alt": {
-				"additionalProperties": false,
-				"properties": {
-					"en": {
-						"type": "string"
-					},
-					"ru": {
-						"type": "string"
-					}
+				"additionalProperties": {
+					"type": "string"
 				},
-				"required": [
-					"en",
-					"ru"
-				],
-				"type": "object"
+				"propertyNames": {
+					"enum": [
+						"en",
+						"ru"
+					],
+					"type": "string"
+				},
+				"type": "object",
+				"x-refinements": [
+					"d6b7290780a4"
+				]
 			},
 			"caption": {
-				"additionalProperties": false,
-				"properties": {
-					"en": {
-						"type": "string"
-					},
-					"ru": {
-						"type": "string"
-					}
+				"additionalProperties": {
+					"type": "string"
 				},
-				"required": [
-					"en",
-					"ru"
-				],
-				"type": "object"
+				"propertyNames": {
+					"enum": [
+						"en",
+						"ru"
+					],
+					"type": "string"
+				},
+				"type": "object",
+				"x-refinements": [
+					"d6b7290780a4"
+				]
 			},
 			"capturedAt": {
 				"pattern": "^\\d{4}(?:-(?:0[1-9]|1[0-2]))?$",
@@ -6199,20 +6165,20 @@
 				"type": "string"
 			},
 			"description": {
-				"additionalProperties": false,
-				"properties": {
-					"en": {
-						"type": "string"
-					},
-					"ru": {
-						"type": "string"
-					}
+				"additionalProperties": {
+					"type": "string"
 				},
-				"required": [
-					"en",
-					"ru"
-				],
-				"type": "object"
+				"propertyNames": {
+					"enum": [
+						"en",
+						"ru"
+					],
+					"type": "string"
+				},
+				"type": "object",
+				"x-refinements": [
+					"d6b7290780a4"
+				]
 			},
 			"favorite": {
 				"default": false,
@@ -6350,22 +6316,19 @@
 				"type": "array"
 			},
 			"title": {
-				"additionalProperties": false,
-				"properties": {
-					"en": {
-						"type": "string"
-					},
-					"ru": {
-						"type": "string"
-					}
+				"additionalProperties": {
+					"type": "string"
 				},
-				"required": [
-					"en",
-					"ru"
-				],
+				"propertyNames": {
+					"enum": [
+						"en",
+						"ru"
+					],
+					"type": "string"
+				},
 				"type": "object",
 				"x-refinements": [
-					"c313ab772a1f"
+					"d6b7290780a4"
 				]
 			},
 			"unlisted": {
@@ -6762,6 +6725,10 @@
 				"pattern": "\\S",
 				"type": "string"
 			},
+			"links.title": {
+				"pattern": "\\S",
+				"type": "string"
+			},
 			"listing.more": {
 				"pattern": "\\S",
 				"type": "string"
@@ -6815,6 +6782,10 @@
 				"type": "string"
 			},
 			"nav.portfolio": {
+				"pattern": "\\S",
+				"type": "string"
+			},
+			"note.title": {
 				"pattern": "\\S",
 				"type": "string"
 			},

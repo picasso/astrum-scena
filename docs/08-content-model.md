@@ -8,12 +8,12 @@
 
 `src/content.config.ts` объявляет ровно четыре коллекции через Astro 7 Content Layer API:
 
-| Collection | Формат   | Стабильный entry ID           | Локализация                |
-| ---------- | -------- | ----------------------------- | -------------------------- |
-| `albums`   | YAML     | имя файла без расширения      | короткие поля `{ en, ru }` |
-| `photos`   | YAML     | имя файла без расширения      | короткие поля `{ en, ru }` |
-| `articles` | Markdown | `${translationKey}-${locale}` | отдельный файл на язык     |
-| `pages`    | Markdown | `${translationKey}-${locale}` | отдельный файл на язык     |
+| Collection | Формат   | Стабильный entry ID           | Локализация              |
+| ---------- | -------- | ----------------------------- | ------------------------ |
+| `albums`   | YAML     | имя файла без расширения      | короткие поля по локалям |
+| `photos`   | YAML     | имя файла без расширения      | короткие поля по локалям |
+| `articles` | Markdown | `${translationKey}-${locale}` | отдельный файл на язык   |
+| `pages`    | Markdown | `${translationKey}-${locale}` | отдельный файл на язык   |
 
 Все ID и slug — lowercase ASCII kebab-case. Локализованный файл имеет имя
 `<translation-key>.<locale>.md`; filename, `translationKey` и `locale` обязаны совпадать.
@@ -23,6 +23,12 @@ invariant. Slug не участвует в построении physical entry I
 Во время S8 importer создавал только `.md`. В рабочем режиме (ADR-0012) редактор может использовать
 `.md` и `.mdx`; loader и проверка имён принимают оба расширения и сохраняют один entry ID.
 
+Короткое локализованное поле (в таблицах ниже — `{ <locale> }`) — запись с текстом ровно на каждую
+локаль `content.locales` из `site.lock.yaml`: на одноязычном сайте один ключ. Лишняя локаль или
+пропущенная — ошибка с путём поля (`title.ru: not one of content.locales [en]`,
+`alt.ru: missing the "ru" text required by content.locales`). Схемы коллекций, таксономии и
+`featured/home.yaml` строятся от этого списка (версия 2 у коллекций в lock и у файлов).
+
 ## Матрица полей
 
 ### Album
@@ -30,9 +36,9 @@ invariant. Slug не участвует в построении physical entry I
 | Поле              | Тип                                                | Правило                                                   |
 | ----------------- | -------------------------------------------------- | --------------------------------------------------------- |
 | `category`        | `series \| places`                                 | ровно одна утверждённая категория                         |
-| `title`           | `{ en, ru }`                                       | оба непустых                                              |
-| `description`     | `{ en, ru }`                                       | оба ключа обязательны, пустая строка допустима            |
-| `excerpt`         | `{ en, ru }`, optional                             | текст карточки в `details`; пусто → из description        |
+| `title`           | `{ <locale> }`                                     | непустой в каждой локали                                  |
+| `description`     | `{ <locale> }`                                     | ключ каждой локали обязателен, пустая строка допустима    |
+| `excerpt`         | `{ <locale> }`, optional                           | текст карточки в `details`; пусто → из description        |
 | `layout`          | `justified \| masonry \| square \| rect`, optional | режим страницы альбома; нет → site default `album.layout` |
 | `status`          | `draft \| published`                               | legacy status не наследуется                              |
 | `coverId`         | photo ID                                           | обязан входить в `photoIds`                               |
@@ -45,8 +51,8 @@ Published album может ссылаться только на published photos
 
 | Поле                            | Тип                                        | Правило                                            |
 | ------------------------------- | ------------------------------------------ | -------------------------------------------------- |
-| `title`                         | `{ en, ru }`                               | оба непустых                                       |
-| `description`, `caption`, `alt` | `{ en, ru }`, optional                     | короткие локализованные поля                       |
+| `title`                         | `{ <locale> }`                             | непустой в каждой локали                           |
+| `description`, `caption`, `alt` | `{ <locale> }`, optional                   | короткие локализованные поля                       |
 | `status`                        | `draft \| published`                       | единственный источник публичности                  |
 | `placeId`                       | place ID, optional                         | самое точное подтверждённое место                  |
 | `capturedAt`                    | частичная дата `YYYY \| YYYY-MM`, optional | подтверждённая дата съёмки (см. ниже)              |

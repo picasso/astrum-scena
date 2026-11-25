@@ -1,3 +1,4 @@
+import { LOCALE_CATALOG } from '../../config/locale-schema.ts'
 import type { Locale } from '../content/schemas.ts'
 
 // album page description header: a decorative mosaic of all album photos beside the description
@@ -20,13 +21,12 @@ export const MOSAIC_TILE_MAX_PX = 88
 export const MOSAIC_TILE_MIN_PX = 24
 
 // desktop header geometry: `.gallery-aside` is 1024px wide at 1440, 2rem column gap, 16px / 1.5
-// text, 1em paragraph gap; mean Ubuntu 16px glyph width was measured on a real description, and
-// +5 % covers word-wrap loss
+// text, 1em paragraph gap; the mean Ubuntu 16px glyph width per locale (LOCALE_CATALOG) was measured
+// on a real description, and +5 % covers word-wrap loss
 const HEADER_WIDTH_PX = 1024
 const COLUMN_GAP_PX = 32
 const LINE_HEIGHT_PX = 24
 const PARAGRAPH_GAP_PX = 16
-const CHAR_WIDTH_PX: Record<Locale, number> = { en: 7.1, ru: 8.1 }
 const WRAP_LOSS = 1.05
 // the text keeps at least half the header, so the mosaic stays a narrow side column
 const MOSAIC_MAX_WIDTH_PX = HEADER_WIDTH_PX / 2 - COLUMN_GAP_PX
@@ -58,7 +58,7 @@ export function estimateTextHeight(
 	textWidth: number,
 	locale: Locale,
 ): number {
-	const perLine = CHAR_WIDTH_PX[locale] * WRAP_LOSS
+	const perLine = LOCALE_CATALOG[locale].charWidthPx * WRAP_LOSS
 	const lines = paragraphs.reduce(
 		(sum, paragraph) => sum + Math.max(1, Math.ceil((paragraph.length * perLine) / textWidth)),
 		0,

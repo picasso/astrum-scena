@@ -75,6 +75,20 @@ describe('projectPhotoText / projectAlbumText', () => {
 		}
 		expect(projectAlbumText(album, 'ru')).toEqual({ title: 'Album RU', description: 'AD RU' })
 	})
+
+	it('projects an authored album excerpt in the locale', () => {
+		const album: AlbumData = {
+			category: 'series',
+			title: { en: 'Album EN', ru: 'Album RU' },
+			description: { en: 'AD EN', ru: 'AD RU' },
+			excerpt: { en: 'Own EN.', ru: 'Own RU.' },
+			status: 'published',
+			coverId: 'p1',
+			photoIds: ['p1'],
+		}
+		expect(projectAlbumText(album, 'ru').excerpt).toBe('Own RU.')
+		expect(projectAlbumText(album, 'en').excerpt).toBe('Own EN.')
+	})
 })
 
 const places: Place[] = [

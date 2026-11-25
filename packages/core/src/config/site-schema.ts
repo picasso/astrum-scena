@@ -19,6 +19,7 @@ import { layoutSchema } from './layout.ts'
 import { type Locale, localeSchema } from './locale-schema.ts'
 import { type LocalizedLabel, localizedLabelSchema } from './localized-label.ts'
 import { isLocalizedRouteTemplate } from './localized-route.ts'
+import { localeCoverageIssues } from './localized-text.ts'
 import { iconNameSchema, menuSchema } from './menu.ts'
 import { privacySchema } from './privacy.ts'
 import { seoSchema } from './seo-schema.ts'
@@ -561,7 +562,7 @@ function withDerivedRights<
 // array or scalar replaces the default whole; a `moreDocs.<kind>` block is written whole)
 export const siteSchema = z
 	.object({
-		schemaVersion: z.literal(3),
+		schemaVersion: z.literal(4),
 		origin: originSchema,
 		identity: identitySchema,
 		content: contentConfigSchema,
@@ -631,20 +632,21 @@ export const siteSchema = z
 	})
 	.strict()
 	.superRefine((value, context) => {
-		// config texts must cover every active locale; other catalog locales may stay for a later switch
+		// a config text has exactly the active locales: a missing one would fail a page, another one
+		// is dead text
 		const requireLocales = (text: LocalizedLabel, path: (string | number)[]) => {
-			for (const locale of value.content.locales) {
-				if (text[locale] === undefined)
-					context.addIssue({
-						code: 'custom',
-						path: [...path, locale],
-						message: `missing the "${locale}" text required by content.locales`,
-					})
-			}
+			for (const issue of localeCoverageIssues(text, value.content.locales))
+				context.addIssue({
+					code: 'custom',
+					path: [...path, ...issue.path],
+					message: issue.message,
+				})
 		}
 		requireLocales(value.identity.title, ['identity', 'title'])
 		requireLocales(value.identity.photoAlt, ['identity', 'photoAlt'])
 		requireLocales(value.identity.copyright.holder, ['identity', 'copyright', 'holder'])
+		requireLocales(value.privacy.controller.name, ['privacy', 'controller', 'name'])
+		requireLocales(value.seo.description, ['seo', 'description'])
 		value.menu.items.forEach((item, index) =>
 			requireLocales(item.label, ['menu', 'items', index, 'label']),
 		)

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { buildSiteConfig } from './fixtures/site-config.ts'
+import { buildSiteConfig, keepLocales } from './fixtures/site-config.ts'
 import { LANGUAGE_SWITCHER_MODES, switcherDisplay } from './language-switcher.ts'
 import { MENU_ANIMATIONS, MENU_THEME_MODES, MENU_WIDTH_LADDER, MENU_WIDTH_MODES } from './menu.ts'
 import { defaultLocale, siteSchema } from './site-schema.ts'
@@ -43,6 +43,16 @@ const withSurface = (name: string, value: unknown) =>
 const withMasonry = (masonry: unknown) => withPortfolio({ ...validSite.portfolio, masonry })
 const withJustified = (justified: unknown) => withAlbum({ ...validSite.album, justified })
 const withMoreDocs = (moreDocs: unknown) => ({ ...validSite, moreDocs })
+// the valid config with `content` and the given fields, every config text cut to the locales of
+// `content` as a site with them writes it; the field under test is laid over it afterwards
+const siteOn = (content: unknown, fields: object = {}) => {
+	const locales = (content as { locales?: unknown } | undefined)?.locales
+	const site = { ...validSite, ...fields }
+	return {
+		...(Array.isArray(locales) && locales.length > 0 ? keepLocales(site, locales) : site),
+		content,
+	}
+}
 
 // identity for tests that force `content.locales: [en, ru]`: built here so it covers those locales
 // whatever site.yaml holds
@@ -132,7 +142,7 @@ describe('factcheck own hosts', () => {
 })
 
 describe('content locales', () => {
-	const withContent = (content: unknown) => ({ ...validSite, content })
+	const withContent = (content: unknown) => siteOn(content)
 
 	it('accepts one or more catalog locales holding the reference locale', () => {
 		expectAccept(withContent({ locales: ['ru'], referenceLocale: 'ru' }))
@@ -315,10 +325,7 @@ describe('menu', () => {
 	// locales and social are built here too, so the label coverage check depends on nothing in site.yaml
 	const CONTENT = { locales: ['en', 'ru'], referenceLocale: 'ru' }
 	const withMenu = (menu: unknown, content: unknown = CONTENT) => ({
-		...validSite,
-		content,
-		identity: IDENTITY_EN_RU,
-		social: [],
+		...siteOn(content, { identity: IDENTITY_EN_RU, social: [] }),
 		menu,
 	})
 	// a valid block; each reject case overlays one invalid key on it
@@ -463,6 +470,16 @@ describe('menu', () => {
 		expectReject(withMenu({ ...base, items }, { locales: ['en'], referenceLocale: 'en' }))
 	})
 
+	it('rejects a label in a locale outside content.locales, naming its path', () => {
+		const items = [{ segment: 'gallery', label: { en: 'Gallery', ru: 'Галерея' } }]
+		const result = siteSchema.safeParse(
+			withMenu({ ...base, items }, { locales: ['en'], referenceLocale: 'en' }),
+		)
+		expect(
+			result.error?.issues.map((issue) => `${issue.path.join('.')}: ${issue.message}`),
+		).toEqual(['menu.items.0.label.ru: not one of content.locales [en]'])
+	})
+
 	it('accepts on|off for sectionIcon and sectionIconSwap, rejects anything else', () => {
 		for (const value of ['off', 'on']) {
 			expectAccept(withMenu({ ...base, sectionIcon: value }))
@@ -545,13 +562,13 @@ describe('identity', () => {
 		copyright: { holder: { en: 'Example Author', ru: 'Пример Автора' }, since: 2001 },
 	}
 	const withIdentity = (value: unknown, content: unknown = CONTENT) => ({
-		...validSite,
-		content,
-		menu: {
-			...validSite.menu,
-			items: [{ segment: 'about', label: { en: 'About', ru: 'Обо мне' } }],
-		},
-		social: [],
+		...siteOn(content, {
+			menu: {
+				...validSite.menu,
+				items: [{ segment: 'about', label: { en: 'About', ru: 'Обо мне' } }],
+			},
+			social: [],
+		}),
 		identity: value,
 	})
 
@@ -592,13 +609,13 @@ describe('identity', () => {
 describe('social', () => {
 	const CONTENT = { locales: ['en', 'ru'], referenceLocale: 'ru' }
 	const withSocial = (social: unknown, content: unknown = CONTENT) => ({
-		...validSite,
-		content,
-		identity: IDENTITY_EN_RU,
-		menu: {
-			...validSite.menu,
-			items: [{ segment: 'about', label: { en: 'About', ru: 'Обо мне' } }],
-		},
+		...siteOn(content, {
+			identity: IDENTITY_EN_RU,
+			menu: {
+				...validSite.menu,
+				items: [{ segment: 'about', label: { en: 'About', ru: 'Обо мне' } }],
+			},
+		}),
 		social,
 	})
 	const link = {
@@ -667,6 +684,26 @@ describe('privacy controller', () => {
 		expectReject(
 			withPrivacy({ controller: { ...controller, contact: { kind: 'email', href: 'x' } } }),
 		)
+	})
+
+	it('requires the controller name and the seo description in exactly the active locales', () => {
+		const issues = (site: unknown) =>
+			siteSchema
+				.safeParse(site)
+				.error?.issues.map((issue) => `${issue.path.join('.')}: ${issue.message}`)
+		const oneLocale = siteOn({ locales: ['en'], referenceLocale: 'en' })
+		expectAccept(oneLocale)
+		expect(
+			issues({
+				...oneLocale,
+				privacy: { controller: controller },
+				seo: { description: { ru: 'Описание' } },
+			}),
+		).toEqual([
+			'privacy.controller.name.ru: not one of content.locales [en]',
+			'seo.description.ru: not one of content.locales [en]',
+			'seo.description.en: missing the "en" text required by content.locales',
+		])
 	})
 
 	it('shares the localized route validator with the social contacts link', () => {

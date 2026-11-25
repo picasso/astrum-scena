@@ -2,10 +2,11 @@ import { z } from 'astro/zod'
 
 import { KEBAB_CASE_PATTERN } from '../../config/kebab-case.ts'
 import { type Locale, localeSchema } from '../../config/locale-schema.ts'
+import { type LocalizedText, localizedText } from '../../config/localized-text.ts'
 import { sha256HexSchema } from '../../config/sha256-schema.ts'
 import { ALBUM_LAYOUTS } from '../../config/variants.ts'
 
-export { type Locale, localeSchema, sha256HexSchema }
+export { type Locale, localeSchema, type LocalizedText, sha256HexSchema }
 
 const ISO_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}(?:T\d{2}:\d{2}:\d{2}(?:\.\d{3})?Z)?$/
 // capture date is `YYYY` or `YYYY-MM` only: the year comes from the archive folder, and day, time
@@ -47,16 +48,10 @@ export const isoDateSchema = z
 		}
 		return value.length === 10 ? value : new Date(value).toISOString()
 	})
-// only for `photoSchema.capturedAt`; `publishedAt` keeps requiring a full date or datetime
+// only for the photo's `capturedAt`; `publishedAt` keeps requiring a full date or datetime
 export const partialCapturedAtSchema = z
 	.string()
 	.regex(PARTIAL_CAPTURED_AT_PATTERN, 'capturedAt must be YYYY or YYYY-MM')
-export const localizedTextSchema = z
-	.object({
-		en: z.string(),
-		ru: z.string(),
-	})
-	.strict()
 
 // editorial crop focus in percent (docs/blocks/gallery.md, "Focal point"), center when absent; it
 // lives on the photo record rather than the generated manifest and steers every fixed-ratio crop
@@ -194,91 +189,90 @@ export const mediaDescriptorSchema = z
 		}
 	})
 
-export const photoSchema = z
-	.object({
-		title: localizedTextSchema.refine((value) => value.en.trim() && value.ru.trim(), {
-			message: 'Both localized titles are required',
-			path: ['title'],
-		}),
-		description: localizedTextSchema.optional(),
-		caption: localizedTextSchema.optional(),
-		alt: localizedTextSchema.optional(),
-		status: statusSchema,
-		placeId: kebabIdSchema.optional(),
-		capturedAt: partialCapturedAtSchema.optional(),
-		publishedAt: isoDateSchema.optional(),
-		colorMode: z.enum(['color', 'black-and-white']).optional(),
-		// the build resolver merges it with the manifest entry, which stays the source of files
-		focalPoint: focalPointSchema.optional(),
-		favorite: z.boolean().default(false),
-		// independent visibility axis (ADR-0010): an unlisted photo is published and embeddable but
-		// left out of portfolio grids (the legacy `_private` tag); no `.default`, so re-serialized
-		// records do not gain `unlisted: false`
-		unlisted: z.boolean().optional(),
-		tags: z.array(kebabIdSchema).default([]),
-		media: mediaDescriptorSchema.optional(),
-		...sourceIdentityFields,
-	})
-	.strict()
-	.superRefine((value, context) => {
-		refineSourceIdentity(value, context)
-		// `colorMode` is not required here: it is auto-detected from pixels when not authored and
-		// must not block publication (ADR-0010/ADR-0012)
-		if (value.status === 'published' && !value.publishedAt) {
-			context.addIssue({
-				code: 'custom',
-				message: 'Published photo requires publishedAt',
-				path: ['publishedAt'],
-			})
-		}
-		if (new Set(value.tags).size !== value.tags.length) {
-			context.addIssue({
-				code: 'custom',
-				message: 'Photo tags must be unique',
-				path: ['tags'],
-			})
-		}
-	})
+// the localized data schemas are built from the site's `content.locales` (its lock): a text has
+// exactly the active locales, so a one-locale site writes one text per field
 
-export const albumSchema = z
-	.object({
-		category: z.enum(['series', 'places']),
-		title: localizedTextSchema.refine((value) => value.en.trim() && value.ru.trim(), {
-			message: 'Both localized titles are required',
-			path: ['title'],
-		}),
-		description: localizedTextSchema,
-		// card excerpt for the Portfolio index `details` mode; when absent or empty in a locale it
-		// is derived from description in whole sentences, like document excerpts
-		excerpt: localizedTextSchema.optional(),
-		// overrides the site default `album.layout`; the modes' numeric settings stay shared in
-		// site.yaml instead of being copied per album
-		layout: z.enum(ALBUM_LAYOUTS).optional(),
-		status: statusSchema,
-		coverId: kebabIdSchema,
-		photoIds: z.array(kebabIdSchema).min(1),
-		// see photoSchema.unlisted
-		unlisted: z.boolean().optional(),
-		...sourceIdentityFields,
-	})
-	.strict()
-	.superRefine((value, context) => {
-		refineSourceIdentity(value, context)
-		if (new Set(value.photoIds).size !== value.photoIds.length) {
-			context.addIssue({
-				code: 'custom',
-				message: 'Album photoIds must be unique',
-				path: ['photoIds'],
-			})
-		}
-		if (!value.photoIds.includes(value.coverId)) {
-			context.addIssue({
-				code: 'custom',
-				message: 'Album coverId must be included in photoIds',
-				path: ['coverId'],
-			})
-		}
-	})
+export const photoSchemaFor = (locales: readonly Locale[]) =>
+	z
+		.object({
+			title: localizedText(locales, { required: true }),
+			description: localizedText(locales).optional(),
+			caption: localizedText(locales).optional(),
+			alt: localizedText(locales).optional(),
+			status: statusSchema,
+			placeId: kebabIdSchema.optional(),
+			capturedAt: partialCapturedAtSchema.optional(),
+			publishedAt: isoDateSchema.optional(),
+			colorMode: z.enum(['color', 'black-and-white']).optional(),
+			// the build resolver merges it with the manifest entry, which stays the source of files
+			focalPoint: focalPointSchema.optional(),
+			favorite: z.boolean().default(false),
+			// independent visibility axis (ADR-0010): an unlisted photo is published and embeddable but
+			// left out of portfolio grids (the legacy `_private` tag); no `.default`, so re-serialized
+			// records do not gain `unlisted: false`
+			unlisted: z.boolean().optional(),
+			tags: z.array(kebabIdSchema).default([]),
+			media: mediaDescriptorSchema.optional(),
+			...sourceIdentityFields,
+		})
+		.strict()
+		.superRefine((value, context) => {
+			refineSourceIdentity(value, context)
+			// `colorMode` is not required here: it is auto-detected from pixels when not authored and
+			// must not block publication (ADR-0010/ADR-0012)
+			if (value.status === 'published' && !value.publishedAt) {
+				context.addIssue({
+					code: 'custom',
+					message: 'Published photo requires publishedAt',
+					path: ['publishedAt'],
+				})
+			}
+			if (new Set(value.tags).size !== value.tags.length) {
+				context.addIssue({
+					code: 'custom',
+					message: 'Photo tags must be unique',
+					path: ['tags'],
+				})
+			}
+		})
+
+export const albumSchemaFor = (locales: readonly Locale[]) =>
+	z
+		.object({
+			category: z.enum(['series', 'places']),
+			title: localizedText(locales, { required: true }),
+			description: localizedText(locales),
+			// card excerpt for the Portfolio index `details` mode; when absent or empty in a locale it
+			// is derived from description in whole sentences, like document excerpts
+			excerpt: localizedText(locales).optional(),
+			// overrides the site default `album.layout`; the modes' numeric settings stay shared in
+			// site.yaml instead of being copied per album
+			layout: z.enum(ALBUM_LAYOUTS).optional(),
+			status: statusSchema,
+			coverId: kebabIdSchema,
+			photoIds: z.array(kebabIdSchema).min(1),
+			// see the photo's `unlisted`
+			unlisted: z.boolean().optional(),
+			...sourceIdentityFields,
+		})
+		.strict()
+		.superRefine((value, context) => {
+			refineSourceIdentity(value, context)
+			if (new Set(value.photoIds).size !== value.photoIds.length) {
+				context.addIssue({
+					code: 'custom',
+					message: 'Album photoIds must be unique',
+					path: ['photoIds'],
+				})
+			}
+			if (!value.photoIds.includes(value.coverId)) {
+				context.addIssue({
+					code: 'custom',
+					message: 'Album coverId must be included in photoIds',
+					path: ['coverId'],
+				})
+			}
+		})
 
 export const localizedDocumentBaseSchema = z
 	.object({
@@ -325,149 +319,157 @@ export const pageSchema = localizedDocumentBaseSchema
 // route, outside [slug] routing, /status/, translation and factcheck
 export const legalSchema = z.object({ title: z.string().trim().min(1) }).strict()
 
-export const categorySchema = z
-	.object({
-		id: z.enum(['series', 'places']),
-		label: localizedTextSchema,
-	})
-	.strict()
+export const categorySchemaFor = (locales: readonly Locale[]) =>
+	z
+		.object({
+			id: z.enum(['series', 'places']),
+			label: localizedText(locales),
+		})
+		.strict()
 
-export const placeSchema = z
-	.object({
-		id: kebabIdSchema,
-		name: localizedTextSchema,
-		kind: z.enum(['country', 'region', 'locality']),
-		parentId: kebabIdSchema.optional(),
-	})
-	.strict()
+export const placeSchemaFor = (locales: readonly Locale[]) =>
+	z
+		.object({
+			id: kebabIdSchema,
+			name: localizedText(locales),
+			kind: z.enum(['country', 'region', 'locality']),
+			parentId: kebabIdSchema.optional(),
+		})
+		.strict()
 
-export const tagSchema = z
-	.object({
-		id: kebabIdSchema,
-		label: localizedTextSchema,
-		kind: z.enum(['subject', 'condition', 'motif', 'moment', 'technique']),
-	})
-	.strict()
+export const tagSchemaFor = (locales: readonly Locale[]) =>
+	z
+		.object({
+			id: kebabIdSchema,
+			label: localizedText(locales),
+			kind: z.enum(['subject', 'condition', 'motif', 'moment', 'technique']),
+		})
+		.strict()
 
-export const categoriesConfigSchema = z
-	.object({
-		schemaVersion: z.literal(1),
-		categories: z.array(categorySchema),
-	})
-	.strict()
+export const categoriesConfigSchemaFor = (locales: readonly Locale[]) =>
+	z
+		.object({
+			schemaVersion: z.literal(2),
+			categories: z.array(categorySchemaFor(locales)),
+		})
+		.strict()
 
-export const placesConfigSchema = z
-	.object({
-		schemaVersion: z.literal(1),
-		places: z.array(placeSchema),
-	})
-	.strict()
+export const placesConfigSchemaFor = (locales: readonly Locale[]) =>
+	z
+		.object({
+			schemaVersion: z.literal(2),
+			places: z.array(placeSchemaFor(locales)),
+		})
+		.strict()
 
-export const tagsConfigSchema = z
-	.object({
-		schemaVersion: z.literal(1),
-		tags: z.array(tagSchema),
-	})
-	.strict()
+export const tagsConfigSchemaFor = (locales: readonly Locale[]) =>
+	z
+		.object({
+			schemaVersion: z.literal(2),
+			tags: z.array(tagSchemaFor(locales)),
+		})
+		.strict()
 
-export const featuredInlineCopySchema = z
-	.object({
-		title: localizedTextSchema.refine((value) => value.en.trim() && value.ru.trim(), {
-			message: 'Both localized titles are required',
-			path: ['title'],
-		}),
-		description: localizedTextSchema,
-	})
-	.strict()
+export const featuredInlineCopySchemaFor = (locales: readonly Locale[]) =>
+	z
+		.object({
+			title: localizedText(locales, { required: true }),
+			description: localizedText(locales),
+		})
+		.strict()
 
-export const featuredItemSchema = z
-	.object({
-		id: kebabIdSchema,
-		align: z.enum(['left', 'right']),
-		target: z
-			.object({
-				collection: z.enum(['albums', 'articles', 'pages']),
-				slug: kebabIdSchema,
-				linkKind: z.enum(['album', 'page']),
-			})
-			.strict(),
-		copySource: z.enum(['target', 'media', 'inline']),
-		// slide copy written in home.yaml regardless of the target type; required exactly when
-		// `copySource: inline`
-		copy: featuredInlineCopySchema.optional(),
-		// `target` takes the album's `coverId`, or the document's reference-locale `coverId`
-		// (ADR-0013); a document without one fails at build time
-		mediaSource: z.union([
-			z.literal('target'),
-			z
+export const featuredItemSchemaFor = (locales: readonly Locale[]) =>
+	z
+		.object({
+			id: kebabIdSchema,
+			align: z.enum(['left', 'right']),
+			target: z
 				.object({
-					photoSlug: kebabIdSchema,
+					collection: z.enum(['albums', 'articles', 'pages']),
+					slug: kebabIdSchema,
+					linkKind: z.enum(['album', 'page']),
 				})
 				.strict(),
-		]),
-	})
-	.strict()
-	.superRefine((value, context) => {
-		if (value.copySource === 'inline') {
-			if (!value.copy) {
+			copySource: z.enum(['target', 'media', 'inline']),
+			// slide copy written in home.yaml regardless of the target type; required exactly when
+			// `copySource: inline`
+			copy: featuredInlineCopySchemaFor(locales).optional(),
+			// `target` takes the album's `coverId`, or the document's reference-locale `coverId`
+			// (ADR-0013); a document without one fails at build time
+			mediaSource: z.union([
+				z.literal('target'),
+				z
+					.object({
+						photoSlug: kebabIdSchema,
+					})
+					.strict(),
+			]),
+		})
+		.strict()
+		.superRefine((value, context) => {
+			if (value.copySource === 'inline') {
+				if (!value.copy) {
+					context.addIssue({
+						code: 'custom',
+						message: 'Inline copySource requires an inline copy block',
+						path: ['copy'],
+					})
+				}
+			} else if (value.copy) {
 				context.addIssue({
 					code: 'custom',
-					message: 'Inline copySource requires an inline copy block',
+					message: 'copy is only allowed with copySource: inline',
 					path: ['copy'],
 				})
 			}
-		} else if (value.copy) {
-			context.addIssue({
-				code: 'custom',
-				message: 'copy is only allowed with copySource: inline',
-				path: ['copy'],
-			})
-		}
-		if (value.target.collection === 'albums') {
-			if (value.target.linkKind !== 'album') {
+			if (value.target.collection === 'albums') {
+				if (value.target.linkKind !== 'album') {
+					context.addIssue({
+						code: 'custom',
+						message: 'Album target requires album linkKind',
+						path: ['target', 'linkKind'],
+					})
+				}
+				return
+			}
+			if (value.target.linkKind !== 'page') {
 				context.addIssue({
 					code: 'custom',
-					message: 'Album target requires album linkKind',
+					message: 'Article/page target requires page linkKind',
 					path: ['target', 'linkKind'],
 				})
 			}
-			return
-		}
-		if (value.target.linkKind !== 'page') {
-			context.addIssue({
-				code: 'custom',
-				message: 'Article/page target requires page linkKind',
-				path: ['target', 'linkKind'],
-			})
-		}
-	})
+		})
 
-export const featuredConfigSchema = z
-	.object({
-		schemaVersion: z.literal(1),
-		slides: z.array(featuredItemSchema).min(1),
-	})
-	.strict()
-	.superRefine((value, context) => {
-		const ids = value.slides.map((slide) => slide.id)
-		if (new Set(ids).size !== ids.length) {
-			context.addIssue({
-				code: 'custom',
-				message: 'Featured slide IDs must be unique',
-				path: ['slides'],
-			})
-		}
-	})
+export const featuredConfigSchemaFor = (locales: readonly Locale[]) =>
+	z
+		.object({
+			schemaVersion: z.literal(2),
+			slides: z.array(featuredItemSchemaFor(locales)).min(1),
+		})
+		.strict()
+		.superRefine((value, context) => {
+			const ids = value.slides.map((slide) => slide.id)
+			if (new Set(ids).size !== ids.length) {
+				context.addIssue({
+					code: 'custom',
+					message: 'Featured slide IDs must be unique',
+					path: ['slides'],
+				})
+			}
+		})
 
-export type AlbumData = z.infer<typeof albumSchema>
+export type AlbumSchema = ReturnType<typeof albumSchemaFor>
+export type PhotoSchema = ReturnType<typeof photoSchemaFor>
+
+export type AlbumData = z.infer<AlbumSchema>
 export type ArticleData = z.infer<typeof articleSchema>
-export type Category = z.infer<typeof categorySchema>
-export type FeaturedConfig = z.infer<typeof featuredConfigSchema>
-export type FeaturedInlineCopy = z.infer<typeof featuredInlineCopySchema>
+export type Category = z.infer<ReturnType<typeof categorySchemaFor>>
+export type FeaturedConfig = z.infer<ReturnType<typeof featuredConfigSchemaFor>>
+export type FeaturedInlineCopy = z.infer<ReturnType<typeof featuredInlineCopySchemaFor>>
 export type FocalPoint = z.infer<typeof focalPointSchema>
-export type LocalizedText = z.infer<typeof localizedTextSchema>
 export type MediaDescriptor = z.infer<typeof mediaDescriptorSchema>
 export type PageData = z.infer<typeof pageSchema>
-export type PhotoData = z.infer<typeof photoSchema>
-export type Place = z.infer<typeof placeSchema>
-export type Tag = z.infer<typeof tagSchema>
+export type PhotoData = z.infer<PhotoSchema>
+export type Place = z.infer<ReturnType<typeof placeSchemaFor>>
+export type Tag = z.infer<ReturnType<typeof tagSchemaFor>>

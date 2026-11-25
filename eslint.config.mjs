@@ -46,12 +46,22 @@ const dynamicImport = (pattern, message) => [
 ]
 // the locale set and its roles come from site.yaml `content`, and locale metadata from the catalog
 // in the core's config/locale-schema.ts
-const localeLiteral = {
-	selector:
-		':matches(Literal[value=/^(en|ru)$/], TemplateLiteral[expressions.length=0] > TemplateElement[value.cooked=/^(en|ru)$/])',
-	message:
-		'Do not hardcode a locale: take it from site.yaml `content` (locales, referenceLocale, defaultLocale()) or LOCALE_CATALOG.',
-}
+const localeLiterals = [
+	{
+		selector:
+			':matches(Literal[value=/^(en|ru)$/], TemplateLiteral[expressions.length=0] > TemplateElement[value.cooked=/^(en|ru)$/])',
+		message:
+			'Do not hardcode a locale: take it from site.yaml `content` (locales, referenceLocale, defaultLocale()) or LOCALE_CATALOG.',
+	},
+	// a record keyed or read by a fixed locale is a text of a two-locale site: localized data holds
+	// exactly `content.locales`, and locale metadata lives in LOCALE_CATALOG
+	{
+		selector:
+			':matches(Property > Identifier.key[name=/^(en|ru)$/], Property > Literal.key[value=/^(en|ru)$/], MemberExpression[computed=false] > Identifier.property[name=/^(en|ru)$/])',
+		message:
+			'Do not key or read a record by a fixed locale: index it by a locale of site.yaml `content`, or put locale metadata into LOCALE_CATALOG.',
+	},
+]
 
 // the derivative engine runs on sharp at prepare time; reached from runtime code, even through
 // another lib module, it would pull sharp into the site build. `lib/images/build` is the core's only
@@ -69,8 +79,12 @@ const configLoaderImport = {
 	message: 'lib takes the site config as an argument; only tests read it through the loader.',
 }
 
+// besides the config layer, the declarations of the dictionaries the core ships: one JSON per
+// catalog locale, imported by name
 const LOCALE_EXEMPT = [
 	`${CORE}/config/**`,
+	`${CORE}/i18n/dictionaries.ts`,
+	`${CORE}/modules/*/manifest.ts`,
 	'**/*.test.{ts,tsx}',
 	'**/test-fixtures.ts',
 	'**/fixtures/**',
@@ -145,7 +159,7 @@ const boundaries = (files, patterns, extra = NO_EXTRA) => {
 		{
 			files,
 			ignores: LOCALE_EXEMPT,
-			rules: { 'no-restricted-syntax': ['error', ...base.syntax, localeLiteral] },
+			rules: { 'no-restricted-syntax': ['error', ...base.syntax, ...localeLiterals] },
 		},
 	]
 	if (!files.every((file) => file.startsWith(`${CORE}/`))) return objects
@@ -160,7 +174,7 @@ const boundaries = (files, patterns, extra = NO_EXTRA) => {
 		{
 			files,
 			ignores: [...LOCALE_EXEMPT, ...IMAGE_BUILD_EXEMPT],
-			rules: { 'no-restricted-syntax': ['error', ...build.syntax, localeLiteral] },
+			rules: { 'no-restricted-syntax': ['error', ...build.syntax, ...localeLiterals] },
 		},
 	]
 }
@@ -223,7 +237,7 @@ export default defineConfig(
 	// unit tests included, names a locale
 	{
 		files: ['e2e/**', 'playwright.config.ts'],
-		rules: { 'no-restricted-syntax': ['error', enumDeclaration, localeLiteral] },
+		rules: { 'no-restricted-syntax': ['error', enumDeclaration, ...localeLiterals] },
 	},
 	// core files resolve from the package and site files from the site root; only the bin's entry reads
 	// the current directory, to resolve `--root` against it

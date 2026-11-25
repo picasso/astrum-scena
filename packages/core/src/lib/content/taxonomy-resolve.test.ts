@@ -6,8 +6,11 @@ import {
 	proposeTag,
 	resolvePlaceName,
 	resolveTagName,
+	type TaxonomyLocales,
 	TaxonomyProposalError,
 } from './taxonomy-resolve.ts'
+
+const SITE: TaxonomyLocales = { locales: ['en', 'ru'], referenceLocale: 'en' }
 
 const PLACES: Place[] = [
 	{ id: 'italy', name: { en: 'Italy', ru: 'Италия' }, kind: 'country' },
@@ -62,7 +65,7 @@ describe('resolveTagName', () => {
 describe('proposePlace', () => {
 	it('builds a country without a parent', () => {
 		expect(
-			proposePlace({ name: { en: 'France', ru: 'Франция' }, kind: 'country' }, PLACES),
+			proposePlace({ name: { en: 'France', ru: 'Франция' }, kind: 'country' }, PLACES, SITE),
 		).toEqual({ id: 'france', name: { en: 'France', ru: 'Франция' }, kind: 'country' })
 	})
 
@@ -75,6 +78,7 @@ describe('proposePlace', () => {
 					parentId: 'tuscany',
 				},
 				PLACES,
+				SITE,
 			),
 		).toEqual({
 			id: 'florence',
@@ -89,6 +93,7 @@ describe('proposePlace', () => {
 			proposePlace(
 				{ name: { en: 'Venice', ru: 'Венеция' }, kind: 'locality', parentId: 'greece' },
 				PLACES,
+				SITE,
 			).id,
 		).toBe('venice-greece')
 	})
@@ -98,13 +103,14 @@ describe('proposePlace', () => {
 			proposePlace(
 				{ name: { en: 'Spain', ru: 'Испания' }, kind: 'country', parentId: 'italy' },
 				PLACES,
+				SITE,
 			),
 		).toThrow(TaxonomyProposalError)
 	})
 
 	it('rejects a non-country without a parentId', () => {
 		expect(() =>
-			proposePlace({ name: { en: 'Sicily', ru: 'Сицилия' }, kind: 'region' }, PLACES),
+			proposePlace({ name: { en: 'Sicily', ru: 'Сицилия' }, kind: 'region' }, PLACES, SITE),
 		).toThrow(TaxonomyProposalError)
 	})
 
@@ -113,6 +119,7 @@ describe('proposePlace', () => {
 			proposePlace(
 				{ name: { en: 'Kyoto', ru: 'Киото' }, kind: 'locality', parentId: 'japan' },
 				PLACES,
+				SITE,
 			),
 		).toThrow(TaxonomyProposalError)
 	})
@@ -123,23 +130,75 @@ describe('proposePlace', () => {
 			proposePlace(
 				{ name: { en: 'Murano', ru: 'Мурано' }, kind: 'locality', parentId: 'venice' },
 				PLACES,
+				SITE,
 			),
 		).toThrow(TaxonomyProposalError)
 	})
 
 	it('rejects an empty localized name', () => {
 		expect(() =>
-			proposePlace({ name: { en: 'Ghost', ru: '' }, kind: 'country' }, PLACES),
+			proposePlace({ name: { en: 'Ghost', ru: '' }, kind: 'country' }, PLACES, SITE),
 		).toThrow(TaxonomyProposalError)
 	})
 })
 
+describe('proposePlace on the site locales', () => {
+	it('proposes a place with the one locale of a one-locale site', () => {
+		expect(
+			proposePlace({ name: { en: 'France' }, kind: 'country' }, PLACES, {
+				locales: ['en'],
+				referenceLocale: 'en',
+			}),
+		).toEqual({ id: 'france', name: { en: 'France' }, kind: 'country' })
+	})
+
+	it('names a locale outside content.locales and a missing one', () => {
+		const site: TaxonomyLocales = { locales: ['en'], referenceLocale: 'en' }
+		expect(() =>
+			proposePlace({ name: { en: 'France', ru: 'Франция' }, kind: 'country' }, PLACES, site),
+		).toThrow('place name.ru: not one of content.locales [en]')
+		expect(() =>
+			proposePlace({ name: { en: 'France' }, kind: 'country' }, PLACES, SITE),
+		).toThrow('place name.ru: missing the "ru" text required by content.locales')
+	})
+
+	it('takes the id from the reference locale, past one without Latin letters', () => {
+		const name = { en: 'Lake Garda', ru: 'Озеро Гарда' }
+		expect(
+			proposePlace({ name, kind: 'country' }, PLACES, {
+				locales: ['en', 'ru'],
+				referenceLocale: 'ru',
+			}).id,
+		).toBe('lake-garda')
+	})
+
+	it('takes the id from the reference locale, not from the first one of the list', () => {
+		const name = { en: 'Lake Garda', ru: 'Garda Lago' }
+		expect(
+			proposePlace({ name, kind: 'country' }, PLACES, {
+				locales: ['en', 'ru'],
+				referenceLocale: 'ru',
+			}).id,
+		).toBe('garda-lago')
+	})
+
+	it('finds an existing place by the name of a one-locale record', () => {
+		const places: Place[] = [{ id: 'harbor', name: { en: 'Harbor' }, kind: 'country' }]
+		expect(resolvePlaceName('Harbor', places)).toEqual({ status: 'exists', id: 'harbor' })
+		expect(resolvePlaceName('Harbour', places)).toEqual({
+			status: 'close',
+			candidates: [expect.objectContaining({ id: 'harbor' })],
+		})
+	})
+})
+
 describe('proposeTag', () => {
-	it('builds a new tag from the EN label', () => {
+	it('builds a new tag from the reference-locale label', () => {
 		expect(
 			proposeTag(
 				{ label: { en: 'Long Exposure', ru: 'Длинная выдержка' }, kind: 'technique' },
 				TAGS,
+				SITE,
 			),
 		).toEqual({
 			id: 'long-exposure',
@@ -149,14 +208,14 @@ describe('proposeTag', () => {
 	})
 
 	it('resolves an id collision with the kind', () => {
-		expect(proposeTag({ label: { en: 'Fog', ru: 'Туман' }, kind: 'condition' }, TAGS).id).toBe(
-			'fog-condition',
-		)
+		expect(
+			proposeTag({ label: { en: 'Fog', ru: 'Туман' }, kind: 'condition' }, TAGS, SITE).id,
+		).toBe('fog-condition')
 	})
 
 	it('rejects an empty localized label', () => {
-		expect(() => proposeTag({ label: { en: '', ru: 'Туман' }, kind: 'motif' }, TAGS)).toThrow(
-			TaxonomyProposalError,
-		)
+		expect(() =>
+			proposeTag({ label: { en: '', ru: 'Туман' }, kind: 'motif' }, TAGS, SITE),
+		).toThrow(TaxonomyProposalError)
 	})
 })

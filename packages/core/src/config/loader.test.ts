@@ -190,12 +190,12 @@ describe('config loader', () => {
 	})
 
 	it('rejects a collection version the core does not read, listing the ones it does', () => {
-		const root = lockedRoot((lock) => (object(lock.collections).albums = 2))
+		const root = lockedRoot((lock) => (object(lock.collections).albums = 1))
 		const supported = COLLECTION_VERSIONS.albums!.join(', ')
 
 		for (const load of [loadSiteConfig, loadSeoConfig])
 			expect(() => load(root)).toThrow(
-				`${SITE_LOCK_PATH}: collections.albums: version 2 is not supported; supported: ${supported}; see UPGRADING.md`,
+				`${SITE_LOCK_PATH}: collections.albums: version 1 is not supported; supported: ${supported}; see UPGRADING.md`,
 			)
 	})
 
@@ -241,7 +241,7 @@ describe('config loader', () => {
 			`${SITE_LOCK_PATH}: missing schemaVersion; supported: 1`,
 		)
 		expect(() => loadSiteConfig(siteVersion)).toThrow(
-			`${SITE_LOCK_PATH}: site: schemaVersion 1 is not supported; supported: 3; see UPGRADING.md`,
+			`${SITE_LOCK_PATH}: site: schemaVersion 1 is not supported; supported: 4; see UPGRADING.md`,
 		)
 	})
 
@@ -278,16 +278,17 @@ describe('upgrade from the three-file shape', () => {
 		Object.fromEntries(Object.entries(value).filter(([key]) => !keys.includes(key)))
 	const unversioned = (file: string) => without(readLegacy(file), 'schemaVersion')
 
+	// the step from 3 to 4 changes only the number on a two-locale site
 	const upgraded = (): string =>
-		writeSiteFiles(
-			makeRoot(),
-			withCoursesModule({
+		writeSiteFiles(makeRoot(), {
+			...withCoursesModule({
 				...readLegacy('src/config/site.yaml'),
 				schemaVersion: 2,
 				seo: unversioned('src/config/seo.yaml'),
 				images: unversioned('config/images.yaml'),
 			}),
-		)
+			schemaVersion: 4,
+		})
 
 	it('fails on the old shape, naming the first file to move', () => {
 		expect(() => loadSiteConfig(legacyRoot)).toThrow(

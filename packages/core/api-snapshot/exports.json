@@ -19,7 +19,7 @@
 	},
 	"@picasso-ai/astrum-scena/collections": {
 		"CoreCollections": {
-			"declaration": "{ albums: CollectionConfig<typeof albumSchema>; articles: CollectionConfig<typeof articleSchema>; legal: CollectionConfig<typeof legalSchema>; pages: CollectionConfig<typeof pageSchema>; photos: CollectionConfig<typeof photoSchema>; }",
+			"declaration": "{ albums: CollectionConfig<AlbumSchema>; articles: CollectionConfig<typeof articleSchema>; legal: CollectionConfig<typeof legalSchema>; pages: CollectionConfig<typeof pageSchema>; photos: CollectionConfig<PhotoSchema>; }",
 			"kind": "type"
 		},
 		"ModuleCollections": {

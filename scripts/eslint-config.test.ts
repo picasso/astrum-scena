@@ -121,6 +121,24 @@ describe('eslint.config.mjs style rules', () => {
 		).not.toContain(rule)
 	})
 
+	it('bans a record keyed or read by a fixed locale outside the config layer and tests', async () => {
+		const rule = 'no-restricted-syntax'
+		for (const code of [
+			'export const text = { en: 1 }\n',
+			"export const text = { 'ru': 1 }\n",
+			'export const read = (text: { en: string }) => text.en\n',
+		])
+			expect(await ruleIds(code, `${CORE}/lib/probe.ts`), code).toContain(rule)
+		expect(
+			await ruleIds(
+				'export const read = (text: Record<string, string>, l: string) => text[l]\n',
+				`${CORE}/lib/probe.ts`,
+			),
+		).not.toContain(rule)
+		for (const file of [`${CORE}/config/probe.ts`, `${CORE}/lib/probe.test.ts`])
+			expect(await ruleIds('export const text = { en: 1 }\n', file), file).not.toContain(rule)
+	})
+
 	it('bans locale literals in live code outside the config layer and tests', async () => {
 		const rule = 'no-restricted-syntax'
 		const literal = "export const locale = 'ru'\n"

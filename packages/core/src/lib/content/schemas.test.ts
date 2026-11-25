@@ -2,17 +2,126 @@ import { describe, expect, it } from 'vitest'
 
 import { ALBUM_LAYOUTS } from '../../config/variants.ts'
 import {
-	albumSchema,
+	albumSchemaFor,
 	articleSchema,
-	featuredItemSchema,
+	categoriesConfigSchemaFor,
+	featuredConfigSchemaFor,
+	featuredItemSchemaFor,
 	isoDateSchema,
 	mediaDescriptorSchema,
 	pageSchema,
 	partialCapturedAtSchema,
-	photoSchema,
+	photoSchemaFor,
+	placesConfigSchemaFor,
+	tagsConfigSchemaFor,
 } from './schemas'
 
+const albumSchema = albumSchemaFor(['en', 'ru'])
+const featuredItemSchema = featuredItemSchemaFor(['en', 'ru'])
+const photoSchema = photoSchemaFor(['en', 'ru'])
+
 const localized = { en: 'Title', ru: 'Название' }
+
+const issuesOf = (result: { error?: { issues: { path: PropertyKey[]; message: string }[] } }) =>
+	result.error?.issues.map((issue) => `${issue.path.join('.')}: ${issue.message}`)
+
+describe('localized data shapes from content.locales', () => {
+	const album = {
+		category: 'series',
+		description: { en: '' },
+		status: 'draft',
+		coverId: 'one',
+		photoIds: ['one'],
+	}
+
+	it('accepts a text per locale of a two-locale and of a one-locale site', () => {
+		expect(photoSchema.parse({ title: localized, status: 'draft' }).title).toEqual(localized)
+		expect(
+			photoSchemaFor(['en']).parse({ title: { en: 'Title' }, status: 'draft' }).title,
+		).toEqual({ en: 'Title' })
+		expect(albumSchemaFor(['en']).safeParse({ ...album, title: { en: 'Album' } }).success).toBe(
+			true,
+		)
+	})
+
+	it('rejects a locale outside content.locales, naming the field and the locale', () => {
+		const result = photoSchemaFor(['en']).safeParse({ title: localized, status: 'draft' })
+		expect(issuesOf(result)).toEqual(['title.ru: not one of content.locales [en]'])
+	})
+
+	it('rejects an active locale without its text, naming the field and the locale', () => {
+		const result = photoSchema.safeParse({
+			title: localized,
+			alt: { en: 'Alt' },
+			status: 'draft',
+		})
+		expect(issuesOf(result)).toEqual([
+			'alt.ru: missing the "ru" text required by content.locales',
+		])
+	})
+
+	it('keeps an optional field optional on a one-locale site', () => {
+		const photo = photoSchemaFor(['en']).parse({ title: { en: 'Title' }, status: 'draft' })
+		expect(photo.alt).toBeUndefined()
+	})
+
+	it('rejects a blank title in any active locale and allows an empty description', () => {
+		const result = photoSchema.safeParse({ title: { en: 'Title', ru: ' ' }, status: 'draft' })
+		expect(issuesOf(result)).toEqual(['title.ru: the "ru" text must not be empty'])
+		expect(albumSchemaFor(['en']).safeParse({ ...album, title: { en: '' } }).success).toBe(
+			false,
+		)
+		expect(
+			albumSchemaFor(['en']).parse({ ...album, title: { en: 'Album' } }).description,
+		).toEqual({ en: '' })
+	})
+
+	it('builds the taxonomy and featured files at version 2 from the locales', () => {
+		const label = { en: 'Series' }
+		expect(
+			categoriesConfigSchemaFor(['en']).safeParse({
+				schemaVersion: 2,
+				categories: [{ id: 'series', label }],
+			}).success,
+		).toBe(true)
+		expect(
+			issuesOf(
+				placesConfigSchemaFor(['en']).safeParse({
+					schemaVersion: 2,
+					places: [
+						{ id: 'harbor', name: { en: 'Harbor', ru: 'Гавань' }, kind: 'locality' },
+					],
+				}),
+			),
+		).toEqual(['places.0.name.ru: not one of content.locales [en]'])
+		expect(tagsConfigSchemaFor(['en']).safeParse({ schemaVersion: 1, tags: [] }).success).toBe(
+			false,
+		)
+		const slide = {
+			id: 'slide',
+			align: 'left',
+			target: { collection: 'albums', slug: 'album', linkKind: 'album' },
+			copySource: 'inline',
+			copy: { title: { en: 'Title' }, description: { en: '' } },
+			mediaSource: 'target',
+		}
+		expect(
+			featuredConfigSchemaFor(['en']).safeParse({ schemaVersion: 2, slides: [slide] })
+				.success,
+		).toBe(true)
+		expect(
+			issuesOf(
+				featuredConfigSchemaFor(['en', 'ru']).safeParse({
+					schemaVersion: 2,
+					slides: [slide],
+				}),
+			),
+		).toEqual([
+			'slides.0.copy.title.ru: missing the "ru" text required by content.locales',
+			'slides.0.copy.description.ru: missing the "ru" text required by content.locales',
+		])
+	})
+})
 
 describe('content schemas', () => {
 	it('applies conservative photo defaults', () => {

@@ -4,7 +4,7 @@ import path from 'node:path'
 
 import { afterAll, afterEach, describe, expect, it, vi } from 'vitest'
 
-import { buildSiteConfig } from './config/fixtures/site-config.ts'
+import { buildSiteConfig, keepLocales } from './config/fixtures/site-config.ts'
 import { writeSiteFiles } from './config/fixtures/site-files.ts'
 import { SITE_LOCK_ENV } from './config/loader.ts'
 import { SITE_LOCK_PATH } from './config/lock.ts'
@@ -28,12 +28,16 @@ const lockOf = (site: object): string => {
 	return path.join(root, SITE_LOCK_PATH)
 }
 
-async function collectionsFor(site: object): Promise<string[]> {
+async function defineFor(site: object) {
 	vi.stubEnv(SITE_LOCK_ENV, lockOf(site))
 	vi.resetModules()
 	vi.doMock('astro:content', () => ({ defineCollection: (collection: unknown) => collection }))
 	const { defineCoreCollections } = await import('./collections.ts')
-	return Object.keys(defineCoreCollections()).sort()
+	return defineCoreCollections()
+}
+
+async function collectionsFor(site: object): Promise<string[]> {
+	return Object.keys(await defineFor(site)).sort()
 }
 
 const CORE = ['albums', 'articles', 'legal', 'pages', 'photos']
@@ -53,5 +57,31 @@ describe('defineCoreCollections', () => {
 			},
 		}
 		expect(await collectionsFor(withoutCourses)).toEqual(CORE)
+	})
+
+	it("builds the albums and photos from the lock's content.locales", async () => {
+		const oneLocale = {
+			...keepLocales(config, ['en']),
+			content: { locales: ['en'], referenceLocale: 'en' },
+		}
+		type Parser = { safeParse(value: unknown): { success: boolean } }
+		const { albums, photos } = await defineFor(oneLocale)
+		const photo = photos.schema as Parser
+		expect(photo.safeParse({ title: { en: 'Title' }, status: 'draft' }).success).toBe(true)
+		expect(
+			photo.safeParse({ title: { en: 'Title', ru: 'Название' }, status: 'draft' }).success,
+		).toBe(false)
+		const album = albums.schema as Parser
+		const entry = {
+			category: 'series',
+			description: { en: '' },
+			status: 'draft',
+			coverId: 'one',
+			photoIds: ['one'],
+		}
+		expect(album.safeParse({ ...entry, title: { en: 'Album' } }).success).toBe(true)
+		expect(album.safeParse({ ...entry, title: { en: 'Album', ru: 'Альбом' } }).success).toBe(
+			false,
+		)
 	})
 })

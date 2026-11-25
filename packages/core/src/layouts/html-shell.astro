@@ -50,7 +50,11 @@ const {
 } = Astro.props
 const siteTitle = localizedLabel(site.identity.title, lang)
 const pageTitle = title ? `${title} — ${siteTitle}` : siteTitle
-const pageDescription = selectDescription(seo.description[lang], { description, excerpt, body })
+const pageDescription = selectDescription(localizedLabel(seo.description, lang), {
+	description,
+	excerpt,
+	body,
+})
 const socialUrl = canonical ?? new URL(Astro.url.pathname, site.origin).href
 const socialImage = seo.socialImage ? new URL(seo.socialImage, site.origin).href : undefined
 

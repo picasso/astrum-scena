@@ -12,10 +12,8 @@ import { collectLinks, type MdastLike } from './validate-children.ts'
 // node retagged via `data.hName`. The title must stay an mdast `text` node so the serializer
 // escapes it: interpolating it into an `html` node would allow stored HTML/JS injection
 
-const LINKS_DEFAULT_TITLE = {
-	ru: 'Ссылки',
-	en: 'Links',
-} as const satisfies Record<Locale, string>
+// the default title is the `links.title` text of the site's dictionary for the document locale
+export type LinksDefaultTitle = (locale: Locale) => string | undefined
 
 type LinksLocale = Locale
 
@@ -149,7 +147,7 @@ function buildReplacement(model: LinksModel, titleText: string | null, list: Mut
 	}
 }
 
-export const linksMdastPlugin = {
+export const linksMdastPlugin = (defaultTitle: LinksDefaultTitle) => ({
 	name: 'astrum-scena-links',
 	containerDirective(node: LinksDirectiveNode, ctx: LinksVisitorContext): void {
 		if (node.name !== DIRECTIVES.links) return
@@ -175,10 +173,16 @@ export const linksMdastPlugin = {
 				const locale = detectLocale(ctx)
 				if (locale === null) {
 					throw new Error(
-						`${locationPrefix(ctx, node)} links: cannot determine the document locale for the default title; name the file *.ru.md(x) or *.en.md(x), or pass an explicit title="…"`,
+						`${locationPrefix(ctx, node)} links: cannot determine the document locale for the default title; name the file *.<locale>.md(x), or pass an explicit title="…"`,
 					)
 				}
-				titleText = LINKS_DEFAULT_TITLE[locale]
+				const text = defaultTitle(locale)
+				if (text === undefined) {
+					throw new Error(
+						`${locationPrefix(ctx, node)} links: the document locale "${locale}" is not one of content.locales, so it has no default title; pass an explicit title="…"`,
+					)
+				}
+				titleText = text
 			}
 		}
 
@@ -194,4 +198,4 @@ export const linksMdastPlugin = {
 
 		ctx.replaceNode(node, buildReplacement(model, titleText, list))
 	},
-}
+})

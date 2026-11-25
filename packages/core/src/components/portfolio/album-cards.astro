@@ -79,7 +79,7 @@ const cards: CardModel[] = albums.map((album) => {
 	const media = resolveSurfaceMedia(catalog.manifest, cover.id, 'portfolioCard')
 	const excerpt =
 		details && excerptMode === 'on'
-			? deriveAlbumExcerpt(album.data.excerpt?.[locale], text.description)
+			? deriveAlbumExcerpt(text.excerpt, text.description)
 			: undefined
 	return {
 		href: albumHref(album.id, locale),

@@ -38,6 +38,169 @@ the core version a breaking release bumps to.
 
 ## [Unreleased]
 
+### `schemaVersion` 4 of `site.yaml`, `site.yaml`, `site`, `site.schemaVersion`, `privacy.controller.name.(keys)`, `privacy.controller.name.en`, `privacy.controller.name.ru`, `seo.description.(keys)`, `seo.description.en`, `seo.description.ru`, `site.privacy.controller.name.(keys)`, `site.privacy.controller.name.en`, `site.privacy.controller.name.ru`, `site.seo.description.(keys)`, `site.seo.description.en`, `site.seo.description.ru`
+
+**Before:** `site.yaml` has `schemaVersion: 3`. `privacy.controller.name` and `seo.description`
+always hold an `en` and a `ru` text, whatever `content.locales` lists, and the other config texts
+(`identity`, `menu.items[].label`, `social[].label`) may carry a locale the site does not build:
+
+```yaml
+# site.yaml (excerpt)
+schemaVersion: 3
+content:
+    locales:
+        - en
+    referenceLocale: en
+privacy:
+    controller:
+        name:
+            en: Example Person
+            ru: Пример Человека
+seo:
+    description:
+        en: Photographs by Example.
+        ru: Фотографии Примера.
+```
+
+**After:** `site.yaml` has `schemaVersion: 4`; version 3 fails with
+`site.yaml: schemaVersion 3 is not supported; supported: 4; see UPGRADING.md`. Every config text,
+`privacy.controller.name` and `seo.description` included, holds exactly the locales of
+`content.locales`: a missing one fails with
+`site.yaml: seo.description.ru: missing the "ru" text required by content.locales` and another one
+with `site.yaml: privacy.controller.name.ru: not one of content.locales [en]`. A site with two
+locales changes only the number; a one-locale site deletes the texts of the other locale.
+
+```yaml
+# site.yaml (excerpt)
+schemaVersion: 4
+content:
+    locales:
+        - en
+    referenceLocale: en
+privacy:
+    controller:
+        name:
+            en: Example Person
+seo:
+    description:
+        en: Photographs by Example.
+```
+
+**Order:** In one commit with the content entry below, before the first build with this release:
+edit `site.yaml`, then run `astrum-scena config resolve`, which writes `site.schemaVersion: 4` into
+`site.lock.yaml` (the lock's own `schemaVersion` stays 1) once the collection versions of the entry below are raised. Do not rerun the image
+pipeline: `configDigest` does not read these sections.
+
+**Writers:** `astrum-scena config resolve` of this release.
+
+**Verify:** `astrum-scena check config-lock` (`pnpm check:config-lock` in the demo) passes; on a
+two-locale site `git diff site.yaml` shows only the `schemaVersion` line, and the site builds the same
+pages with the same markup as before.
+
+### `collections.albums`, `collections.photos`, `schemaVersion` 2 of `src/content/config/categories.yaml`, `places.yaml`, `tags.yaml` and `src/content/featured/home.yaml`, `title`, `title.(keys)`, `title.en`, `title.ru`, `description`, `description.(keys)`, `description.en`, `description.ru`, `excerpt`, `excerpt.(keys)`, `excerpt.en`, `excerpt.ru`, `caption`, `caption.(keys)`, `caption.en`, `caption.ru`, `alt`, `alt.(keys)`, `alt.en`, `alt.ru`, `categories[].label`, `categories[].label.(keys)`, `categories[].label.en`, `categories[].label.ru`, `places[].name`, `places[].name.(keys)`, `places[].name.en`, `places[].name.ru`, `tags[].label`, `tags[].label.(keys)`, `tags[].label.en`, `tags[].label.ru`, `slides[].copy.title`, `slides[].copy.title.(keys)`, `slides[].copy.title.en`, `slides[].copy.title.ru`, `slides[].copy.description`, `slides[].copy.description.(keys)`, `slides[].copy.description.en`, `slides[].copy.description.ru`, `CoreCollections`
+
+**Before:** The localized fields of the albums and photos, the labels and names of the taxonomy
+files and the inline copy of the featured slides are `{en, ru}` pairs, both required on every site;
+the lock reads the two collections at version 1 and the four files carry `schemaVersion: 1`:
+
+```yaml
+# site.lock.yaml (excerpt)
+collections:
+    albums: 1
+    photos: 1
+```
+
+```yaml
+# src/content/config/tags.yaml
+schemaVersion: 1
+tags:
+    - id: dusk
+      label:
+          en: Dusk
+          ru: Сумерки
+      kind: moment
+```
+
+```yaml
+# src/content/photos/harbor-dawn.yaml (excerpt), on a site with `locales: [en]`
+title:
+    en: Harbor at Dawn
+    ru: Гавань на рассвете
+```
+
+**After:** Each of these fields holds exactly the locales of `content.locales`, the same rule as the
+config texts: `src/content/photos/harbor-dawn.yaml: title.ru: not one of content.locales [en]` for
+another locale, `alt.ru: missing the "ru" text required by content.locales` for a missing one; an
+optional field (`excerpt`, `caption`, `alt`, a photo's `description`) may still be left out, and a
+`title` may not be blank in any locale. The collections `albums` and `photos` are at version 2 in the
+lock, and the four files at `schemaVersion: 2`; an older version fails with
+`site.lock.yaml: collections.albums: version 1 is not supported; supported: 2; see UPGRADING.md` or
+`src/content/config/tags.yaml: schemaVersion 1 is not supported; supported: 2; see UPGRADING.md`. A
+site with two locales changes only the numbers; a one-locale site deletes the texts of the other
+locale from every album, photo, taxonomy entry and inline slide copy. `src/content.config.ts` stays
+`defineCoreCollections()`, which now builds the two schemas from the lock, and the type
+`CoreCollections` names them by their new types.
+
+```yaml
+# site.lock.yaml (excerpt)
+collections:
+    albums: 2
+    photos: 2
+```
+
+```yaml
+# src/content/config/tags.yaml, on a site with `locales: [en]`
+schemaVersion: 2
+tags:
+    - id: dusk
+      label:
+          en: Dusk
+      kind: moment
+```
+
+```yaml
+# src/content/photos/harbor-dawn.yaml (excerpt), on a site with `locales: [en]`
+title:
+    en: Harbor at Dawn
+```
+
+```yaml
+# src/content/albums/harbor.yaml (excerpt), on a site with `locales: [en]`
+title:
+    en: Harbor
+description:
+    en: Mornings at the old harbor.
+excerpt:
+    en: Mornings at the harbor.
+```
+
+```yaml
+# src/content/featured/home.yaml (excerpt), on a site with `locales: [en]`
+schemaVersion: 2
+slides:
+    - id: harbor
+      copySource: inline
+      copy:
+          title:
+              en: Harbor
+          description:
+              en: Mornings at the old harbor.
+```
+
+**Order:** In one commit with the `site.yaml` entry above, before the first build with this release:
+set `albums` and `photos` under `collections` of `site.lock.yaml` to `2` (resolve keeps the versions
+a lock holds, so this is the step that raises them), set `schemaVersion: 2` in the three taxonomy files and in `src/content/featured/home.yaml` when the
+site has one, delete
+the texts of a locale the site does not build, then run `astrum-scena config resolve`. Do not rerun
+the image pipeline: the image digests do not read these fields.
+
+**Writers:** `astrum-scena config resolve` of this release.
+
+**Verify:** `astrum-scena check content` and `astrum-scena check config-lock` pass, and the site
+builds (`astro build`), which is what reads `src/content/featured/home.yaml`; on a two-locale site
+`git diff` shows only the version lines, the site builds the same pages with the same markup as
+before, and its visual baselines, if it has any, pass unchanged.
+
 ## [0.6.9]
 
 ### `schemaVersion` in every site file the core reads, `version` of `config/images.yaml`, `src/content/config/image-sets.yaml`

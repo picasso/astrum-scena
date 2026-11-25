@@ -551,7 +551,9 @@ surface, each derived from the source the core itself reads:
   `src/content/config/place-gps-bounds.yaml` and the image data files `data/images/*.jsonl` (the
   version of the first line, and the lines after it as `rows`). Every one of them but the content
   collections starts
-  with a required `schemaVersion` (`2` in `site.yaml`, `1` elsewhere, the lock included; the first
+  with a required `schemaVersion` (`4` in `site.yaml`, `2` in the taxonomy files
+  `src/content/config/{categories,places,tags}.yaml` and in `src/content/featured/home.yaml`, `1`
+  elsewhere, the lock included; the first
   line of a `.jsonl` file holds only it), as do the generated `src/generated/images-public.json` and
   `images-release.json`; the core checks it before the schema and rejects a missing or unsupported
   version with the file and the versions it reads;

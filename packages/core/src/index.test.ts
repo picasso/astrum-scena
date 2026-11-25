@@ -23,6 +23,7 @@ import { SUPPORTED_LOCALES } from './config/locale-schema.ts'
 import { SITE_LOCK_PATH } from './config/lock.ts'
 import { siteRoot } from './config/site-root.ts'
 import { CORE_ROOT } from './core-root.ts'
+import { CORE_DICTIONARIES } from './i18n/dictionaries.ts'
 import { siteDictionaryPath } from './i18n/site-dictionary-path.ts'
 import astrumScena from './index.ts'
 import {
@@ -221,6 +222,34 @@ describe('astrumScena integration', () => {
 		expect(compile).toThrow('src/theme/theme.css: unknown tokens: --color-acent')
 	})
 
+	it("renders the note and links default titles from the site's dictionary override", async () => {
+		const root = mkdtempSync(path.join(tmpdir(), 'astrum-scena-block-titles-'))
+		scratch.push(root)
+		cpSync(siteRoot, root, {
+			recursive: true,
+			filter: (source) => !/(^|\/)(node_modules|dist|\.astro)$/.test(source),
+		})
+		const dictionary = path.join(root, siteDictionaryPath('en'))
+		writeFileSync(
+			dictionary,
+			`${readFileSync(dictionary, 'utf8')}note.title: Since then\nlinks.title: Further reading\n`,
+		)
+		const processor = (await setUp(root)).config.markdown?.processor as unknown as {
+			createRenderer: (options: object) => Promise<{
+				render: (source: string, options: object) => Promise<{ code: string }>
+			}>
+		}
+		const renderer = await processor.createRenderer({})
+		const render = async (source: string) =>
+			(await renderer.render(source, { fileURL: new URL('file:///docs/x.en.md') })).code
+		const note = await render(':::note{claim="prod-d602206b:64cf2f9d"}\nBody.\n:::')
+		expect(note).toContain('>Since then<')
+		expect(note).not.toContain(CORE_DICTIONARIES.en['note.title'])
+		const links = await render(':::links\n- [a](https://a.example)\n:::')
+		expect(links).toContain('>Further reading<')
+		expect(links).not.toContain(`>${CORE_DICTIONARIES.en['links.title']}<`)
+	})
+
 	it("serves the site's replacement components from src/overrides", async () => {
 		const { plugins } = await setUp(siteRoot)
 		const module = plugins.find((plugin) => plugin.name === 'astrum-scena:overrides')!
@@ -357,8 +386,8 @@ describe('astro config', () => {
 			features: { directive: true },
 			mdastPlugins: [
 				calloutMdastPlugin,
-				noteMdastPlugin,
-				linksMdastPlugin,
+				{ name: noteMdastPlugin(() => undefined).name },
+				{ name: linksMdastPlugin(() => undefined).name },
 				{ name: coreImportsMdastPlugin().name },
 			],
 		})
@@ -373,6 +402,19 @@ describe('astro config', () => {
 		const { code } = await (await processor.createRenderer({})).render(SOURCE, {})
 		expect(code).toContain('class="callout callout--block callout--default"')
 		expect(code).toContain('<strong>text</strong>')
+	})
+
+	it("gives the directive blocks their default title from the site's dictionaries", async () => {
+		const processor = (await configFor()).markdown?.processor as unknown as {
+			createRenderer: (options: object) => Promise<{
+				render: (source: string, options: object) => Promise<{ code: string }>
+			}>
+		}
+		const renderer = await processor.createRenderer({})
+		const { code } = await renderer.render(':::links\n- [a](https://a.example)\n:::', {
+			fileURL: new URL('file:///docs/x.en.md'),
+		})
+		expect(code).toContain(`>${CORE_DICTIONARIES.en['links.title']}<`)
 	})
 })
 
