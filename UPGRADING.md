@@ -38,6 +38,8 @@ the core version a breaking release bumps to.
 
 ## [Unreleased]
 
+## [0.6.10]
+
 ### `schemaVersion` 4 of `site.yaml`, `site.yaml`, `site`, `site.schemaVersion`, `privacy.controller.name.(keys)`, `privacy.controller.name.en`, `privacy.controller.name.ru`, `seo.description.(keys)`, `seo.description.en`, `seo.description.ru`, `site.privacy.controller.name.(keys)`, `site.privacy.controller.name.en`, `site.privacy.controller.name.ru`, `site.seo.description.(keys)`, `site.seo.description.en`, `site.seo.description.ru`
 
 **Before:** `site.yaml` has `schemaVersion: 3`. `privacy.controller.name` and `seo.description`
