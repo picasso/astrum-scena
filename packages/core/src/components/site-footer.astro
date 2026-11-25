@@ -59,11 +59,13 @@ const socialOn = site.footer.social === 'on' && site.social.length > 0
 // a language-neutral page overrides `footer.lang`
 const langDisplay = switcherDisplay(site.footer.lang, localeNeutral)
 const recentWorks = site.footer.recentWorks
-// a language-neutral page links every locale's privacy page, the reference locale first
+// a language-neutral page links every locale's privacy page, the reference locale first; a
+// one-locale site has a single policy, linked as on any other page
 const privacyLocales = [
 	site.content.referenceLocale,
 	...site.content.locales.filter((locale) => locale !== site.content.referenceLocale),
 ]
+const listEveryPrivacy = localeNeutral && privacyLocales.length > 1
 const menuLinks = site.menu.items.map((item) => ({
 	href: localizedHref(lang, item.segment),
 	label: localizedLabel(item.label, lang),
@@ -148,7 +150,7 @@ const columns = footerColumnCount(site.footer.columns, 1 + Number(showFirst) + N
 				{
 					!hidePrivacyLinks && (
 						<nav class="footer-legal" aria-label={t('footer.privacy')}>
-							{localeNeutral ? (
+							{listEveryPrivacy ? (
 								privacyLocales.map((locale) => (
 									<a
 										href={pageHref('privacy', locale)}

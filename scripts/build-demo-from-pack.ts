@@ -16,12 +16,13 @@ import { tmpdir } from 'node:os'
 import { basename, join, resolve, sep } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 
-import { parse as parseYaml } from 'yaml'
+import { parse as parseYaml, stringify as stringifyYaml } from 'yaml'
 
 import { R2_ENV_VARS } from '../packages/core/src/cli/images/r2-env.ts'
 import { BIN, GATES, IMAGE_COMMANDS } from '../packages/core/src/cli/registry.ts'
 import { writeSiteFiles } from '../packages/core/src/config/fixtures/site-files.ts'
 import { loadSiteConfig, loadSiteSection } from '../packages/core/src/config/loader.ts'
+import type { SiteConfig } from '../packages/core/src/config/site-schema.ts'
 import { type CoreManifest, declaredSpecifiers } from '../packages/core/src/eslint.ts'
 
 // builds the demo the way a site gets the core: from the `pnpm pack` tarball, installed in a directory
@@ -78,18 +79,18 @@ export const expectedDemoPages = (
 	...localePages(locales, portfolioPages(albums)),
 ]
 
-const ALBUM_FILE = /\.ya?ml$/
+const YAML_FILE = /\.ya?ml$/
 
 export function loadDemoAlbums(site: string): DemoAlbum[] {
 	const directory = join(site, 'src', 'content', 'albums')
 	return readdirSync(directory)
-		.filter((file) => ALBUM_FILE.test(file))
+		.filter((file) => YAML_FILE.test(file))
 		.sort()
 		.map((file) => {
 			const data = parseYaml(readFileSync(join(directory, file), 'utf8')) as {
 				photoIds: string[]
 			}
-			return { id: file.replace(ALBUM_FILE, ''), photoIds: data.photoIds }
+			return { id: file.replace(YAML_FILE, ''), photoIds: data.photoIds }
 		})
 }
 
@@ -542,6 +543,95 @@ export function assertNoCourses(dist: string, locales: readonly string[]): void 
 		throw new Error(`the packed demo without the courses module:\n  ${problems.join('\n  ')}`)
 }
 
+// the demo with its reference locale only: a localized value is an object whose every key is a locale
+// of the site, and it keeps the reference key alone, in the config (written from the lock's effective
+// config and resolved again) and in the YAML content; the documents and the dictionary of the other
+// locales leave the site. Everything is restored whatever `action` does
+const CONTENT_DIR = join('src', 'content')
+const DICTIONARY_DIR = join('src', 'i18n')
+
+const isLocalized = (value: object, locales: readonly string[]): boolean => {
+	const keys = Object.keys(value)
+	return keys.length > 0 && keys.every((key) => locales.includes(key))
+}
+
+export function keepLocale(value: unknown, locales: readonly string[], keep: string): unknown {
+	if (Array.isArray(value)) return value.map((item) => keepLocale(item, locales, keep))
+	if (!value || typeof value !== 'object') return value
+	if (isLocalized(value, locales))
+		return Object.fromEntries(Object.entries(value).filter(([key]) => key === keep))
+	return Object.fromEntries(
+		Object.entries(value).map(([key, item]) => [key, keepLocale(item, locales, keep)]),
+	)
+}
+
+const filesUnder = (site: string, dir: string): string[] =>
+	existsSync(join(site, dir))
+		? readdirSync(join(site, dir), { recursive: true, encoding: 'utf8' })
+				.map((file) => join(dir, file))
+				.filter((file) => isFile(join(site, file)))
+				.sort()
+		: []
+
+export function withOneLocale<T>(site: string, action: () => T): T {
+	const { locales, referenceLocale } = loadSiteSection(site, 'content')
+	const others = locales.filter((locale) => locale !== referenceLocale)
+	const contentFiles = filesUnder(site, CONTENT_DIR)
+	const yamlFiles = contentFiles.filter((file) => YAML_FILE.test(file))
+	const dropped = [
+		...contentFiles.filter((file) =>
+			others.some((locale) => new RegExp(`\\.${locale}\\.mdx?$`).test(file)),
+		),
+		...others
+			.map((locale) => join(DICTIONARY_DIR, `${locale}.yaml`))
+			.filter((file) => isFile(join(site, file))),
+	]
+	const rootFiles = readdirSync(site).filter((file) => YAML_FILE.test(file))
+	const saved = new Map(
+		[...rootFiles, ...yamlFiles, ...dropped].map((file) => [
+			file,
+			readFileSync(join(site, file), 'utf8'),
+		]),
+	)
+	const oneLocale = (text: string): string =>
+		stringifyYaml(keepLocale(parseYaml(text), locales, referenceLocale))
+	try {
+		const config = keepLocale(loadSiteConfig(site), locales, referenceLocale) as SiteConfig
+		writeSiteFiles(site, {
+			...config,
+			content: { ...config.content, locales: [referenceLocale] },
+		})
+		for (const file of yamlFiles) writeFileSync(join(site, file), oneLocale(saved.get(file)!))
+		for (const file of dropped) rmSync(join(site, file))
+		return action()
+	} finally {
+		for (const [file, text] of saved) writeFileSync(join(site, file), text)
+	}
+}
+
+export const TRANSLATIONS_METRIC = 'site-status__tone-translations'
+
+// the one-locale build has every page of the reference locale, no directory of another locale, no
+// hreflang anywhere and no translation freshness on /status/; `site` is the restored demo, whose other
+// locales the build must lack
+export function assertOneLocaleBuild(dist: string, site: string): void {
+	const { locales, referenceLocale } = loadSiteSection(site, 'content')
+	const problems = expectedDemoPages([referenceLocale], loadDemoAlbums(site))
+		.filter((page) => !existsSync(join(dist, page)))
+		.map((page) => `dist lacks ${page}`)
+	for (const locale of locales)
+		if (locale !== referenceLocale && existsSync(join(dist, locale)))
+			problems.push(`dist has ${locale}/`)
+	for (const file of htmlFiles(dist))
+		if (/\shreflang=/.test(readFileSync(join(dist, file), 'utf8')))
+			problems.push(`${file} has an hreflang attribute`)
+	const status = join(dist, 'status', 'index.html')
+	if (existsSync(status) && readFileSync(status, 'utf8').includes(TRANSLATIONS_METRIC))
+		problems.push(`status/index.html shows ${TRANSLATIONS_METRIC}`)
+	if (problems.length > 0)
+		throw new Error(`the packed demo with one locale:\n  ${problems.join('\n  ')}`)
+}
+
 // the package script of the demo that runs every gate of the site through the core's bin
 export const SITE_GATES_SCRIPT = 'check:site'
 
@@ -936,6 +1026,18 @@ export function buildPackedDemo({ out }: { out: string }): string {
 		assertNoCourses(withoutModuleOut, loadSiteSection(site, 'content').locales)
 	} finally {
 		rmSync(withoutModuleOut, { recursive: true, force: true })
+	}
+	const oneLocaleOut = join(site, 'one-locale-dist')
+	try {
+		console.log('building the packed demo with one locale')
+		const result = withOneLocale(site, () => buildInto(site, work, oneLocaleOut))
+		if (result.status !== 0)
+			throw new Error(
+				`the packed demo with one locale failed to build:\n${result.output.slice(-2000)}`,
+			)
+		assertOneLocaleBuild(oneLocaleOut, site)
+	} finally {
+		rmSync(oneLocaleOut, { recursive: true, force: true })
 	}
 	console.log(`demo built from the packed ${CORE} (outside the workspace) in ${site}`)
 	return site

@@ -1,4 +1,4 @@
-import { mkdtempSync, readFileSync, rmSync } from 'node:fs'
+import { cpSync, mkdtempSync, readFileSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 
@@ -22,6 +22,7 @@ import Fullscreen from '../layouts/fullscreen.astro'
 import HtmlShell from '../layouts/html-shell.astro'
 import type { BannerModel } from '../lib/banner/select.ts'
 import { parseManifest } from '../lib/images/manifest.ts'
+import { IMAGES_PUBLIC_RELATIVE_PATH } from '../lib/images/public-config.ts'
 import { footerPromoContext } from '../lib/portfolio/footer-promo-build.ts'
 import { resolveSurfaceMedia } from '../lib/portfolio/surface.ts'
 import { fontPreloads, localeScript } from '../theme/fonts.ts'
@@ -320,6 +321,51 @@ describe('HtmlShell fonts by locale script', () => {
 			expect(files[1]).toMatch(/-700\.woff2$/)
 		}
 		expect(fontPreloads('latin')).not.toEqual(fontPreloads('cyrillic'))
+	})
+})
+
+describe('one-locale site', () => {
+	// the demo's dictionaries name both its locales, which a one-locale config rejects; the shell
+	// still reads the demo's generated image config
+	beforeEach(() => {
+		const demoRoot = siteRoot
+		root.override = mkdtempSync(path.join(tmpdir(), 'one-locale-site-'))
+		cpSync(
+			path.join(demoRoot, IMAGES_PUBLIC_RELATIVE_PATH),
+			path.join(root.override, IMAGES_PUBLIC_RELATIVE_PATH),
+		)
+		config.site = buildSiteConfig({ content: { locales: ['en'], referenceLocale: 'en' } })
+		config.site.footer = { ...config.site.footer, recentWorks: 'off' }
+	})
+	afterEach(() => {
+		if (root.override) rmSync(root.override, { force: true, recursive: true })
+		root.override = undefined
+	})
+
+	const languageNav = () => `aria-label="${useTranslations('en')('nav.language.label')}"`
+
+	it('draws no language block in the overlay of the header and the fullscreen home', async () => {
+		const header = await container.renderToString(SiteHeader, { props: { lang: 'en' } })
+		const home = await container.renderToString(Fullscreen, {
+			props: {},
+			request: new Request('https://site.test/en/'),
+		})
+		for (const html of [header, home]) {
+			expect(html).toContain('id="site-menu-overlay"')
+			expect(html).not.toContain(languageNav())
+			expect(html).not.toContain('hreflang=')
+		}
+	})
+
+	it('links the single privacy policy on a neutral page without a locale suffix', async () => {
+		const html = await container.renderToString(SiteFooter, {
+			props: { lang: 'en', localeNeutral: true, promo: footerPromo },
+			request: new Request('https://site.test/rights/'),
+		})
+		expect(html.match(/href="\/[a-z]{2}\/privacy\/"/g)).toEqual(['href="/en/privacy/"'])
+		expect(html).toContain(`>${useTranslations('en')('footer.privacy')}</a>`)
+		expect(html).not.toContain('(EN)')
+		expect(html).not.toContain('hreflang=')
 	})
 })
 

@@ -475,6 +475,7 @@ legacy-аудиты, авторский голос, CSS-бюджет и заме
 - source_spec: `_bmad-output/implementation-artifacts/spec-6-10a-localized-data-shapes.md`
   summary: 6.10b — одноязычный сайт: без переключателя языка в меню и альтернатив `hreflang` при одной локали, `/status/` без свежести перевода, демо собирается в CI с одной локалью и с двумя, e2e берут подписи из конфига и словарей (критерии 6.10 №3–5, кроме локали вне en/ru).
   evidence: решение владельца 2026-11-23 при планировании 6.10: спек на всю историю ~4000+ токенов; одноязычный сайт опирается на формы данных 6.10a и поставляется отдельным PR.
+  closed_by: spec-6-10b-single-locale-site.md
 - source_spec: `_bmad-output/implementation-artifacts/spec-6-10a-localized-data-shapes.md`
   summary: 6.10c — каталог локалей из конфига: `LOCALE_CATALOG` (script, ogLocale, intl), `CHAR_WIDTH_PX` и `SERVICE_COPY_LOCALE` — умолчания ядра с переопределением и дополнением в `site.yaml`, тип `Locale`, `localeSchema` и регулярки путей от конфига, тест `lib` с локалью вне en/ru (критерий 6.10 №2 и часть №5).
   evidence: решение владельца 2026-11-23 при планировании 6.10: тип `Locale` из `keyof LOCALE_CATALOG` используется примерно в 70 файлах ядра — самый широкий рефакторинг истории, от 6.10a и 6.10b не зависит.

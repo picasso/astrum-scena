@@ -37,6 +37,7 @@ import {
 	assertImageCommands,
 	assertInstall,
 	assertNoCourses,
+	assertOneLocaleBuild,
 	assertSiteEslint,
 	assertSiteFormatters,
 	assertSiteGates,
@@ -73,8 +74,10 @@ import {
 	siteLintDevDependencies,
 	SLUG_COLLISION_ERROR,
 	SLUG_COLLISION_PAGE,
+	TRANSLATIONS_METRIC,
 	UNKNOWN_POINT_ERROR,
 	UNKNOWN_POINT_FILE,
+	withOneLocale,
 	withoutCoursesModule,
 } from './build-demo-from-pack.ts'
 
@@ -557,30 +560,32 @@ describe('packed package exports', () => {
 	})
 })
 
-describe('the demo without the courses module', () => {
-	const withDemoCopy = (check: (site: string) => void) => {
-		const work = mkdtempSync(join(tmpdir(), 'demo-without-module-'))
-		const site = join(work, 'site')
-		try {
-			cpSync('demo', site, {
-				recursive: true,
-				filter: (source) => !/(^|\/)(node_modules|dist|\.astro)$/.test(source),
-			})
-			check(site)
-		} finally {
-			rmSync(work, { recursive: true, force: true })
-		}
+const withDemoCopy = (check: (site: string) => void) => {
+	const work = mkdtempSync(join(tmpdir(), 'demo-copy-'))
+	const site = join(work, 'site')
+	try {
+		cpSync('demo', site, {
+			recursive: true,
+			filter: (source) => !/(^|\/)(node_modules|dist|\.astro)$/.test(source),
+		})
+		check(site)
+	} finally {
+		rmSync(work, { recursive: true, force: true })
 	}
-	const snapshot = (site: string) =>
-		readdirSync(site, { recursive: true, encoding: 'utf8' })
-			.sort()
-			.map((file) => {
-				const path = join(site, file)
-				return existsSync(path) && !statSync(path).isDirectory()
-					? `${file}\n${readFileSync(path, 'utf8')}`
-					: file
-			})
-			.join('\n')
+}
+
+const snapshot = (site: string) =>
+	readdirSync(site, { recursive: true, encoding: 'utf8' })
+		.sort()
+		.map((file) => {
+			const path = join(site, file)
+			return existsSync(path) && !statSync(path).isDirectory()
+				? `${file}\n${readFileSync(path, 'utf8')}`
+				: file
+		})
+		.join('\n')
+
+describe('the demo without the courses module', () => {
 	const COURSES = join('src', 'content', 'courses')
 
 	it('runs the build on a site without the module, its targets and, unless kept, its content', () => {
@@ -650,6 +655,82 @@ describe('the demo without the courses module', () => {
 					'dist has ru/courses/\n  sitemap-0.xml lists a /courses/ URL',
 				),
 		)
+	})
+})
+
+describe('the demo with one locale', () => {
+	const files = (site: string) => readdirSync(site, { recursive: true, encoding: 'utf8' })
+
+	it('keeps only the reference locale in the config, the YAML content and the documents', () => {
+		withDemoCopy((site) => {
+			const { locales, referenceLocale } = loadSiteSection(site, 'content')
+			const others = locales.filter((locale) => locale !== referenceLocale)
+			expect(others.length).toBeGreaterThan(0)
+			const before = snapshot(site)
+			withOneLocale(site, () => {
+				const config = loadSiteConfig(site)
+				expect(config.content.locales).toEqual([referenceLocale])
+				expect(config.identity.title).toEqual({
+					[referenceLocale]: expect.any(String),
+				})
+				const tags = readFileSync(join(site, 'src/content/config/tags.yaml'), 'utf8')
+				expect(tags).toContain(`${referenceLocale}:`)
+				for (const locale of others) {
+					expect(JSON.stringify(config)).not.toContain(`"${locale}":`)
+					expect(tags).not.toMatch(new RegExp(`^\\s*${locale}:`, 'm'))
+					expect(files(site).filter((file) => file.includes(`.${locale}.md`))).toEqual([])
+					expect(existsSync(join(site, 'src/i18n', `${locale}.yaml`))).toBe(false)
+				}
+				expect(
+					files(site).filter((file) => file.includes(`.${referenceLocale}.md`)).length,
+				).toBeGreaterThan(0)
+				expect(existsSync(join(site, 'src/i18n', `${referenceLocale}.yaml`))).toBe(true)
+			})
+			expect(snapshot(site)).toBe(before)
+		})
+	})
+
+	it('restores the site when the build throws', () => {
+		withDemoCopy((site) => {
+			const before = snapshot(site)
+			expect(() =>
+				withOneLocale(site, () => {
+					throw new Error('spawn failed')
+				}),
+			).toThrow('spawn failed')
+			expect(snapshot(site)).toBe(before)
+		})
+	})
+
+	it('finds an hreflang, another locale, the translation metric or a missing page in the build', () => {
+		withDemoCopy((site) => {
+			const { locales, referenceLocale: ref } = loadSiteSection(site, 'content')
+			const other = locales.find((locale) => locale !== ref)!
+			const pages = expectedDemoPages([ref], loadDemoAlbums(site))
+			const status = 'status/index.html'
+			withDist(
+				{ ...emptyPages(pages), [status]: '<span class="site-status__metric-value">' },
+				(dist) => expect(() => assertOneLocaleBuild(dist, site)).not.toThrow(),
+			)
+			withDist(
+				{
+					...emptyPages(pages.filter((page) => page !== `${ref}/privacy/index.html`)),
+					[`${ref}/index.html`]: `<link rel="alternate" hreflang="${ref}" href="/${ref}/">`,
+					[`${other}/index.html`]: '',
+					[status]: `<span class="${TRANSLATIONS_METRIC}">`,
+				},
+				(dist) =>
+					expect(() => assertOneLocaleBuild(dist, site)).toThrow(
+						[
+							'the packed demo with one locale:',
+							`dist lacks ${ref}/privacy/index.html`,
+							`dist has ${other}/`,
+							`${ref}/index.html has an hreflang attribute`,
+							`status/index.html shows ${TRANSLATIONS_METRIC}`,
+						].join('\n  '),
+					),
+			)
+		})
 	})
 })
 
