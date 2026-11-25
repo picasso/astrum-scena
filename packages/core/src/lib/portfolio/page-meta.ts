@@ -2,7 +2,8 @@ import type { Locale } from '../../config/locale-schema.ts'
 import { switchLocalePath } from '../../i18n/ui.ts'
 
 // every route is self-canonical; alternates keep the same album/photo pair because
-// `switchLocalePath` swaps only the locale prefix. x-default is the first active locale
+// `switchLocalePath` swaps only the locale prefix. x-default is the first active locale. A one-locale
+// site has nothing to alternate with, so it emits no hreflang at all
 
 // unlisted documents, albums and photos (ADR-0010) stay reachable by URL but opt out of indexing
 export const UNLISTED_ROBOTS = 'noindex,follow'
@@ -27,6 +28,7 @@ export function buildLocaleMeta(
 	locales: readonly [Locale, ...Locale[]],
 ): LocaleMeta {
 	const absolute = (path: string): string => new URL(path, origin).href
+	if (locales.length === 1) return { canonical: absolute(pathname), alternates: [] }
 	return {
 		canonical: absolute(pathname),
 		alternates: [

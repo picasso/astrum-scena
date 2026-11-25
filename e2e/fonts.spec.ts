@@ -1,13 +1,14 @@
 import { expect, type Page, test } from '@playwright/test'
 
 import {
-	LOCALE_CATALOG,
 	type LocaleScript,
 	SERVICE_COPY_LOCALE,
 } from '../packages/core/src/config/locale-schema.ts'
 import { RIGHTS_PATH } from '../packages/core/src/lib/content/routes.ts'
 import { fontPreloads, localeScript } from '../packages/core/src/theme/fonts.ts'
-import { escapeRegExp, href, type Lang, locales, openMenu } from './helpers.ts'
+import { demoConfig, escapeRegExp, href, type Lang, locales, openMenu } from './helpers.ts'
+
+const { catalog } = demoConfig.content
 
 // the files of a script's family share the prefix of its preloads (`<prefix>-<face>.woff2`), so the
 // core's own preload list names both families without a copy of the file names here
@@ -79,7 +80,7 @@ async function loadHomeWithMenu(page: Page, lang: Lang): Promise<FontTraffic> {
 }
 
 for (const lang of locales) {
-	if (localeScript(lang) === 'latin') {
+	if (localeScript(catalog, lang) === 'latin') {
 		test(`a ${lang} page requests only the latin subset`, async ({ page }) => {
 			const { urls, failures } = await loadHomeWithMenu(page, lang)
 			expect(failures).toEqual([])
@@ -94,7 +95,10 @@ for (const lang of locales) {
 		}) => {
 			const { urls, failures } = await loadHomeWithMenu(page, lang)
 			expect(failures).toEqual([])
-			await expect(page.locator('html')).toHaveAttribute('data-script', localeScript(lang))
+			await expect(page.locator('html')).toHaveAttribute(
+				'data-script',
+				localeScript(catalog, lang),
+			)
 			expect(urls.some((url) => FULL_FILE.test(url))).toBe(true)
 			expect(urls.filter((url) => LATIN_SUBSET.test(url))).toEqual([])
 			expect(await hasLoadedFace(page, FAMILY.cyrillic)).toBe(true)
@@ -108,15 +112,15 @@ for (const lang of locales) {
 test('a cyrillic-script section on the rights page renders with the full file', async ({
 	page,
 }) => {
-	const cyrillic = locales.find((lang) => LOCALE_CATALOG[lang].script === 'cyrillic')
-	const latin = locales.find((lang) => LOCALE_CATALOG[lang].script === 'latin')
+	const cyrillic = locales.find((lang) => localeScript(catalog, lang) === 'cyrillic')
+	const latin = locales.find((lang) => localeScript(catalog, lang) === 'latin')
 	test.skip(!cyrillic || !latin, 'needs a latin-script and a cyrillic-script locale')
 	const { urls, failures } = collectFontRequests(page)
 	await page.goto(RIGHTS_PATH, { waitUntil: 'load' })
 	await settleFonts(page)
 	await expect(page.locator('html')).toHaveAttribute(
 		'data-script',
-		localeScript(SERVICE_COPY_LOCALE),
+		localeScript(catalog, SERVICE_COPY_LOCALE),
 	)
 	await expect(page.locator(`section[lang="${cyrillic}"]`)).toBeVisible()
 	expect(await firstFamily(page, `section[lang="${cyrillic}"]`)).toBe(FAMILY.cyrillic)

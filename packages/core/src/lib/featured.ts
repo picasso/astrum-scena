@@ -3,15 +3,17 @@ import path from 'node:path'
 
 import { parse as parseYaml } from 'yaml'
 
+import { UPGRADE_HINT } from '../config/lock.ts'
 import { assertSchemaVersion } from '../config/schema-version.ts'
-import { FEATURED_HOME_PATH } from './content/files'
+import { validate } from '../config/yaml-file.ts'
+import { FEATURED_HOME_PATH, lockedLocales } from './content/files'
 import type { ContentEntry, ContentSnapshot } from './content/model'
 import { contentHref } from './content/routes'
 import {
 	type AlbumData,
 	type ArticleData,
 	type FeaturedConfig,
-	featuredConfigSchema,
+	featuredConfigSchemaFor,
 	type FeaturedInlineCopy,
 	type Locale,
 	type PageData,
@@ -19,6 +21,7 @@ import {
 } from './content/schemas'
 import { computeAlt } from './hero-alt'
 import type { PhotoMedia } from './images/media'
+import { pickLocale } from './portfolio/locale.ts'
 import { type SplitHeading, splitHeading } from './split-heading'
 import { cleanText, truncateSentences } from './text'
 
@@ -28,7 +31,10 @@ import { cleanText, truncateSentences } from './text'
 
 // a site without the file (one with no photos yet) gets a home page without the slider; a file that
 // exists must still hold at least one valid slide
-export async function loadFeaturedHome(root: string): Promise<FeaturedConfig | undefined> {
+export async function loadFeaturedHome(
+	root: string,
+	locales: readonly Locale[] = lockedLocales(root),
+): Promise<FeaturedConfig | undefined> {
 	let raw: string
 	try {
 		raw = await readFile(path.join(root, FEATURED_HOME_PATH), 'utf8')
@@ -37,8 +43,9 @@ export async function loadFeaturedHome(root: string): Promise<FeaturedConfig | u
 		throw error
 	}
 	const value: unknown = parseYaml(raw)
-	assertSchemaVersion(value, FEATURED_HOME_PATH, featuredConfigSchema)
-	return featuredConfigSchema.parse(value)
+	const schema = featuredConfigSchemaFor(locales)
+	assertSchemaVersion(value, FEATURED_HOME_PATH, schema, UPGRADE_HINT)
+	return validate(schema, value, FEATURED_HOME_PATH)
 }
 
 // throws when the photo or its hero role is missing (fail-closed)
@@ -90,8 +97,8 @@ function requiredEntry<T>(
 
 function photoCopy(photo: ContentEntry<PhotoData>, locale: Locale) {
 	return {
-		title: photo.data.title[locale],
-		description: photo.data.description?.[locale] ?? '',
+		title: pickLocale(photo.data.title, locale),
+		description: photo.data.description ? pickLocale(photo.data.description, locale) : '',
 	}
 }
 
@@ -100,7 +107,10 @@ function inlineCopy(
 	locale: Locale,
 ): { title: string; description: string } {
 	if (!copy) throw new Error('Inline copySource requires an inline copy block')
-	return { title: copy.title[locale], description: copy.description[locale] }
+	return {
+		title: pickLocale(copy.title, locale),
+		description: pickLocale(copy.description, locale),
+	}
 }
 
 function albumMedia(
@@ -192,8 +202,8 @@ export function resolveFeaturedSlides(
 					? inlineCopy(slide.copy, locale)
 					: slide.copySource === 'target'
 						? {
-								title: album.data.title[locale],
-								description: album.data.description[locale],
+								title: pickLocale(album.data.title, locale),
+								description: pickLocale(album.data.description, locale),
 							}
 						: photoCopy(photo, locale)
 			title = copy.title

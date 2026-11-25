@@ -47,20 +47,14 @@ describe('buildLocaleMeta', () => {
 		})
 	})
 
-	it('emits a single alternate plus x-default for an English-only site', () => {
-		const meta = buildLocaleMeta('/en/portfolio/', ORIGIN, ['en'])
-		expect(meta.alternates).toEqual([
-			{ hreflang: 'en', href: 'https://site.test/en/portfolio/' },
-			{ hreflang: 'x-default', href: 'https://site.test/en/portfolio/' },
-		])
-	})
-
-	it('emits a single alternate plus x-default for a one-locale site', () => {
-		const meta = buildLocaleMeta('/ru/portfolio/', ORIGIN, ['ru'])
-		expect(meta.alternates).toEqual([
-			{ hreflang: 'ru', href: 'https://site.test/ru/portfolio/' },
-			{ hreflang: 'x-default', href: 'https://site.test/ru/portfolio/' },
-		])
+	it('emits no alternates on a one-locale site and keeps the canonical', () => {
+		for (const locale of ['en', 'ru'] as const) {
+			const meta = buildLocaleMeta(`/${locale}/portfolio/`, ORIGIN, [locale])
+			expect(meta).toEqual({
+				canonical: `https://site.test/${locale}/portfolio/`,
+				alternates: [],
+			})
+		}
 	})
 })
 

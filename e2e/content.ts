@@ -8,6 +8,7 @@ import type { GalleryProps } from '../packages/core/src/lib/blocks/gallery/schem
 import {
 	collectPublishedDocuments,
 	documentCourseStatus,
+	documentIn,
 	documentUnlisted,
 } from '../packages/core/src/lib/content/documents.ts'
 import { loadContentSnapshot } from '../packages/core/src/lib/content/files.ts'
@@ -49,14 +50,14 @@ const articles: DemoDocument[] = collectPublishedDocuments(snapshot.articles, co
 	(document) => ({
 		kind: 'article',
 		slug: document.slug,
-		unlisted: documentUnlisted(document.byLocale[content.referenceLocale].data),
+		unlisted: documentUnlisted(documentIn(document, content.referenceLocale).data),
 		href: (lang) => articleHref(document.slug, lang),
 	}),
 )
 
 const courses: DemoDocument[] = collectPublishedDocuments(snapshot.courses, content).map(
 	(document) => {
-		const reference = document.byLocale[content.referenceLocale].data
+		const reference = documentIn(document, content.referenceLocale).data
 		return {
 			kind: 'course',
 			slug: document.slug,
@@ -71,7 +72,7 @@ const pages: DemoDocument[] = collectPublishedDocuments(snapshot.pages, content)
 	(document) => ({
 		kind: 'page',
 		slug: document.slug,
-		unlisted: documentUnlisted(document.byLocale[content.referenceLocale].data),
+		unlisted: documentUnlisted(documentIn(document, content.referenceLocale).data),
 		href: (lang) => pageHref(document.slug, lang),
 	}),
 )

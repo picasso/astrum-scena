@@ -15,7 +15,7 @@ export function getStaticPaths() {
 type Props = { locale: Locale }
 
 const { locale } = Astro.props
-const featured = await loadFeaturedHome(siteRoot)
+const featured = await loadFeaturedHome(siteRoot, site.content.locales)
 ---
 
 <Fullscreen>

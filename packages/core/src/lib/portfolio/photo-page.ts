@@ -1,3 +1,4 @@
+import { localeEntry } from '../../config/locale-schema.ts'
 import { siteRoot } from '../../config/site-root.ts'
 import type { SiteConfig } from '../../config/site-schema.ts'
 import { loadTaxonomyConfig } from '../content/files.ts'
@@ -77,7 +78,7 @@ export async function buildPhotoPageModel(
 	locale: Locale,
 	albumHref: string,
 	photoHrefFor: (photoId: string) => string,
-	config: Pick<SiteConfig, 'viewer'>,
+	config: Pick<SiteConfig, 'viewer' | 'content'>,
 ): Promise<PhotoPageModel> {
 	const { album, photo, related } = await resolvePublishedPhoto(albumId, photoId)
 	const catalog = loadImageCatalog(siteRoot)
@@ -112,7 +113,7 @@ export async function buildPhotoPageModel(
 		: []
 	const tags = resolveTagLabels(photo.data.tags, taxonomy.tags, locale)
 	const captured = photo.data.capturedAt
-		? formatCapturedAt(photo.data.capturedAt, locale)
+		? formatCapturedAt(photo.data.capturedAt, localeEntry(config.content.catalog, locale).intl)
 		: undefined
 
 	const relatedCards: PhotoRelatedCard[] = related.map((item) => {

@@ -15,6 +15,7 @@ import { SURFACE_SIZES } from '../../lib/portfolio/sizes.ts'
 import { resolveSurfaceMedia } from '../../lib/portfolio/surface.ts'
 import AlbumCards from './album-cards.astro'
 import AlbumGrid from './album-grid.astro'
+import AlbumIntro from './album-intro.astro'
 import PhotoItem from './photo-item.astro'
 import ResponsivePicture from './responsive-picture.astro'
 
@@ -228,6 +229,25 @@ describe('AlbumCards', () => {
 		expect(without).toContain('card__body--title-only')
 	})
 
+	it('shows an authored album excerpt in details rather than one from the description', async () => {
+		const excerptOf = async (entry: AlbumEntry) =>
+			/<p class="card__excerpt"[^>]*>([^<]*)<\/p>/.exec(
+				await container.renderToString(AlbumCards, {
+					props: {
+						catalog,
+						albums: [entry],
+						photosById,
+						locale: 'en',
+						presentation: 'details',
+						excerpt: 'on',
+					},
+				}),
+			)?.[1]
+		expect(await excerptOf(album)).toBe('desc')
+		const authored = { ...album.data, excerpt: { en: 'Authored EN.', ru: 'Автор RU.' } }
+		expect(await excerptOf({ ...album, data: authored })).toBe('Authored EN.')
+	})
+
 	it('crops the grid preview at the cover focalPoint, centre when absent', async () => {
 		const focused = new Map(photosById)
 		const cover = photoEntry('morning-ridge')
@@ -299,5 +319,27 @@ describe('AlbumGrid', () => {
 		for (const layout of ['justified', 'masonry', 'square', 'rect'] as const) {
 			expect(await classOf(withLayout(layout))).toBe(layout)
 		}
+	})
+})
+
+describe('AlbumIntro', () => {
+	// one short paragraph: the mosaic tile follows the estimated text height
+	const tileOf = async () => {
+		const html = await container.renderToString(AlbumIntro, {
+			props: { catalog, album, photosById, description: 'x'.repeat(120), locale: 'en' },
+		})
+		return /--mosaic-tile:(\d+)px/.exec(html)?.[1]
+	}
+
+	it("sizes the mosaic by the glyph width of the site's catalog", async () => {
+		const byDefault = await tileOf()
+		const { catalog: locales } = config.site.content
+		config.site.content = {
+			...config.site.content,
+			catalog: { ...locales, en: { ...locales.en!, charWidthPx: 40 } },
+		}
+		const wider = await tileOf()
+		expect(byDefault).toBeDefined()
+		expect(Number(wider)).toBeGreaterThan(Number(byDefault))
 	})
 })

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { SUPPORTED_LOCALES } from '../config/locale-schema.ts'
+import { DEFAULT_LOCALE_CATALOG } from '../config/locale-schema.ts'
 import en from './en.json' with { type: 'json' }
 import {
 	isActive,
@@ -133,9 +133,9 @@ describe('section icons', () => {
 })
 
 describe('languageName', () => {
-	// the English dictionary declares the key set, so it names every catalog locale
-	it('has an English name for every catalog locale, in Latin script only', () => {
-		for (const code of SUPPORTED_LOCALES) {
+	// the English dictionary declares the key set, so it names every locale of the default catalog
+	it('has an English name for every locale of the default catalog, in Latin script only', () => {
+		for (const code of Object.keys(DEFAULT_LOCALE_CATALOG)) {
 			const name = (en as Record<string, string>)[`language.${code}`]
 			expect(name, `language.${code}`).toBeTruthy()
 			expect(name).not.toMatch(/[\u0400-\u04ff]/)

@@ -30,7 +30,7 @@ const locale = (Astro.currentLocale ?? defaultLocale(site)) as Locale
 const [photos, albums, taxonomy, imageSets] = await Promise.all([
 	getCollection('photos'),
 	getCollection('albums'),
-	loadTaxonomyConfig(siteRoot),
+	loadTaxonomyConfig(siteRoot, site.content.locales),
 	loadImageSets(siteRoot),
 ])
 const catalog = loadImageCatalog(siteRoot)

@@ -6,7 +6,7 @@ import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest
 import { parse, stringify } from 'yaml'
 
 import { withCoursesModule } from './fixtures/courses-module-upgrade.ts'
-import { buildSiteConfig } from './fixtures/site-config.ts'
+import { buildSiteConfig, contentConfig } from './fixtures/site-config.ts'
 import { writeSiteConfig, writeSiteFiles } from './fixtures/site-files.ts'
 import {
 	loadSeoConfig,
@@ -15,9 +15,10 @@ import {
 	SITE_LOCK_ENV,
 	siteLockPath,
 } from './loader.ts'
+import { effectiveCatalog } from './locale-schema.ts'
 import { COLLECTION_VERSIONS, RETIRED_CONFIG_FILES, SITE_LOCK_PATH } from './lock.ts'
 import { siteRoot } from './site-root.ts'
-import { siteSchema } from './site-schema.ts'
+import { type SiteConfig, siteSchema } from './site-schema.ts'
 
 // loadImageConfig of lib/images/build is this slice; config tests do not import lib
 const loadImageConfig = (root: string) => loadSiteSection(root, 'images')
@@ -83,7 +84,7 @@ describe('config loader', () => {
 
 	it('loads the effective config resolved from the site config at the given root', () => {
 		const fixture = buildSiteConfig({
-			content: { locales: ['ru', 'en'], referenceLocale: 'en' },
+			content: contentConfig(['ru', 'en'], 'en'),
 		})
 		const root = writeSiteFiles(makeRoot(), fixture)
 
@@ -190,12 +191,12 @@ describe('config loader', () => {
 	})
 
 	it('rejects a collection version the core does not read, listing the ones it does', () => {
-		const root = lockedRoot((lock) => (object(lock.collections).albums = 2))
+		const root = lockedRoot((lock) => (object(lock.collections).albums = 1))
 		const supported = COLLECTION_VERSIONS.albums!.join(', ')
 
 		for (const load of [loadSiteConfig, loadSeoConfig])
 			expect(() => load(root)).toThrow(
-				`${SITE_LOCK_PATH}: collections.albums: version 2 is not supported; supported: ${supported}; see UPGRADING.md`,
+				`${SITE_LOCK_PATH}: collections.albums: version 1 is not supported; supported: ${supported}; see UPGRADING.md`,
 			)
 	})
 
@@ -241,7 +242,7 @@ describe('config loader', () => {
 			`${SITE_LOCK_PATH}: missing schemaVersion; supported: 1`,
 		)
 		expect(() => loadSiteConfig(siteVersion)).toThrow(
-			`${SITE_LOCK_PATH}: site: schemaVersion 1 is not supported; supported: 3; see UPGRADING.md`,
+			`${SITE_LOCK_PATH}: site: schemaVersion 1 is not supported; supported: 4; see UPGRADING.md`,
 		)
 	})
 
@@ -278,16 +279,17 @@ describe('upgrade from the three-file shape', () => {
 		Object.fromEntries(Object.entries(value).filter(([key]) => !keys.includes(key)))
 	const unversioned = (file: string) => without(readLegacy(file), 'schemaVersion')
 
+	// the step from 3 to 4 changes only the number on a two-locale site
 	const upgraded = (): string =>
-		writeSiteFiles(
-			makeRoot(),
-			withCoursesModule({
+		writeSiteFiles(makeRoot(), {
+			...withCoursesModule({
 				...readLegacy('src/config/site.yaml'),
 				schemaVersion: 2,
 				seo: unversioned('src/config/seo.yaml'),
 				images: unversioned('config/images.yaml'),
 			}),
-		)
+			schemaVersion: 4,
+		})
 
 	it('fails on the old shape, naming the first file to move', () => {
 		expect(() => loadSiteConfig(legacyRoot)).toThrow(
@@ -301,11 +303,14 @@ describe('upgrade from the three-file shape', () => {
 
 		const site = without(loadSiteConfig(root), 'schemaVersion', 'seo', 'images') as {
 			theme: Record<string, unknown>
+			content: SiteConfig['content']
 		}
-		// a default the core gained after the merge is not in the old file
+		// defaults the core gained after the merge are not in the old file
 		const { favicon, ...theme } = site.theme
 		expect(favicon).toEqual({ background: '#1b1b1f', foreground: '#fcbf00' })
-		expect({ ...site, theme }).toEqual(
+		const { catalog, ...content } = site.content
+		expect(catalog).toEqual(effectiveCatalog(content.locales, {}))
+		expect({ ...site, theme, content }).toEqual(
 			without(withCoursesModule(unversioned('src/config/site.yaml')), 'schemaVersion'),
 		)
 		expect(seo).toEqual(unversioned('src/config/seo.yaml'))

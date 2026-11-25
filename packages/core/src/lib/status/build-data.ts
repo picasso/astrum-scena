@@ -7,7 +7,7 @@ import { defaultLocale, type SiteConfig } from '../../config/site-schema.ts'
 import { COURSES_MODULE_ID } from '../../modules/courses/manifest.ts'
 import { courseHref } from '../../modules/courses/routes.ts'
 import { isModuleEnabled } from '../../modules/registry.ts'
-import type { DocumentData } from '../content/documents.ts'
+import { type DocumentData, documentIn } from '../content/documents.ts'
 import { articleHref, pageHref } from '../content/routes.ts'
 import type { Locale } from '../content/schemas.ts'
 import {
@@ -159,7 +159,7 @@ function pairDocuments(
 // displayLocale
 function documentRouteHref(pair: DocumentPair, roles: StatusLocales): string | undefined {
 	const { displayLocale } = roles
-	const display = pair.byLocale[displayLocale].data
+	const display = documentIn(pair, displayLocale).data
 	if (display.status !== 'published') return undefined
 	if (pair.collection === 'articles') return articleHref(display.slug, displayLocale)
 	if (pair.collection === 'courses') return courseHref(display.slug, displayLocale)
@@ -172,11 +172,11 @@ function documentFreshness(
 	pair: DocumentPair,
 	roles: StatusLocales,
 ): ReturnType<typeof resolveTranslationFreshness> {
-	const referenceBody = pair.byLocale[roles.referenceLocale].body ?? ''
+	const referenceBody = documentIn(pair, roles.referenceLocale).body ?? ''
 	const results = roles.translatedLocales.map((locale) =>
 		resolveTranslationFreshness({
 			referenceBody,
-			translationMarker: pair.byLocale[locale].data.translatedFromDigest,
+			translationMarker: documentIn(pair, locale).data.translatedFromDigest,
 		}),
 	)
 	return results.find((result) => result.status === 'needs-review') ?? { status: 'current' }
@@ -188,8 +188,8 @@ type BuiltRow = {
 }
 
 function buildRow(pair: DocumentPair, roles: StatusLocales): BuiltRow {
-	const display = pair.byLocale[roles.displayLocale].data
-	const reference = pair.byLocale[roles.referenceLocale].data
+	const display = documentIn(pair, roles.displayLocale).data
+	const reference = documentIn(pair, roles.referenceLocale).data
 	const published = display.status === 'published'
 	const freshness = documentFreshness(pair, roles)
 	const section: StatusSection = pair.collection

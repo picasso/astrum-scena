@@ -51,5 +51,7 @@
 	"contact.requiredMessage": "Please give a message.",
 	"contact.tooLong": "The text is too long. Please shorten it.",
 	"contact.invalidEmail": "Please give a valid email address.",
-	"contact.challenge": "Please complete the verification and try again."
+	"contact.challenge": "Please complete the verification and try again.",
+	"note.title": "What has changed since this was written",
+	"links.title": "Links"
 }

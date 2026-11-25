@@ -347,7 +347,7 @@
 				"additionalProperties": false,
 				"properties": {
 					"albums": {
-						"const": 1,
+						"const": 2,
 						"type": "number"
 					},
 					"articles": {
@@ -367,7 +367,7 @@
 						"type": "number"
 					},
 					"photos": {
-						"const": 1,
+						"const": 2,
 						"type": "number"
 					}
 				},
@@ -722,21 +722,50 @@
 					"content": {
 						"additionalProperties": false,
 						"properties": {
+							"catalog": {
+								"additionalProperties": {
+									"additionalProperties": false,
+									"properties": {
+										"charWidthPx": {
+											"exclusiveMinimum": 0,
+											"type": "number"
+										},
+										"intl": {
+											"type": "string",
+											"x-refinements": [
+												"014e51dec5f8"
+											]
+										},
+										"ogLocale": {
+											"pattern": "^[a-z]{2,3}_[A-Z]{2}$",
+											"type": "string"
+										},
+										"script": {
+											"enum": [
+												"cyrillic",
+												"latin"
+											],
+											"type": "string"
+										}
+									},
+									"type": "object"
+								},
+								"default": {},
+								"propertyNames": {
+									"pattern": "^[a-z]{2,3}$",
+									"type": "string"
+								},
+								"type": "object"
+							},
 							"locales": {
 								"items": {
-									"enum": [
-										"en",
-										"ru"
-									],
+									"pattern": "^[a-z]{2,3}$",
 									"type": "string"
 								},
 								"minItems": 1,
 								"prefixItems": [
 									{
-										"enum": [
-											"en",
-											"ru"
-										],
+										"pattern": "^[a-z]{2,3}$",
 										"type": "string"
 									}
 								],
@@ -746,20 +775,22 @@
 								]
 							},
 							"referenceLocale": {
-								"enum": [
-									"en",
-									"ru"
-								],
+								"pattern": "^[a-z]{2,3}$",
 								"type": "string"
 							}
 						},
 						"required": [
+							"catalog",
 							"locales",
 							"referenceLocale"
 						],
 						"type": "object",
 						"x-refinements": [
-							"3fc3333f7d27"
+							"3fc3333f7d27",
+							"b585029ddcaf"
+						],
+						"x-transforms": [
+							"a0a483518163"
 						]
 					},
 					"factcheck": {
@@ -949,10 +980,7 @@
 											]
 										},
 										"propertyNames": {
-											"enum": [
-												"en",
-												"ru"
-											],
+											"pattern": "^[a-z]{2,3}$",
 											"type": "string"
 										},
 										"type": "object"
@@ -978,10 +1006,7 @@
 									]
 								},
 								"propertyNames": {
-									"enum": [
-										"en",
-										"ru"
-									],
+									"pattern": "^[a-z]{2,3}$",
 									"type": "string"
 								},
 								"type": "object"
@@ -995,10 +1020,7 @@
 									]
 								},
 								"propertyNames": {
-									"enum": [
-										"en",
-										"ru"
-									],
+									"pattern": "^[a-z]{2,3}$",
 									"type": "string"
 								},
 								"type": "object"
@@ -1504,10 +1526,7 @@
 												]
 											},
 											"propertyNames": {
-												"enum": [
-													"en",
-													"ru"
-												],
+												"pattern": "^[a-z]{2,3}$",
 												"type": "string"
 											},
 											"type": "object"
@@ -2309,27 +2328,17 @@
 										"type": "object"
 									},
 									"name": {
-										"additionalProperties": false,
-										"properties": {
-											"en": {
-												"minLength": 1,
-												"type": "string",
-												"x-transforms": [
-													"da06e05e67eb"
-												]
-											},
-											"ru": {
-												"minLength": 1,
-												"type": "string",
-												"x-transforms": [
-													"da06e05e67eb"
-												]
-											}
+										"additionalProperties": {
+											"minLength": 1,
+											"type": "string",
+											"x-transforms": [
+												"da06e05e67eb"
+											]
 										},
-										"required": [
-											"en",
-											"ru"
-										],
+										"propertyNames": {
+											"pattern": "^[a-z]{2,3}$",
+											"type": "string"
+										},
 										"type": "object"
 									}
 								},
@@ -2346,34 +2355,24 @@
 						"type": "object"
 					},
 					"schemaVersion": {
-						"const": 3,
+						"const": 4,
 						"type": "number"
 					},
 					"seo": {
 						"additionalProperties": false,
 						"properties": {
 							"description": {
-								"additionalProperties": false,
-								"properties": {
-									"en": {
-										"minLength": 1,
-										"type": "string",
-										"x-transforms": [
-											"da06e05e67eb"
-										]
-									},
-									"ru": {
-										"minLength": 1,
-										"type": "string",
-										"x-transforms": [
-											"da06e05e67eb"
-										]
-									}
+								"additionalProperties": {
+									"minLength": 1,
+									"type": "string",
+									"x-transforms": [
+										"da06e05e67eb"
+									]
 								},
-								"required": [
-									"en",
-									"ru"
-								],
+								"propertyNames": {
+									"pattern": "^[a-z]{2,3}$",
+									"type": "string"
+								},
 								"type": "object"
 							},
 							"socialImage": {
@@ -2447,10 +2446,7 @@
 										]
 									},
 									"propertyNames": {
-										"enum": [
-											"en",
-											"ru"
-										],
+										"pattern": "^[a-z]{2,3}$",
 										"type": "string"
 									},
 									"type": "object"
@@ -2886,7 +2882,7 @@
 				],
 				"type": "object",
 				"x-refinements": [
-					"6912d02c8068"
+					"6a362df84611"
 				],
 				"x-transforms": [
 					"b968fb9b5d5e"
@@ -3187,21 +3183,50 @@
 			"content": {
 				"additionalProperties": false,
 				"properties": {
+					"catalog": {
+						"additionalProperties": {
+							"additionalProperties": false,
+							"properties": {
+								"charWidthPx": {
+									"exclusiveMinimum": 0,
+									"type": "number"
+								},
+								"intl": {
+									"type": "string",
+									"x-refinements": [
+										"014e51dec5f8"
+									]
+								},
+								"ogLocale": {
+									"pattern": "^[a-z]{2,3}_[A-Z]{2}$",
+									"type": "string"
+								},
+								"script": {
+									"enum": [
+										"cyrillic",
+										"latin"
+									],
+									"type": "string"
+								}
+							},
+							"type": "object"
+						},
+						"default": {},
+						"propertyNames": {
+							"pattern": "^[a-z]{2,3}$",
+							"type": "string"
+						},
+						"type": "object"
+					},
 					"locales": {
 						"items": {
-							"enum": [
-								"en",
-								"ru"
-							],
+							"pattern": "^[a-z]{2,3}$",
 							"type": "string"
 						},
 						"minItems": 1,
 						"prefixItems": [
 							{
-								"enum": [
-									"en",
-									"ru"
-								],
+								"pattern": "^[a-z]{2,3}$",
 								"type": "string"
 							}
 						],
@@ -3211,10 +3236,7 @@
 						]
 					},
 					"referenceLocale": {
-						"enum": [
-							"en",
-							"ru"
-						],
+						"pattern": "^[a-z]{2,3}$",
 						"type": "string"
 					}
 				},
@@ -3224,7 +3246,11 @@
 				],
 				"type": "object",
 				"x-refinements": [
-					"3fc3333f7d27"
+					"3fc3333f7d27",
+					"b585029ddcaf"
+				],
+				"x-transforms": [
+					"a0a483518163"
 				]
 			},
 			"factcheck": {
@@ -3391,10 +3417,7 @@
 									]
 								},
 								"propertyNames": {
-									"enum": [
-										"en",
-										"ru"
-									],
+									"pattern": "^[a-z]{2,3}$",
 									"type": "string"
 								},
 								"type": "object"
@@ -3420,10 +3443,7 @@
 							]
 						},
 						"propertyNames": {
-							"enum": [
-								"en",
-								"ru"
-							],
+							"pattern": "^[a-z]{2,3}$",
 							"type": "string"
 						},
 						"type": "object"
@@ -3437,10 +3457,7 @@
 							]
 						},
 						"propertyNames": {
-							"enum": [
-								"en",
-								"ru"
-							],
+							"pattern": "^[a-z]{2,3}$",
 							"type": "string"
 						},
 						"type": "object"
@@ -3915,10 +3932,7 @@
 										]
 									},
 									"propertyNames": {
-										"enum": [
-											"en",
-											"ru"
-										],
+										"pattern": "^[a-z]{2,3}$",
 										"type": "string"
 									},
 									"type": "object"
@@ -4671,27 +4685,17 @@
 								"type": "object"
 							},
 							"name": {
-								"additionalProperties": false,
-								"properties": {
-									"en": {
-										"minLength": 1,
-										"type": "string",
-										"x-transforms": [
-											"da06e05e67eb"
-										]
-									},
-									"ru": {
-										"minLength": 1,
-										"type": "string",
-										"x-transforms": [
-											"da06e05e67eb"
-										]
-									}
+								"additionalProperties": {
+									"minLength": 1,
+									"type": "string",
+									"x-transforms": [
+										"da06e05e67eb"
+									]
 								},
-								"required": [
-									"en",
-									"ru"
-								],
+								"propertyNames": {
+									"pattern": "^[a-z]{2,3}$",
+									"type": "string"
+								},
 								"type": "object"
 							}
 						},
@@ -4708,34 +4712,24 @@
 				"type": "object"
 			},
 			"schemaVersion": {
-				"const": 3,
+				"const": 4,
 				"type": "number"
 			},
 			"seo": {
 				"additionalProperties": false,
 				"properties": {
 					"description": {
-						"additionalProperties": false,
-						"properties": {
-							"en": {
-								"minLength": 1,
-								"type": "string",
-								"x-transforms": [
-									"da06e05e67eb"
-								]
-							},
-							"ru": {
-								"minLength": 1,
-								"type": "string",
-								"x-transforms": [
-									"da06e05e67eb"
-								]
-							}
+						"additionalProperties": {
+							"minLength": 1,
+							"type": "string",
+							"x-transforms": [
+								"da06e05e67eb"
+							]
 						},
-						"required": [
-							"en",
-							"ru"
-						],
+						"propertyNames": {
+							"pattern": "^[a-z]{2,3}$",
+							"type": "string"
+						},
 						"type": "object"
 					},
 					"socialImage": {
@@ -4804,10 +4798,7 @@
 								]
 							},
 							"propertyNames": {
-								"enum": [
-									"en",
-									"ru"
-								],
+								"pattern": "^[a-z]{2,3}$",
 								"type": "string"
 							},
 							"type": "object"
@@ -5166,7 +5157,7 @@
 		],
 		"type": "object",
 		"x-refinements": [
-			"6912d02c8068"
+			"6a362df84611"
 		],
 		"x-transforms": [
 			"b968fb9b5d5e"
@@ -5187,36 +5178,30 @@
 				"type": "string"
 			},
 			"description": {
-				"additionalProperties": false,
-				"properties": {
-					"en": {
-						"type": "string"
-					},
-					"ru": {
-						"type": "string"
-					}
+				"additionalProperties": {
+					"type": "string"
 				},
-				"required": [
-					"en",
-					"ru"
-				],
-				"type": "object"
+				"propertyNames": {
+					"pattern": "^[a-z]{2,3}$",
+					"type": "string"
+				},
+				"type": "object",
+				"x-refinements": [
+					"d6b7290780a4"
+				]
 			},
 			"excerpt": {
-				"additionalProperties": false,
-				"properties": {
-					"en": {
-						"type": "string"
-					},
-					"ru": {
-						"type": "string"
-					}
+				"additionalProperties": {
+					"type": "string"
 				},
-				"required": [
-					"en",
-					"ru"
-				],
-				"type": "object"
+				"propertyNames": {
+					"pattern": "^[a-z]{2,3}$",
+					"type": "string"
+				},
+				"type": "object",
+				"x-refinements": [
+					"d6b7290780a4"
+				]
 			},
 			"layout": {
 				"enum": [
@@ -5256,22 +5241,16 @@
 				"type": "string"
 			},
 			"title": {
-				"additionalProperties": false,
-				"properties": {
-					"en": {
-						"type": "string"
-					},
-					"ru": {
-						"type": "string"
-					}
+				"additionalProperties": {
+					"type": "string"
 				},
-				"required": [
-					"en",
-					"ru"
-				],
+				"propertyNames": {
+					"pattern": "^[a-z]{2,3}$",
+					"type": "string"
+				},
 				"type": "object",
 				"x-refinements": [
-					"c313ab772a1f"
+					"d6b7290780a4"
 				]
 			},
 			"unlisted": {
@@ -5306,10 +5285,7 @@
 				"type": "string"
 			},
 			"locale": {
-				"enum": [
-					"en",
-					"ru"
-				],
+				"pattern": "^[a-z]{2,3}$",
 				"type": "string"
 			},
 			"master": {
@@ -5438,20 +5414,17 @@
 							"type": "string"
 						},
 						"label": {
-							"additionalProperties": false,
-							"properties": {
-								"en": {
-									"type": "string"
-								},
-								"ru": {
-									"type": "string"
-								}
+							"additionalProperties": {
+								"type": "string"
 							},
-							"required": [
-								"en",
-								"ru"
-							],
-							"type": "object"
+							"propertyNames": {
+								"pattern": "^[a-z]{2,3}$",
+								"type": "string"
+							},
+							"type": "object",
+							"x-refinements": [
+								"d6b7290780a4"
+							]
 						}
 					},
 					"required": [
@@ -5463,7 +5436,7 @@
 				"type": "array"
 			},
 			"schemaVersion": {
-				"const": 1,
+				"const": 2,
 				"type": "number"
 			}
 		},
@@ -5615,20 +5588,17 @@
 							"type": "string"
 						},
 						"name": {
-							"additionalProperties": false,
-							"properties": {
-								"en": {
-									"type": "string"
-								},
-								"ru": {
-									"type": "string"
-								}
+							"additionalProperties": {
+								"type": "string"
 							},
-							"required": [
-								"en",
-								"ru"
-							],
-							"type": "object"
+							"propertyNames": {
+								"pattern": "^[a-z]{2,3}$",
+								"type": "string"
+							},
+							"type": "object",
+							"x-refinements": [
+								"d6b7290780a4"
+							]
 						},
 						"parentId": {
 							"pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
@@ -5645,7 +5615,7 @@
 				"type": "array"
 			},
 			"schemaVersion": {
-				"const": 1,
+				"const": 2,
 				"type": "number"
 			}
 		},
@@ -5659,7 +5629,7 @@
 		"additionalProperties": false,
 		"properties": {
 			"schemaVersion": {
-				"const": 1,
+				"const": 2,
 				"type": "number"
 			},
 			"tags": {
@@ -5681,20 +5651,17 @@
 							"type": "string"
 						},
 						"label": {
-							"additionalProperties": false,
-							"properties": {
-								"en": {
-									"type": "string"
-								},
-								"ru": {
-									"type": "string"
-								}
+							"additionalProperties": {
+								"type": "string"
 							},
-							"required": [
-								"en",
-								"ru"
-							],
-							"type": "object"
+							"propertyNames": {
+								"pattern": "^[a-z]{2,3}$",
+								"type": "string"
+							},
+							"type": "object",
+							"x-refinements": [
+								"d6b7290780a4"
+							]
 						}
 					},
 					"required": [
@@ -5735,10 +5702,7 @@
 				"type": "string"
 			},
 			"locale": {
-				"enum": [
-					"en",
-					"ru"
-				],
+				"pattern": "^[a-z]{2,3}$",
 				"type": "string"
 			},
 			"master": {
@@ -5856,7 +5820,7 @@
 		"additionalProperties": false,
 		"properties": {
 			"schemaVersion": {
-				"const": 1,
+				"const": 2,
 				"type": "number"
 			},
 			"slides": {
@@ -5874,38 +5838,29 @@
 							"additionalProperties": false,
 							"properties": {
 								"description": {
-									"additionalProperties": false,
-									"properties": {
-										"en": {
-											"type": "string"
-										},
-										"ru": {
-											"type": "string"
-										}
+									"additionalProperties": {
+										"type": "string"
 									},
-									"required": [
-										"en",
-										"ru"
-									],
-									"type": "object"
-								},
-								"title": {
-									"additionalProperties": false,
-									"properties": {
-										"en": {
-											"type": "string"
-										},
-										"ru": {
-											"type": "string"
-										}
+									"propertyNames": {
+										"pattern": "^[a-z]{2,3}$",
+										"type": "string"
 									},
-									"required": [
-										"en",
-										"ru"
-									],
 									"type": "object",
 									"x-refinements": [
-										"c313ab772a1f"
+										"d6b7290780a4"
+									]
+								},
+								"title": {
+									"additionalProperties": {
+										"type": "string"
+									},
+									"propertyNames": {
+										"pattern": "^[a-z]{2,3}$",
+										"type": "string"
+									},
+									"type": "object",
+									"x-refinements": [
+										"d6b7290780a4"
 									]
 								}
 							},
@@ -6035,10 +5990,7 @@
 				"type": "string"
 			},
 			"locale": {
-				"enum": [
-					"en",
-					"ru"
-				],
+				"pattern": "^[a-z]{2,3}$",
 				"type": "string"
 			},
 			"master": {
@@ -6156,36 +6108,30 @@
 		"additionalProperties": false,
 		"properties": {
 			"alt": {
-				"additionalProperties": false,
-				"properties": {
-					"en": {
-						"type": "string"
-					},
-					"ru": {
-						"type": "string"
-					}
+				"additionalProperties": {
+					"type": "string"
 				},
-				"required": [
-					"en",
-					"ru"
-				],
-				"type": "object"
+				"propertyNames": {
+					"pattern": "^[a-z]{2,3}$",
+					"type": "string"
+				},
+				"type": "object",
+				"x-refinements": [
+					"d6b7290780a4"
+				]
 			},
 			"caption": {
-				"additionalProperties": false,
-				"properties": {
-					"en": {
-						"type": "string"
-					},
-					"ru": {
-						"type": "string"
-					}
+				"additionalProperties": {
+					"type": "string"
 				},
-				"required": [
-					"en",
-					"ru"
-				],
-				"type": "object"
+				"propertyNames": {
+					"pattern": "^[a-z]{2,3}$",
+					"type": "string"
+				},
+				"type": "object",
+				"x-refinements": [
+					"d6b7290780a4"
+				]
 			},
 			"capturedAt": {
 				"pattern": "^\\d{4}(?:-(?:0[1-9]|1[0-2]))?$",
@@ -6199,20 +6145,17 @@
 				"type": "string"
 			},
 			"description": {
-				"additionalProperties": false,
-				"properties": {
-					"en": {
-						"type": "string"
-					},
-					"ru": {
-						"type": "string"
-					}
+				"additionalProperties": {
+					"type": "string"
 				},
-				"required": [
-					"en",
-					"ru"
-				],
-				"type": "object"
+				"propertyNames": {
+					"pattern": "^[a-z]{2,3}$",
+					"type": "string"
+				},
+				"type": "object",
+				"x-refinements": [
+					"d6b7290780a4"
+				]
 			},
 			"favorite": {
 				"default": false,
@@ -6350,22 +6293,16 @@
 				"type": "array"
 			},
 			"title": {
-				"additionalProperties": false,
-				"properties": {
-					"en": {
-						"type": "string"
-					},
-					"ru": {
-						"type": "string"
-					}
+				"additionalProperties": {
+					"type": "string"
 				},
-				"required": [
-					"en",
-					"ru"
-				],
+				"propertyNames": {
+					"pattern": "^[a-z]{2,3}$",
+					"type": "string"
+				},
 				"type": "object",
 				"x-refinements": [
-					"c313ab772a1f"
+					"d6b7290780a4"
 				]
 			},
 			"unlisted": {
@@ -6762,6 +6699,10 @@
 				"pattern": "\\S",
 				"type": "string"
 			},
+			"links.title": {
+				"pattern": "\\S",
+				"type": "string"
+			},
 			"listing.more": {
 				"pattern": "\\S",
 				"type": "string"
@@ -6815,6 +6756,10 @@
 				"type": "string"
 			},
 			"nav.portfolio": {
+				"pattern": "\\S",
+				"type": "string"
+			},
+			"note.title": {
 				"pattern": "\\S",
 				"type": "string"
 			},

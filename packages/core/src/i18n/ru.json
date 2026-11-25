@@ -51,5 +51,7 @@
 	"contact.requiredMessage": "Напишите сообщение.",
 	"contact.tooLong": "Текст слишком длинный. Пожалуйста, сократите его.",
 	"contact.invalidEmail": "Укажите корректный email.",
-	"contact.challenge": "Пройдите проверку и попробуйте ещё раз."
+	"contact.challenge": "Пройдите проверку и попробуйте ещё раз.",
+	"note.title": "Что изменилось с момента написания",
+	"links.title": "Ссылки"
 }

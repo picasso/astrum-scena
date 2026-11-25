@@ -41,7 +41,7 @@ const title = sections.map((section) => section.title).join(' · ')
 	<div class="prose">
 		{
 			sections.map(({ locale, Content }) => (
-				<section lang={locale} data-script={localeScript(locale)}>
+				<section lang={locale} data-script={localeScript(site.content.catalog, locale)}>
 					<h2>{languageName(locale, locale)}</h2>
 					<p>{config.copyright}</p>
 					<Content />

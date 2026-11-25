@@ -4,6 +4,7 @@ import type { SiteConfig } from '../../config/site-schema.ts'
 import {
 	collectPublishedDocuments,
 	type DocumentEntry,
+	documentIn,
 	documentStaticPaths,
 	documentUnlisted,
 	findPublishedDocument,
@@ -77,7 +78,7 @@ export function resolvePublished<E extends DocumentEntry>(
 ): E {
 	const document = findPublishedDocument(documents, slug)
 	if (!document) throw new Error(`no published ${family} "${slug}"`)
-	return document.byLocale[locale]
+	return documentIn(document, locale)
 }
 
 export async function resolvePublishedArticle(

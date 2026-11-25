@@ -7,7 +7,11 @@ import { loadSiteConfig } from '../packages/core/src/config/loader.ts'
 import type { Locale } from '../packages/core/src/config/locale-schema.ts'
 import { type LocalizedLabel, localizedLabel } from '../packages/core/src/config/localized-label.ts'
 import type { SiteConfig } from '../packages/core/src/config/site-schema.ts'
-import { loadDictionaries, type UIKey } from '../packages/core/src/i18n/dictionaries.ts'
+import {
+	languageKey,
+	loadDictionaries,
+	type UIKey,
+} from '../packages/core/src/i18n/dictionaries.ts'
 import { enabledModules } from '../packages/core/src/modules/registry.ts'
 
 // every expected value comes from the demo's config lock, its content and the core dictionaries, read
@@ -79,7 +83,7 @@ export function t(lang: Lang): (key: UIKey) => string {
 }
 
 // a language link is named in the language of the page it sits on
-export const languageName = (lang: Lang, code: Lang): string => t(lang)(`language.${code}`)
+export const languageName = (lang: Lang, code: Lang): string => t(lang)(languageKey(code))
 
 export function href(lang: Lang, segment: string): string {
 	return segment ? `/${lang}/${segment}/` : `/${lang}/`

@@ -1,6 +1,7 @@
 # a copy of the demo's site.yaml from before the lock, its own data with the rest left to the core;
-# later shapes are applied (schemaVersion 3: the courses module in `modules`)
-schemaVersion: 3
+# later shapes are applied (schemaVersion 3: the courses module in `modules`; 4: only the number on a
+# two-locale site)
+schemaVersion: 4
 origin: https://demo.example.com
 identity:
     title:
@@ -21,7 +22,6 @@ content:
     referenceLocale: en
 privacy:
     controller:
-        # the schema still requires both texts here, whatever content.locales holds
         name:
             en: The Astrum Scena authors
             ru: Авторы Astrum Scena
@@ -65,7 +65,6 @@ social:
       icon: contacts
       hover: '#5b9a68'
 seo:
-    # the schema still requires both descriptions, whatever content.locales holds
     description:
         en: A synthetic photography site that exercises the Astrum Scena core.
         ru: Синтетический фотосайт для проверки ядра Astrum Scena.

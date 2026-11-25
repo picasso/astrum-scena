@@ -45,7 +45,7 @@ const footerPromo = footerPromoContext(
 <Base
 	footerPromo={footerPromo}
 	description={text.description}
-	excerpt={album.data.excerpt?.[locale]}
+	excerpt={text.excerpt}
 	title={text.title}
 	canonical={meta.canonical}
 	robots={unlistedRobots(album.data.unlisted === true)}

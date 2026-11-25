@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest'
 
-import { buildSiteConfig } from './fixtures/site-config.ts'
+import { buildSiteConfig, keepLocales } from './fixtures/site-config.ts'
 import { LANGUAGE_SWITCHER_MODES, switcherDisplay } from './language-switcher.ts'
+import { DEFAULT_LOCALE_CATALOG, SERVICE_COPY_LOCALE } from './locale-schema.ts'
 import { MENU_ANIMATIONS, MENU_THEME_MODES, MENU_WIDTH_LADDER, MENU_WIDTH_MODES } from './menu.ts'
 import { defaultLocale, siteSchema } from './site-schema.ts'
 import {
@@ -43,6 +44,16 @@ const withSurface = (name: string, value: unknown) =>
 const withMasonry = (masonry: unknown) => withPortfolio({ ...validSite.portfolio, masonry })
 const withJustified = (justified: unknown) => withAlbum({ ...validSite.album, justified })
 const withMoreDocs = (moreDocs: unknown) => ({ ...validSite, moreDocs })
+// the valid config with `content` and the given fields, every config text cut to the locales of
+// `content` as a site with them writes it; the field under test is laid over it afterwards
+const siteOn = (content: unknown, fields: object = {}) => {
+	const locales = (content as { locales?: unknown } | undefined)?.locales
+	const site = { ...validSite, ...fields }
+	return {
+		...(Array.isArray(locales) && locales.length > 0 ? keepLocales(site, locales) : site),
+		content,
+	}
+}
 
 // identity for tests that force `content.locales: [en, ru]`: built here so it covers those locales
 // whatever site.yaml holds
@@ -132,9 +143,9 @@ describe('factcheck own hosts', () => {
 })
 
 describe('content locales', () => {
-	const withContent = (content: unknown) => ({ ...validSite, content })
+	const withContent = (content: unknown) => siteOn(content)
 
-	it('accepts one or more catalog locales holding the reference locale', () => {
+	it('accepts one or more locales of the catalog holding the reference locale', () => {
 		expectAccept(withContent({ locales: ['ru'], referenceLocale: 'ru' }))
 		expectAccept(withContent({ locales: ['en'], referenceLocale: 'en' }))
 		expectAccept(withContent({ locales: ['ru', 'en'], referenceLocale: 'en' }))
@@ -151,6 +162,120 @@ describe('content locales', () => {
 	it('takes the default locale from the head of the list', () => {
 		expect(defaultLocale({ content: { locales: ['ru', 'en'] } })).toBe('ru')
 		expect(defaultLocale({ content: { locales: ['en'] } })).toBe('en')
+	})
+})
+
+describe('content catalog', () => {
+	const DE = { script: 'latin', ogLocale: 'de_DE', intl: 'de-DE', charWidthPx: 7.4 }
+	const issues = (content: unknown) => {
+		const result = siteSchema.safeParse(siteOn(content))
+		return result.success
+			? []
+			: result.error.issues.map((issue) => ({
+					path: issue.path.join('.'),
+					message: issue.message,
+				}))
+	}
+	// a site in a locale the core has no default for, its texts moved from the English ones
+	const germanSite = (catalog: unknown) => {
+		const english = keepLocales({ ...validSite, content: undefined }, ['en'])
+		return {
+			...(JSON.parse(JSON.stringify(english).replaceAll('"en":', '"de":')) as object),
+			content: { locales: ['de'], referenceLocale: 'de', catalog },
+		}
+	}
+
+	it("resolves to the core's defaults for the site's locales", () => {
+		expect(parsed(siteOn({ locales: ['en', 'ru'], referenceLocale: 'en' })).content).toEqual({
+			locales: ['en', 'ru'],
+			referenceLocale: 'en',
+			catalog: { en: DEFAULT_LOCALE_CATALOG.en, ru: DEFAULT_LOCALE_CATALOG.ru },
+		})
+	})
+
+	it("always holds the service copy's language, and no locale the site does not use", () => {
+		const { catalog } = parsed(siteOn({ locales: ['ru'], referenceLocale: 'ru' })).content
+		expect(Object.keys(catalog)).toEqual(['ru', SERVICE_COPY_LOCALE])
+		const unused = parsed(
+			siteOn({ locales: ['en'], referenceLocale: 'en', catalog: { de: DE, ru: {} } }),
+		).content.catalog
+		expect(Object.keys(unused)).toEqual(['en'])
+	})
+
+	it('overrides a default field by field', () => {
+		const { catalog } = parsed(
+			siteOn({
+				locales: ['en', 'ru'],
+				referenceLocale: 'en',
+				catalog: { en: { ogLocale: 'en_GB' } },
+			}),
+		).content
+		expect(catalog.en).toEqual({ ...DEFAULT_LOCALE_CATALOG.en, ogLocale: 'en_GB' })
+		expect(catalog.ru).toEqual(DEFAULT_LOCALE_CATALOG.ru)
+	})
+
+	it('accepts a new locale with every field', () => {
+		const site = parsed(germanSite({ de: DE }))
+		expect(site.content.catalog).toEqual({ de: DE, en: DEFAULT_LOCALE_CATALOG.en })
+		expect(site.identity.title).toEqual({ de: validSite.identity.title.en })
+	})
+
+	it('resolves to a fixed point, as the loader requires of the lock', () => {
+		const site = parsed(germanSite({ de: DE, en: { charWidthPx: 7 } }))
+		expect(parsed(site)).toEqual(site)
+	})
+
+	it('names each field a new locale lacks', () => {
+		expect(
+			issues({
+				locales: ['en'],
+				referenceLocale: 'en',
+				catalog: { de: { script: 'latin' } },
+			}),
+		).toEqual(
+			['ogLocale', 'intl', 'charWidthPx'].map((field) => ({
+				path: `content.catalog.de.${field}`,
+				message: 'required: the core has no default entry for "de"',
+			})),
+		)
+	})
+
+	it('rejects a locale without a catalog entry', () => {
+		expect(issues({ locales: ['de'], referenceLocale: 'de' })).toContainEqual({
+			path: 'content.locales.0',
+			message: '"de" has no entry in the catalog; add content.catalog.de',
+		})
+	})
+
+	it('accepts only a script the core has fonts for', () => {
+		expect(
+			issues({
+				locales: ['en'],
+				referenceLocale: 'en',
+				catalog: { el: { ...DE, script: 'greek', ogLocale: 'el_GR', intl: 'el-GR' } },
+			}),
+		).toEqual([
+			{
+				path: 'content.catalog.el.script',
+				message: 'expected a script the core has fonts for: latin, cyrillic',
+			},
+		])
+	})
+
+	it('rejects a malformed locale code, field or tag', () => {
+		const format = 'expected a locale code of two or three lowercase letters, such as `en`'
+		expect(issues({ locales: ['EN'], referenceLocale: 'EN' })).toContainEqual({
+			path: 'content.locales.0',
+			message: format,
+		})
+		expectReject(siteOn({ locales: ['en'], referenceLocale: 'en', catalog: { EN: {} } }))
+		for (const field of [
+			{ ogLocale: 'en-GB' },
+			{ intl: 'not a tag' },
+			{ charWidthPx: 0 },
+			{ unknown: 1 },
+		])
+			expectReject(siteOn({ locales: ['en'], referenceLocale: 'en', catalog: { en: field } }))
 	})
 })
 
@@ -315,10 +440,7 @@ describe('menu', () => {
 	// locales and social are built here too, so the label coverage check depends on nothing in site.yaml
 	const CONTENT = { locales: ['en', 'ru'], referenceLocale: 'ru' }
 	const withMenu = (menu: unknown, content: unknown = CONTENT) => ({
-		...validSite,
-		content,
-		identity: IDENTITY_EN_RU,
-		social: [],
+		...siteOn(content, { identity: IDENTITY_EN_RU, social: [] }),
 		menu,
 	})
 	// a valid block; each reject case overlays one invalid key on it
@@ -463,6 +585,16 @@ describe('menu', () => {
 		expectReject(withMenu({ ...base, items }, { locales: ['en'], referenceLocale: 'en' }))
 	})
 
+	it('rejects a label in a locale outside content.locales, naming its path', () => {
+		const items = [{ segment: 'gallery', label: { en: 'Gallery', ru: 'Галерея' } }]
+		const result = siteSchema.safeParse(
+			withMenu({ ...base, items }, { locales: ['en'], referenceLocale: 'en' }),
+		)
+		expect(
+			result.error?.issues.map((issue) => `${issue.path.join('.')}: ${issue.message}`),
+		).toEqual(['menu.items.0.label.ru: not one of content.locales [en]'])
+	})
+
 	it('accepts on|off for sectionIcon and sectionIconSwap, rejects anything else', () => {
 		for (const value of ['off', 'on']) {
 			expectAccept(withMenu({ ...base, sectionIcon: value }))
@@ -545,13 +677,13 @@ describe('identity', () => {
 		copyright: { holder: { en: 'Example Author', ru: 'Пример Автора' }, since: 2001 },
 	}
 	const withIdentity = (value: unknown, content: unknown = CONTENT) => ({
-		...validSite,
-		content,
-		menu: {
-			...validSite.menu,
-			items: [{ segment: 'about', label: { en: 'About', ru: 'Обо мне' } }],
-		},
-		social: [],
+		...siteOn(content, {
+			menu: {
+				...validSite.menu,
+				items: [{ segment: 'about', label: { en: 'About', ru: 'Обо мне' } }],
+			},
+			social: [],
+		}),
 		identity: value,
 	})
 
@@ -592,13 +724,13 @@ describe('identity', () => {
 describe('social', () => {
 	const CONTENT = { locales: ['en', 'ru'], referenceLocale: 'ru' }
 	const withSocial = (social: unknown, content: unknown = CONTENT) => ({
-		...validSite,
-		content,
-		identity: IDENTITY_EN_RU,
-		menu: {
-			...validSite.menu,
-			items: [{ segment: 'about', label: { en: 'About', ru: 'Обо мне' } }],
-		},
+		...siteOn(content, {
+			identity: IDENTITY_EN_RU,
+			menu: {
+				...validSite.menu,
+				items: [{ segment: 'about', label: { en: 'About', ru: 'Обо мне' } }],
+			},
+		}),
 		social,
 	})
 	const link = {
@@ -667,6 +799,26 @@ describe('privacy controller', () => {
 		expectReject(
 			withPrivacy({ controller: { ...controller, contact: { kind: 'email', href: 'x' } } }),
 		)
+	})
+
+	it('requires the controller name and the seo description in exactly the active locales', () => {
+		const issues = (site: unknown) =>
+			siteSchema
+				.safeParse(site)
+				.error?.issues.map((issue) => `${issue.path.join('.')}: ${issue.message}`)
+		const oneLocale = siteOn({ locales: ['en'], referenceLocale: 'en' })
+		expectAccept(oneLocale)
+		expect(
+			issues({
+				...oneLocale,
+				privacy: { controller: controller },
+				seo: { description: { ru: 'Описание' } },
+			}),
+		).toEqual([
+			'privacy.controller.name.ru: not one of content.locales [en]',
+			'seo.description.ru: not one of content.locales [en]',
+			'seo.description.en: missing the "en" text required by content.locales',
+		])
 	})
 
 	it('shares the localized route validator with the social contacts link', () => {

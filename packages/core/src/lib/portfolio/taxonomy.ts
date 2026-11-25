@@ -1,4 +1,5 @@
 import type { Locale, Place, Tag } from '../content/schemas.ts'
+import { pickLocale } from './locale.ts'
 
 // unknown ids throw: integrity checks catch them at build time, this is the runtime guard
 
@@ -9,7 +10,7 @@ export function resolvePlaceName(
 ): string {
 	const place = places.find((candidate) => candidate.id === placeId)
 	if (!place) throw new Error(`unknown place "${placeId}"`)
-	return place.name[locale]
+	return pickLocale(place.name, locale)
 }
 
 // returns the place chain from the root ancestor down (EUROPE ○ GREECE ○ SANTORINI); a parentId
@@ -28,7 +29,7 @@ export function resolvePlaceHierarchy(
 		seen.add(currentId)
 		const place = byId.get(currentId)
 		if (!place) throw new Error(`unknown place "${currentId}"`)
-		chain.push(place.name[locale])
+		chain.push(pickLocale(place.name, locale))
 		currentId = place.parentId
 	}
 	return chain.reverse()
@@ -48,6 +49,6 @@ export function resolveTagLabels(
 	return tagIds.map((id) => {
 		const tag = byId.get(id)
 		if (!tag) throw new Error(`unknown tag "${id}"`)
-		return { id, label: tag.label[locale] }
+		return { id, label: pickLocale(tag.label, locale) }
 	})
 }

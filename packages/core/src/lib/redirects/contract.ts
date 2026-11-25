@@ -1,6 +1,10 @@
 import { courseHref } from '../../modules/courses/routes.ts'
 import type { ModuleManifest } from '../../modules/manifest.ts'
-import { collectPublishedDocuments, type DocumentLocales } from '../content/documents.ts'
+import {
+	collectPublishedDocuments,
+	documentIn,
+	type DocumentLocales,
+} from '../content/documents.ts'
 import type { ContentSnapshot } from '../content/model.ts'
 import {
 	albumHref,
@@ -49,14 +53,14 @@ export function buildRedirectRouteSets(
 		for (const locale of locales)
 			add(
 				articleHref(document.slug, locale),
-				document.byLocale[referenceLocale].data.unlisted === true,
+				documentIn(document, referenceLocale).data.unlisted === true,
 			)
 	}
 	for (const document of collectPublishedDocuments(snapshot.courses, content)) {
 		for (const locale of locales)
 			add(
 				courseHref(document.slug, locale),
-				document.byLocale[referenceLocale].data.unlisted === true,
+				documentIn(document, referenceLocale).data.unlisted === true,
 			)
 	}
 	for (const document of collectPublishedDocuments(
@@ -67,7 +71,7 @@ export function buildRedirectRouteSets(
 		for (const locale of locales)
 			add(
 				pageHref(document.slug, locale),
-				document.byLocale[referenceLocale].data.unlisted === true,
+				documentIn(document, referenceLocale).data.unlisted === true,
 			)
 	}
 

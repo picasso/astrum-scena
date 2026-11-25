@@ -6,6 +6,8 @@ import { beforeAll, describe, expect, it } from 'vitest'
 
 import { loadSiteConfig } from '../../../config/loader.ts'
 import { siteRoot } from '../../../config/site-root.ts'
+import { loadDictionaries } from '../../../i18n/dictionaries.ts'
+import { enabledModules } from '../../../modules/registry.ts'
 import { extractLegacyLinks } from '../../content/legacy-links.ts'
 import { calloutMdastPlugin } from '../callout/plugin.ts'
 import { noteMdastPlugin } from '../note/plugin.ts'
@@ -16,9 +18,9 @@ import { linksMdastPlugin } from './plugin.ts'
 // stays with the reference site
 
 const ARTICLES = path.join(siteRoot, 'src/content/articles')
-const KEYS = loadSiteConfig(siteRoot).content.locales.map(
-	(locale) => `reading-the-light.${locale}.md`,
-)
+const site = loadSiteConfig(siteRoot)
+const dictionaries = loadDictionaries(siteRoot, site.content.locales, enabledModules(site))
+const KEYS = site.content.locales.map((locale) => `reading-the-light.${locale}.md`)
 
 function source(key: string): string {
 	return readFileSync(path.join(ARTICLES, key), 'utf8')
@@ -37,7 +39,11 @@ let renderer: Renderer
 beforeAll(async () => {
 	renderer = (await createSatteriMarkdownProcessor({
 		features: { directive: true },
-		mdastPlugins: [calloutMdastPlugin, noteMdastPlugin, linksMdastPlugin] as never,
+		mdastPlugins: [
+			calloutMdastPlugin,
+			noteMdastPlugin((locale) => dictionaries[locale]?.['note.title']),
+			linksMdastPlugin((locale) => dictionaries[locale]?.['links.title']),
+		] as never,
 	})) as unknown as Renderer
 })
 

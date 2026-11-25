@@ -3,7 +3,7 @@ import '../styles/global.css'
 
 import { ClientRouter } from 'astro:transitions'
 
-import { LOCALE_CATALOG } from '../config/locale-schema.ts'
+import { localeEntry } from '../config/locale-schema.ts'
 import { localizedLabel } from '../config/localized-label.ts'
 import { seo } from '../config/seo.ts'
 import { site } from '../config/site.ts'
@@ -50,7 +50,11 @@ const {
 } = Astro.props
 const siteTitle = localizedLabel(site.identity.title, lang)
 const pageTitle = title ? `${title} — ${siteTitle}` : siteTitle
-const pageDescription = selectDescription(seo.description[lang], { description, excerpt, body })
+const pageDescription = selectDescription(localizedLabel(seo.description, lang), {
+	description,
+	excerpt,
+	body,
+})
 const socialUrl = canonical ?? new URL(Astro.url.pathname, site.origin).href
 const socialImage = seo.socialImage ? new URL(seo.socialImage, site.origin).href : undefined
 
@@ -61,7 +65,7 @@ const socialImage = seo.socialImage ? new URL(seo.socialImage, site.origin).href
 const mediaOrigin = externalImageOrigin(loadImagePublicConfig(siteRoot).config)
 
 // the locale script picks the font family (theme.css) and the files to preload
-const script = localeScript(lang)
+const script = localeScript(site.content.catalog, lang)
 
 // TODO(favicon): a placeholder that only stops the /favicon.ico 404 on every page (Lighthouse
 // errors-in-console); replace it with the owner's real favicon. The icon is a document of its own that
@@ -127,7 +131,7 @@ const themeScript = `;(() => {
 		<meta property="og:title" content={pageTitle} />
 		<meta property="og:description" content={pageDescription} />
 		<meta property="og:url" content={socialUrl} />
-		<meta property="og:locale" content={LOCALE_CATALOG[lang].ogLocale} />
+		<meta property="og:locale" content={localeEntry(site.content.catalog, lang).ogLocale} />
 		{socialImage && <meta property="og:image" content={socialImage} />}
 		<meta name="twitter:card" content={socialImage ? 'summary_large_image' : 'summary'} />
 		<meta name="twitter:title" content={pageTitle} />

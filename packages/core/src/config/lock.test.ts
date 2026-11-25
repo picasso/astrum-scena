@@ -157,9 +157,9 @@ describe('resolveSiteLock', () => {
 	})
 
 	it('rejects the old shapes of site.yaml with the supported version and the migration', () => {
-		for (const schemaVersion of [1, 2])
+		for (const schemaVersion of [1, 2, 3])
 			expect(() => resolveConfig({ ...buildSiteConfig(), schemaVersion })).toThrow(
-				`${SITE_CONFIG_PATH}: schemaVersion ${schemaVersion} is not supported; supported: 3; see UPGRADING.md`,
+				`${SITE_CONFIG_PATH}: schemaVersion ${schemaVersion} is not supported; supported: 4; see UPGRADING.md`,
 			)
 		expect(() => resolved(makeRoot())).toThrow(SITE_CONFIG_PATH)
 	})

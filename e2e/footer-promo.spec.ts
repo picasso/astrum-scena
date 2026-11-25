@@ -1,6 +1,6 @@
 import { expect, type Page, test } from '@playwright/test'
 
-import { LOCALE_PATH_PREFIX } from '../packages/core/src/config/locale-schema.ts'
+import { localePathPrefix } from '../packages/core/src/config/locale-schema.ts'
 import { RIGHTS_PATH } from '../packages/core/src/lib/content/routes.ts'
 import { albums, firstDocument, photoIdOfImage } from './content.ts'
 import { demoConfig, escapeRegExp, href, locales, otherLocale, referenceLocale } from './helpers.ts'
@@ -9,6 +9,8 @@ import { demoConfig, escapeRegExp, href, locales, otherLocale, referenceLocale }
 // algorithm or the corpus: footer photo ids never intersect the ids of every other image on the page.
 // With `recentWorks: off` there is no promo and the spec is skipped
 test.skip(demoConfig.footer.recentWorks === 'off', 'footer promo is switched off in site.yaml')
+
+const LOCALE_PREFIX = localePathPrefix(locales)
 
 const [firstAlbum] = albums
 const SECOND_LOCALE = otherLocale(referenceLocale) ?? referenceLocale
@@ -70,7 +72,7 @@ test.describe('footer promo', () => {
 	test('every locale of one page shows the same set', async ({ page }) => {
 		const setOf = async (route: string) => {
 			await page.goto(route)
-			return (await promoHrefs(page)).map((link) => link.replace(LOCALE_PATH_PREFIX, ''))
+			return (await promoHrefs(page)).map((link) => link.replace(LOCALE_PREFIX, ''))
 		}
 		const sets: string[][] = []
 		for (const lang of locales) sets.push(await setOf(firstAlbum!.href(lang)))
@@ -85,7 +87,7 @@ test.describe('footer promo', () => {
 			const hrefs = await promoHrefs(page)
 			sets.add(
 				hrefs
-					.map((link) => link.replace(LOCALE_PATH_PREFIX, ''))
+					.map((link) => link.replace(LOCALE_PREFIX, ''))
 					.sort()
 					.join(','),
 			)

@@ -11,10 +11,8 @@ import { type MdastLike, validateNoteChildren } from './validate-children.ts'
 // blockquote node retagged via `data.hName`. The title must stay an mdast `text` node so the
 // serializer escapes it: interpolating it into an `html` node would allow stored HTML/JS injection
 
-const NOTE_DEFAULT_TITLE = {
-	ru: 'Что изменилось с момента написания',
-	en: 'What has changed since this was written',
-} as const satisfies Record<Locale, string>
+// the default title is the `note.title` text of the site's dictionary for the document locale
+export type NoteDefaultTitle = (locale: Locale) => string | undefined
 
 type NoteLocale = Locale
 
@@ -81,7 +79,7 @@ function buildReplacement(
 	}
 }
 
-export const noteMdastPlugin = {
+export const noteMdastPlugin = (defaultTitle: NoteDefaultTitle) => ({
 	name: 'astrum-scena-note',
 	containerDirective(node: NoteDirectiveNode, ctx: NoteVisitorContext): void {
 		if (node.name !== DIRECTIVES.note) return
@@ -106,13 +104,19 @@ export const noteMdastPlugin = {
 				const locale = detectLocale(ctx)
 				if (locale === null) {
 					throw new Error(
-						`${locationPrefix(ctx, node)} note: cannot determine the document locale for the default title; name the file *.ru.md(x) or *.en.md(x), or pass an explicit title="…"`,
+						`${locationPrefix(ctx, node)} note: cannot determine the document locale for the default title; name the file *.<locale>.md(x), or pass an explicit title="…"`,
 					)
 				}
-				titleText = NOTE_DEFAULT_TITLE[locale]
+				const text = defaultTitle(locale)
+				if (text === undefined) {
+					throw new Error(
+						`${locationPrefix(ctx, node)} note: the document locale "${locale}" is not one of content.locales, so it has no default title; pass an explicit title="…"`,
+					)
+				}
+				titleText = text
 			}
 		}
 
 		ctx.replaceNode(node, buildReplacement(model, titleText, children))
 	},
-}
+})

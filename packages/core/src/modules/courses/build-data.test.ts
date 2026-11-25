@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { buildSiteConfig } from '../../config/fixtures/site-config.ts'
+import { buildSiteConfig, contentConfig } from '../../config/fixtures/site-config.ts'
 import type { CoursesSiteConfig } from './build-data.ts'
 
 // `courseStatus` and `unlisted` are Tier-1 fields, so they live only on the EN entries here and an
@@ -29,7 +29,7 @@ const courses = [
 ]
 
 const enabled: CoursesSiteConfig = {
-	content: { locales: ['en', 'ru'], referenceLocale: 'en' },
+	content: contentConfig(['en', 'ru'], 'en'),
 	modules: buildSiteConfig().modules,
 }
 const disabled: CoursesSiteConfig = { ...enabled, modules: {} }

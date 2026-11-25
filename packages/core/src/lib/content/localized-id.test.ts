@@ -14,13 +14,19 @@ describe('localizedDocumentId', () => {
 		expect(localizedDocumentId('about.en.mdx')).toBe('about-en')
 	})
 
+	// whether the site builds the locale is the loader's check against content.locales
+	it('takes any code of the locale format', () => {
+		expect(localizedDocumentId('about.de.md')).toBe('about-de')
+	})
+
 	it('ignores directories in the entry path', () => {
 		expect(localizedDocumentId('nested/dir/about.ru.md')).toBe('about-ru')
 	})
 
 	it.each([
 		['about.md', 'no locale segment'],
-		['about.de.md', 'unsupported locale'],
+		['about.english.md', 'not a locale code'],
+		['about.EN.md', 'upper case locale'],
 		['about.en.extra.md', 'extra segment'],
 		['About.en.md', 'upper case key'],
 		['about.en.markdown', 'foreign extension'],

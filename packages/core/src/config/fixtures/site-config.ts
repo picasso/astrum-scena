@@ -1,4 +1,5 @@
 import { REQUIRED_DENIED_FIELDS } from '../images-schema.ts'
+import { DEFAULT_LOCALE_CATALOG, effectiveCatalog, type Locale } from '../locale-schema.ts'
 import type { SiteConfig } from '../site-schema.ts'
 
 // a complete, valid site config built for tests; it never follows the real site.yaml, so a test that
@@ -7,8 +8,14 @@ export function buildSiteConfig(overrides: Partial<SiteConfig> = {}): SiteConfig
 	return { ...structuredClone(SITE_CONFIG), ...overrides }
 }
 
+// the `content` section a site.yaml with these locales and no catalog resolves to
+export const contentConfig = (
+	locales: [Locale, ...Locale[]],
+	referenceLocale: Locale,
+): SiteConfig['content'] => ({ locales, referenceLocale, catalog: effectiveCatalog(locales, {}) })
+
 const SITE_CONFIG: SiteConfig = {
-	schemaVersion: 3,
+	schemaVersion: 4,
 	origin: 'https://site.test',
 	identity: {
 		title: {
@@ -27,10 +34,7 @@ const SITE_CONFIG: SiteConfig = {
 			since: 2001,
 		},
 	},
-	content: {
-		locales: ['en', 'ru'],
-		referenceLocale: 'ru',
-	},
+	content: contentConfig(['en', 'ru'], 'ru'),
 	factcheck: {
 		ownHosts: ['old-site.test'],
 	},
@@ -361,4 +365,24 @@ const SITE_CONFIG: SiteConfig = {
 			quality: [{ avif: 50, webp: 72 }],
 		},
 	},
+}
+
+const isLocalizedText = (value: object): boolean =>
+	Object.keys(value).length > 0 &&
+	Object.entries(value).every(
+		([key, text]) => Object.hasOwn(DEFAULT_LOCALE_CATALOG, key) && typeof text === 'string',
+	)
+
+// a config (or any part of one) whose texts keep only `locales`, as a site with those
+// `content.locales` writes it; the locale list itself is left to the caller
+export function keepLocales<T>(value: T, locales: readonly string[]): T {
+	if (Array.isArray(value)) return value.map((item: unknown) => keepLocales(item, locales)) as T
+	if (value === null || typeof value !== 'object') return value
+	if (isLocalizedText(value))
+		return Object.fromEntries(
+			Object.entries(value).filter(([locale]) => locales.includes(locale)),
+		) as T
+	return Object.fromEntries(
+		Object.entries(value).map(([key, item]) => [key, keepLocales(item, locales)]),
+	) as T
 }

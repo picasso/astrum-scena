@@ -39,11 +39,16 @@ describe('contactSubmissionSchema', () => {
 		expect(contactSubmissionSchema.safeParse({ ...valid(), token: '' }).success).toBe(false)
 	})
 
-	it('rejects an invalid email and an unknown locale', () => {
+	// the Worker has no site config, so it checks the locale's format only
+	it('rejects an invalid email and a malformed locale code', () => {
 		expect(
 			contactSubmissionSchema.safeParse({ ...valid(), email: 'not-an-email' }).success,
 		).toBe(false)
-		expect(contactSubmissionSchema.safeParse({ ...valid(), locale: 'de' }).success).toBe(false)
+		for (const locale of ['EN', 'english', 'e'])
+			expect(contactSubmissionSchema.safeParse({ ...valid(), locale }).success, locale).toBe(
+				false,
+			)
+		expect(contactSubmissionSchema.safeParse({ ...valid(), locale: 'de' }).success).toBe(true)
 	})
 
 	it('is strict — rejects unknown keys', () => {

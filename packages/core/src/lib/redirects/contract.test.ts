@@ -7,7 +7,7 @@ import { coursesModule } from '../../modules/courses/manifest.ts'
 import { courseSchema } from '../../modules/courses/schema.ts'
 import { loadContentSnapshot, lockedModules } from '../content/files.ts'
 import type { ContentSnapshot } from '../content/model.ts'
-import { albumSchema, articleSchema, pageSchema, photoSchema } from '../content/schemas.ts'
+import { albumSchemaFor, articleSchema, pageSchema, photoSchemaFor } from '../content/schemas.ts'
 import { withRootRedirect } from '../site-files.ts'
 import { buildRedirectRouteSets, validateRedirects } from './contract.ts'
 
@@ -137,7 +137,7 @@ describe('Cloudflare Pages redirect contract', () => {
 				status,
 			}),
 		})
-		const album = albumSchema.parse({
+		const album = albumSchemaFor(['en', 'ru']).parse({
 			category: 'series',
 			title: { en: 'Album', ru: 'Альбом' },
 			description: { en: '', ru: '' },
@@ -145,7 +145,7 @@ describe('Cloudflare Pages redirect contract', () => {
 			coverId: 'featured-photo',
 			photoIds: ['featured-photo'],
 		})
-		const unlistedAlbum = albumSchema.parse({
+		const unlistedAlbum = albumSchemaFor(['en', 'ru']).parse({
 			category: 'series',
 			title: { en: 'Hidden album', ru: 'Скрытый альбом' },
 			description: { en: '', ru: '' },
@@ -154,13 +154,13 @@ describe('Cloudflare Pages redirect contract', () => {
 			photoIds: ['unlisted-album-photo'],
 			unlisted: true,
 		})
-		const photo = photoSchema.parse({
+		const photo = photoSchemaFor(['en', 'ru']).parse({
 			title: { en: 'Photo', ru: 'Фото' },
 			status: 'published',
 			publishedAt: '2026-01-01',
 			unlisted: true,
 		})
-		const albumPhoto = photoSchema.parse({
+		const albumPhoto = photoSchemaFor(['en', 'ru']).parse({
 			title: { en: 'Album photo', ru: 'Фото альбома' },
 			status: 'published',
 			publishedAt: '2026-01-01',

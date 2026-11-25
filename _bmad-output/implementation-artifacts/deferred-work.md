@@ -71,6 +71,7 @@ legacy-аудиты, авторский голос, CSS-бюджет и заме
 - source_spec: `_bmad-output/implementation-artifacts/spec-4-2-locales-from-config.md`
   summary: Формы данных по локалям (`localizedTextSchema {en, ru}` в схемах контента, `privacy`, `seo-schema`, `taxonomy-resolve`, заголовки блоков `note`/`links`, `CHAR_WIDTH_PX` в `album-intro.ts`) сделать записями по локалям из конфига, чтобы одноязычный сайт не заполнял вторую локаль.
   evidence: решение владельца по 4.2 (вопрос 3, вариант B): схемы-фабрики и передача конфига в `content.config.ts` примерно удваивают историю; в 4.2 убираются только списки, роли и умолчания локалей.
+  partial_by: spec-6-10a-localized-data-shapes.md -- схемы альбомов, фото, таксономии и `featured/home.yaml` строятся от `content.locales` lock (запись ровно по активным локалям, версии 2), `privacy.controller.name` и `seo.description` — подписи `site.yaml` со строгой проверкой (`schemaVersion` 4), `taxonomy-resolve` и `portfolio/locale.ts` без ключей `en`/`ru`, заголовки `note`/`links` — ключи словарей `note.title`/`links.title`, ширина глифа `CHAR_WIDTH_PX` — поле `charWidthPx` в `LOCALE_CATALOG`; правило ESLint запрещает ключи и чтение `en`/`ru` вне слоя конфига, объявлений поставляемых словарей и тестов.
 - source_spec: `_bmad-output/implementation-artifacts/spec-4-2-locales-from-config.md`
   summary: Полная сборка фикстуры с одной локалью (AC эпика «тестовая фикстура с одной локалью собирается») и производный от конфига редирект корня `public/_redirects` (`/` → `/en/`) — в 4.3, когда маршруты строятся по списку локалей.
   evidence: решение владельца по 4.2 (вопрос 4, вариант A): пока стоят деревья `src/pages/{en,ru}`, сборка с `locales: [ru]` всё равно выпускает `/en/…`; в 4.2 одна локаль проверяется тестами `lib` и SEO-артефакта.
@@ -470,3 +471,18 @@ legacy-аудиты, авторский голос, CSS-бюджет и заме
 - source_spec: `_bmad-output/implementation-artifacts/spec-6-9c-publication.md`
   summary: В публичном репо PR из форков не получают секрет `IDENTITY_DENYLIST`, поэтому `check:identity` и проверка сообщений коммитов в их CI падают.
   evidence: GitHub не передаёт секреты репо в workflow PR из форков, а в CI без списка гейт падает по решению 6.9c; нужен путь для внешних PR (например, проверка по списку после ревью мейнтейнера) — решение владельца.
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-6-10a-localized-data-shapes.md`
+  summary: 6.10b — одноязычный сайт: без переключателя языка в меню и альтернатив `hreflang` при одной локали, `/status/` без свежести перевода, демо собирается в CI с одной локалью и с двумя, e2e берут подписи из конфига и словарей (критерии 6.10 №3–5, кроме локали вне en/ru).
+  evidence: решение владельца 2026-11-23 при планировании 6.10: спек на всю историю ~4000+ токенов; одноязычный сайт опирается на формы данных 6.10a и поставляется отдельным PR.
+  closed_by: spec-6-10b-single-locale-site.md
+- source_spec: `_bmad-output/implementation-artifacts/spec-6-10a-localized-data-shapes.md`
+  summary: 6.10c — каталог локалей из конфига: `LOCALE_CATALOG` (script, ogLocale, intl), `CHAR_WIDTH_PX` и `SERVICE_COPY_LOCALE` — умолчания ядра с переопределением и дополнением в `site.yaml`, тип `Locale`, `localeSchema` и регулярки путей от конфига, тест `lib` с локалью вне en/ru (критерий 6.10 №2 и часть №5).
+  evidence: решение владельца 2026-11-23 при планировании 6.10: тип `Locale` из `keyof LOCALE_CATALOG` используется примерно в 70 файлах ядра — самый широкий рефакторинг истории, от 6.10a и 6.10b не зависит.
+  closed_by: spec-6-10c-locale-catalog-from-config.md
+- source_spec: `_bmad-output/implementation-artifacts/spec-6-10a-localized-data-shapes.md`
+  summary: Заголовки записей `UPGRADING.md` и пункт `**Breaking:**` в `CHANGELOG.md` для 6.10a — списки ~60 имён снапшота (`title.(keys)`, `site.privacy.controller.name.en` …), нечитаемые для владельца сайта; нужен гейт `check:api-breaking`, принимающий префикс или шаблон (`title.*`), либо имена отдельным списком под человеческим заголовком; оценка — medium.
+  evidence: ревью 6.10a (blind #6); `scripts/check-api-breaking.ts` (`unnamedBreaking`, `unannouncedBreaking`) сверяет точные имена изменений снапшота с заголовками `### <names>`, а смена `{en, ru}` на запись по локалям даёт по три-четыре имени на каждое поле.
+- source_spec: `_bmad-output/implementation-artifacts/spec-6-10a-localized-data-shapes.md`
+  summary: `categories[].label`, `places[].name`, `tags[].label` и `copy.description` слайда `featured` принимают пустую строку в активной локали, и сборка выводит пустой чип или имя места; у подписей `site.yaml` и в `idBase` пустое запрещено; оценка — low.
+  evidence: ревью 6.10a (blind #8); так было и до 6.10a (`localizedTextSchema` — `z.string()` без `min(1)`); исправление — `required: true` у этих полей в `lib/content/schemas.ts` с проверкой демо и реального сайта.

@@ -8,6 +8,7 @@ import type { BannerDocumentCollection } from '../banner/select.ts'
 import {
 	documentCourseStatus,
 	type DocumentEntry,
+	documentIn,
 	type PublishedDocument,
 } from '../content/documents.ts'
 import { deriveExcerpt } from '../content/excerpt.ts'
@@ -84,13 +85,13 @@ function resolveDocumentCard<E extends DocumentEntry>(
 		catalog: ReturnType<typeof loadImageCatalog>
 	},
 ) {
-	const entry = document.byLocale[locale]
+	const entry = documentIn(document, locale)
 	const target = {
 		kind: 'document' as const,
 		collection: options.collection,
 		translationKey: document.translationKey,
 	}
-	const reference = document.byLocale[options.siteConfig.content.referenceLocale].data
+	const reference = documentIn(document, options.siteConfig.content.referenceLocale).data
 	const photoId = reference.coverId
 	// course status is a Tier-1 field, read from the reference locale (ADR-0013)
 	const courseStatus = documentCourseStatus(reference)

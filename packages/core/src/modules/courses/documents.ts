@@ -2,6 +2,7 @@ import type { ArticlesOrder } from '../../config/document-schemas.ts'
 import {
 	documentCourseStatus,
 	type DocumentEntry,
+	documentIn,
 	orderDocuments,
 	type PublishedDocument,
 } from '../../lib/content/documents.ts'
@@ -18,6 +19,6 @@ export function orderCourses<E extends DocumentEntry>(
 	const ordered = orderDocuments(documents, config.order, locale, referenceLocale)
 	if (config.currentFirst === 'off') return ordered
 	const isCurrent = (document: PublishedDocument<E>) =>
-		documentCourseStatus(document.byLocale[referenceLocale].data) === 'current'
+		documentCourseStatus(documentIn(document, referenceLocale).data) === 'current'
 	return [...ordered.filter(isCurrent), ...ordered.filter((document) => !isCurrent(document))]
 }

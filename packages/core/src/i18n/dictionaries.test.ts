@@ -5,7 +5,7 @@ import path from 'node:path'
 import { afterEach, describe, expect, it } from 'vitest'
 import { stringify } from 'yaml'
 
-import { type Locale, SUPPORTED_LOCALES } from '../config/locale-schema.ts'
+import { DEFAULT_LOCALE_CATALOG, type Locale } from '../config/locale-schema.ts'
 import { site } from '../config/site.ts'
 import { siteRoot } from '../config/site-root.ts'
 import { coursesModule } from '../modules/courses/manifest.ts'
@@ -21,6 +21,8 @@ import {
 	uiKeys,
 } from './dictionaries.ts'
 import { siteDictionaryPath } from './site-dictionary-path.ts'
+
+const CATALOG_LOCALES = Object.keys(DEFAULT_LOCALE_CATALOG)
 
 // the fixtures name the two catalog locales
 const en: Locale = 'en'
@@ -46,9 +48,10 @@ afterEach(() => {
 })
 
 describe('core dictionaries', () => {
-	it('give every catalog locale the full key set and nothing else', () => {
-		for (const locale of SUPPORTED_LOCALES) {
-			const dictionary = CORE_DICTIONARIES[locale]
+	it('give every locale of the default catalog the full key set and nothing else', () => {
+		expect(Object.keys(CORE_DICTIONARIES)).toEqual(CATALOG_LOCALES)
+		for (const locale of CATALOG_LOCALES) {
+			const dictionary = CORE_DICTIONARIES[locale]!
 			expect(Object.keys(dictionary).sort(), locale).toEqual([...UI_KEYS].sort())
 			for (const key of UI_KEYS) expect(dictionary[key], `${locale}: ${key}`).toBeTruthy()
 		}
@@ -143,8 +146,8 @@ describe('mergeDictionaries', () => {
 
 	it('fails a locale missing a key in the core and the site, without borrowing another locale', () => {
 		const core = {
-			[en]: CORE_DICTIONARIES[en],
-			[ru]: without(CORE_DICTIONARIES[ru], 'footer.quote', 'contacts.intro'),
+			[en]: CORE_DICTIONARIES[en]!,
+			[ru]: without(CORE_DICTIONARIES[ru]!, 'footer.quote', 'contacts.intro'),
 		}
 		const missing = UI_KEYS.filter((key) => key === 'footer.quote' || key === 'contacts.intro')
 		expect(() => mergeDictionaries([en, ru], {}, core)).toThrow(
@@ -153,7 +156,7 @@ describe('mergeDictionaries', () => {
 	})
 
 	it('takes a key the core lacks from the site dictionary', () => {
-		const core = { [ru]: without(CORE_DICTIONARIES[ru], 'footer.quote') }
+		const core = { [ru]: without(CORE_DICTIONARIES[ru]!, 'footer.quote') }
 		const merged = mergeDictionaries([ru], { [ru]: { 'footer.quote': 'Цитата сайта.' } }, core)
 		expect(merged[ru]?.['footer.quote']).toBe('Цитата сайта.')
 	})
@@ -166,10 +169,10 @@ describe('mergeDictionaries', () => {
 describe('module dictionaries', () => {
 	const MODULE_KEYS = moduleKeys(coursesModule)
 
-	it("give every catalog locale the module's full key set, in its namespace", () => {
+	it("give every locale of the default catalog the module's full key set, in its namespace", () => {
 		expect(MODULE_KEYS.length).toBeGreaterThan(0)
 		for (const key of MODULE_KEYS) expect(key.startsWith('courses.')).toBe(true)
-		for (const locale of SUPPORTED_LOCALES) {
+		for (const locale of CATALOG_LOCALES) {
 			const dictionary = coursesModule.i18n.dictionaries[locale] ?? {}
 			expect(Object.keys(dictionary).sort(), locale).toEqual(MODULE_KEYS)
 		}

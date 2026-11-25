@@ -1,11 +1,16 @@
-import { type Place, placeSchema, type Tag, tagSchema } from './schemas.ts'
-import { foldToAscii, resolveSlugCollision, slugifyFromTitle } from './slug.ts'
+import { localeCoverageIssues, type LocalizedText } from '../../config/localized-text.ts'
+import { type Locale, type Place, placeSchemaFor, type Tag, tagSchemaFor } from './schemas.ts'
+import { foldToAscii, resolveSlugCollision, SlugError, slugifyFromTitle } from './slug.ts'
 
 // authoring helper (add-album and the like) that maps a human name to an existing, close or new
 // place/tag and drafts a valid new record; it writes nothing and confirms nothing, since the owner
 // approves new records and the integrity gate (`astrum-scena check content`) still owns consistency
 
-export type LocalizedText = Place['name']
+export type { LocalizedText }
+
+// the site's locales, from its lock: a proposed name has a text in each, and the id comes from the
+// reference locale's
+export type TaxonomyLocales = { locales: readonly Locale[]; referenceLocale: Locale }
 
 // normalized Levenshtein similarity at which a name counts as close
 const CLOSE_THRESHOLD = 0.8
@@ -85,17 +90,21 @@ function resolveName(name: string, entries: readonly NamedEntry[]): NameResoluti
 	return { status: 'new' }
 }
 
+// a localized text holds only the site's locales, so no value is actually missing
+const texts = (text: Readonly<Record<string, string | undefined>>): string[] =>
+	Object.values(text).filter((value) => value !== undefined)
+
 function placeKeys(place: Place): NamedEntry {
 	return {
 		id: place.id,
-		keys: [place.id, normalizeName(place.name.en), normalizeName(place.name.ru)],
+		keys: [place.id, ...texts(place.name).map(normalizeName)],
 	}
 }
 
 function tagKeys(tag: Tag): NamedEntry {
 	return {
 		id: tag.id,
-		keys: [tag.id, normalizeName(tag.label.en), normalizeName(tag.label.ru)],
+		keys: [tag.id, ...texts(tag.label).map(normalizeName)],
 	}
 }
 
@@ -115,10 +124,31 @@ export class TaxonomyProposalError extends Error {
 	}
 }
 
-function assertLocalized(value: LocalizedText, field: string): void {
-	if (!value.en.trim() || !value.ru.trim()) {
-		throw new TaxonomyProposalError(`${field} requires a non-empty localized en and ru value`)
+// the id base from the reference-locale text, once every active locale has a non-empty one and no
+// other; slugs keep Latin letters only, so a Cyrillic reference text gives way to the first active
+// locale whose text has some
+function idBase(value: LocalizedText, field: string, site: TaxonomyLocales): string {
+	const problems = [
+		...localeCoverageIssues(value, site.locales).map(
+			(issue) => `${field}.${issue.path[0]}: ${issue.message}`,
+		),
+		...site.locales
+			.filter((locale) => value[locale]?.trim() === '')
+			.map((locale) => `${field}.${locale}: the "${locale}" text must not be empty`),
+	]
+	if (problems.length > 0) throw new TaxonomyProposalError(problems.join('; '))
+	const order = [
+		site.referenceLocale,
+		...site.locales.filter((locale) => locale !== site.referenceLocale),
+	]
+	for (const locale of order) {
+		try {
+			return slugifyFromTitle(value[locale]!)
+		} catch (error) {
+			if (!(error instanceof SlugError)) throw error
+		}
 	}
+	throw new TaxonomyProposalError(`${field} has no text an id can be made from`)
 }
 
 export type ProposePlaceInput = {
@@ -127,9 +157,14 @@ export type ProposePlaceInput = {
 	parentId?: string
 }
 
-// the id comes from the EN name; a collision is resolved by the parent id, not an ordinal
-export function proposePlace(input: ProposePlaceInput, places: readonly Place[]): Place {
-	assertLocalized(input.name, 'place name')
+// the id comes from the reference-locale name (see `idBase`); a collision is resolved by the
+// parent id, not an ordinal
+export function proposePlace(
+	input: ProposePlaceInput,
+	places: readonly Place[],
+	site: TaxonomyLocales,
+): Place {
+	const base = idBase(input.name, 'place name', site)
 
 	if (input.kind === 'country') {
 		if (input.parentId !== undefined) {
@@ -151,10 +186,9 @@ export function proposePlace(input: ProposePlaceInput, places: readonly Place[])
 	}
 
 	const existing = new Set(places.map((place) => place.id))
-	const base = slugifyFromTitle(input.name.en)
 	const id = resolveSlugCollision(base, existing, input.parentId ? [input.parentId] : [])
 
-	return placeSchema.parse({
+	return placeSchemaFor(site.locales).parse({
 		id,
 		name: input.name,
 		kind: input.kind,
@@ -167,11 +201,15 @@ export type ProposeTagInput = {
 	kind: Tag['kind']
 }
 
-// the id comes from the EN label; a collision is resolved by the tag kind
-export function proposeTag(input: ProposeTagInput, tags: readonly Tag[]): Tag {
-	assertLocalized(input.label, 'tag label')
+// the id comes from the reference-locale label (see `idBase`); a collision is resolved by the
+// tag kind
+export function proposeTag(
+	input: ProposeTagInput,
+	tags: readonly Tag[],
+	site: TaxonomyLocales,
+): Tag {
+	const base = idBase(input.label, 'tag label', site)
 	const existing = new Set(tags.map((tag) => tag.id))
-	const base = slugifyFromTitle(input.label.en)
 	const id = resolveSlugCollision(base, existing, [input.kind])
-	return tagSchema.parse({ id, label: input.label, kind: input.kind })
+	return tagSchemaFor(site.locales).parse({ id, label: input.label, kind: input.kind })
 }

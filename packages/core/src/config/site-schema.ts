@@ -16,9 +16,16 @@ import {
 import { deriveImageRights, imageConfigSchema, type ImageRights } from './images-schema.ts'
 import { LANGUAGE_SWITCHER_MODES } from './language-switcher.ts'
 import { layoutSchema } from './layout.ts'
-import { type Locale, localeSchema } from './locale-schema.ts'
+import {
+	catalogIssues,
+	effectiveCatalog,
+	type Locale,
+	localeCatalogEntrySchema,
+	localeCodeSchema,
+} from './locale-schema.ts'
 import { type LocalizedLabel, localizedLabelSchema } from './localized-label.ts'
 import { isLocalizedRouteTemplate } from './localized-route.ts'
+import { localeCoverageIssues } from './localized-text.ts'
 import { iconNameSchema, menuSchema } from './menu.ts'
 import { privacySchema } from './privacy.ts'
 import { seoSchema } from './seo-schema.ts'
@@ -461,24 +468,34 @@ const viewerSchema = z
 	.strict()
 	.prefault({})
 
-// `locales` is the site's active subset of the catalog; its order is the language switcher order and its
-// first entry the default locale (x-default, Astro `defaultLocale`). The reference locale (ADR-0013) is
-// the only source of Tier-1 document-level fields (coverId, publishedAt, source, kind).
+// `locales` lists the site's locales; its order is the language switcher order and its first entry the
+// default locale (x-default, Astro `defaultLocale`). The reference locale (ADR-0013) is the only source
+// of Tier-1 document-level fields (coverId, publishedAt, source, kind). `catalog` overrides fields of
+// the core's locale defaults and adds the codes the core has no default for, each with every field;
+// the lock holds the effective entry of each locale the site builds and of the service copy's language.
 const contentConfigSchema = z
 	.object({
 		// a tuple with a rest element types the list as non-empty
 		locales: z
-			.tuple([localeSchema], localeSchema)
+			.tuple([localeCodeSchema], localeCodeSchema)
 			.refine((locales) => new Set(locales).size === locales.length, {
 				message: 'content.locales must not repeat a locale',
 			}),
-		referenceLocale: localeSchema,
+		referenceLocale: localeCodeSchema,
+		catalog: z.record(localeCodeSchema, localeCatalogEntrySchema.partial()).default({}),
 	})
 	.strict()
 	.refine((value) => value.locales.includes(value.referenceLocale), {
 		message: 'content.referenceLocale must be one of content.locales',
 		path: ['referenceLocale'],
 	})
+	.superRefine((value, context) => {
+		for (const issue of catalogIssues(value)) context.addIssue({ code: 'custom', ...issue })
+	})
+	.transform(({ catalog, ...value }) => ({
+		...value,
+		catalog: effectiveCatalog(value.locales, catalog),
+	}))
 
 // the canonical production origin (`site`, canonical URLs, sitemap, robots.txt): an https origin with
 // nothing after the host, so `new URL(path, origin)` never drops or doubles a segment
@@ -561,7 +578,7 @@ function withDerivedRights<
 // array or scalar replaces the default whole; a `moreDocs.<kind>` block is written whole)
 export const siteSchema = z
 	.object({
-		schemaVersion: z.literal(3),
+		schemaVersion: z.literal(4),
 		origin: originSchema,
 		identity: identitySchema,
 		content: contentConfigSchema,
@@ -631,20 +648,21 @@ export const siteSchema = z
 	})
 	.strict()
 	.superRefine((value, context) => {
-		// config texts must cover every active locale; other catalog locales may stay for a later switch
+		// a config text has exactly the active locales: a missing one would fail a page, another one
+		// is dead text
 		const requireLocales = (text: LocalizedLabel, path: (string | number)[]) => {
-			for (const locale of value.content.locales) {
-				if (text[locale] === undefined)
-					context.addIssue({
-						code: 'custom',
-						path: [...path, locale],
-						message: `missing the "${locale}" text required by content.locales`,
-					})
-			}
+			for (const issue of localeCoverageIssues(text, value.content.locales))
+				context.addIssue({
+					code: 'custom',
+					path: [...path, ...issue.path],
+					message: issue.message,
+				})
 		}
 		requireLocales(value.identity.title, ['identity', 'title'])
 		requireLocales(value.identity.photoAlt, ['identity', 'photoAlt'])
 		requireLocales(value.identity.copyright.holder, ['identity', 'copyright', 'holder'])
+		requireLocales(value.privacy.controller.name, ['privacy', 'controller', 'name'])
+		requireLocales(value.seo.description, ['seo', 'description'])
 		value.menu.items.forEach((item, index) =>
 			requireLocales(item.label, ['menu', 'items', index, 'label']),
 		)

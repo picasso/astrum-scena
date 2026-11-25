@@ -3,7 +3,7 @@ import path from 'node:path'
 
 import { describe, expect, it } from 'vitest'
 
-import { LOCALE_CATALOG, type LocaleScript } from '../config/locale-schema.ts'
+import { LOCALE_SCRIPTS, type LocaleScript } from '../config/locale-schema.ts'
 import { siteRoot } from '../config/site-root.ts'
 import { fontPreloads } from './fonts.ts'
 
@@ -62,8 +62,6 @@ const FACE_FILES: Record<string, string> = {
 const FACES = Object.values(FACE_FILES)
 const CYRILLIC = parseRange('U+0400-04FF')
 
-const SCRIPTS = [...new Set(Object.values(LOCALE_CATALOG).map((entry) => entry.script))]
-
 const splitFileName = (url: string): { prefix: string; suffix: string } => {
 	const name = url.replace(/\.woff2$/, '')
 	const at = name.lastIndexOf('-')
@@ -103,7 +101,7 @@ describe('site @font-face declarations', () => {
 	})
 
 	it('declares one family per script with all five faces and one range per family', () => {
-		const families = SCRIPTS.map(familyOf)
+		const families = LOCALE_SCRIPTS.map(familyOf)
 		expect(new Set(faces.map((face) => face.family))).toEqual(new Set(families))
 		for (const family of families) {
 			const ofFamily = faces.filter((face) => face.family === family)
@@ -155,7 +153,7 @@ describe('site font files', () => {
 	})
 
 	it('preloads two declared files of the family each script renders with', () => {
-		for (const script of SCRIPTS) {
+		for (const script of LOCALE_SCRIPTS) {
 			const family = familyOf(script)
 			const files = faces
 				.filter((face) => face.family === family)

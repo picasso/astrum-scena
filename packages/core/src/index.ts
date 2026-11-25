@@ -9,10 +9,11 @@ import tailwindcss from '@tailwindcss/vite'
 import type { AstroIntegration } from 'astro'
 
 import { loadSiteConfig, siteLockPath } from './config/loader.ts'
-import { SUPPORTED_LOCALES } from './config/locale-schema.ts'
+import type { Locale } from './config/locale-schema.ts'
 import { siteConfigError } from './config/lock.ts'
 import { defaultLocale, type SiteConfig } from './config/site-schema.ts'
 import { CORE_ROOT } from './core-root.ts'
+import { loadDictionaries } from './i18n/dictionaries.ts'
 import { siteDictionaryPath } from './i18n/site-dictionary-path.ts'
 import {
 	CORE_SRC,
@@ -93,13 +94,11 @@ function siteSources(siteRoot: string) {
 // the config modules read site.lock.yaml from disk, which Vite cannot see. Registering it as a watch
 // file of each module restores the dependency `?raw` gave, so a resolved lock takes Vite's normal HMR
 // path; an edit of site.yaml reaches the site only through `astrum-scena config resolve`. The
-// dictionaries module reads the site's `src/i18n/<locale>.yaml` the same way, one per catalog locale,
-// since a file may appear for any of them
-function configYamlDependency(siteRoot: string) {
+// dictionaries module reads the site's `src/i18n/<locale>.yaml` the same way, one per locale of
+// `content.locales`; a file for another locale fails the build when it starts
+function configYamlDependency(siteRoot: string, locales: readonly Locale[]) {
 	const lock = path.resolve(siteRoot, siteLockPath())
-	const dictionaries = SUPPORTED_LOCALES.map((locale) =>
-		path.resolve(siteRoot, siteDictionaryPath(locale)),
-	)
+	const dictionaries = locales.map((locale) => path.resolve(siteRoot, siteDictionaryPath(locale)))
 	const watched = new Map([
 		[path.join(CORE_SRC, 'config', 'site.ts'), [lock]],
 		[path.join(CORE_SRC, 'config', 'seo.ts'), [lock]],
@@ -175,11 +174,13 @@ export default function astrumScena(): AstroIntegration {
 				// segments are checked here, before anything compiles
 				const modules = enabledModules(site)
 				await assertModuleContent(siteRoot, modules)
-				const snapshot = await loadContentSnapshot(siteRoot, modules)
+				const snapshot = await loadContentSnapshot(siteRoot, modules, content.locales)
 				assertNoCollisions(site, modules, snapshot)
 				assertMenuSegments(site, modules, snapshot)
 				// unlisted documents, albums and photos are built but kept out of the sitemap (ADR-0010)
 				const { unlisted } = buildRedirectRouteSets(snapshot, content, modules)
+				// the default titles of the directive blocks come from the site's dictionaries
+				const dictionaries = loadDictionaries(siteRoot, content.locales, modules)
 
 				// every locale is prefixed (/{locale}/…); the production root redirect to the default
 				// locale is appended to `_redirects` at build time (siteFiles)
@@ -212,8 +213,8 @@ export default function astrumScena(): AstroIntegration {
 							features: { directive: true },
 							mdastPlugins: [
 								calloutMdastPlugin,
-								noteMdastPlugin,
-								linksMdastPlugin,
+								noteMdastPlugin((locale) => dictionaries[locale]?.['note.title']),
+								linksMdastPlugin((locale) => dictionaries[locale]?.['links.title']),
 								coreImportsMdastPlugin(),
 							],
 						}),
@@ -239,7 +240,7 @@ export default function astrumScena(): AstroIntegration {
 							siteSources(siteRoot),
 							themeTokensPlugin(siteRoot),
 							tailwindcss(),
-							configYamlDependency(siteRoot),
+							configYamlDependency(siteRoot, content.locales),
 							variantCssPlugin({
 								coreRoot: CORE_ROOT,
 								siteRoot,
