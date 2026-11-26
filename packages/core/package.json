@@ -1,6 +1,6 @@
 {
 	"name": "@picasso-ai/astrum-scena",
-	"version": "0.6.10",
+	"version": "0.6.11",
 	"description": "Astrum Scena: an Astro integration for photography sites",
 	"license": "MIT",
 	"type": "module",

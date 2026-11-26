@@ -38,6 +38,8 @@ the core version a breaking release bumps to.
 
 ## [Unreleased]
 
+## [0.6.11]
+
 ### `site.content.taxonomy`, `src/content/config/categories.yaml`, `places` of `src/content/config/places.yaml`
 
 **Before:** The album categories (`series`, `places`), the place kinds (`country`, `region`,
