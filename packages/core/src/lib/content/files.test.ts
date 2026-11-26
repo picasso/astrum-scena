@@ -10,9 +10,11 @@ import {
 	assertValidRepositoryContent,
 	CATEGORIES_CONFIG_PATH,
 	classAttributeErrors,
+	dimensionConfigPath,
 	legalContentErrors,
 	loadCategoriesConfig,
 	loadContentSnapshot,
+	loadDimensionConfig,
 	loadPlacesConfig,
 	loadTagsConfig,
 	loadTaxonomyConfig,
@@ -228,6 +230,7 @@ describe('taxonomy loaders', () => {
 			categories,
 			places: [place],
 			tags: [tag],
+			dimensions: {},
 		})
 	})
 
@@ -238,6 +241,7 @@ describe('taxonomy loaders', () => {
 			categories: ['journeys', 'studies'],
 			placeKinds: ['land', 'spot'],
 			tagKinds: ['mood'],
+			dimensions: {},
 		}
 		const label = (text: string) => ({ en: text, ru: text })
 		const journeys = { id: 'journeys', label: label('Journeys') }
@@ -253,6 +257,7 @@ describe('taxonomy loaders', () => {
 			categories: [journeys, studies],
 			places: [place],
 			tags: [tag],
+			dimensions: {},
 		})
 		await expect(loadCategoriesConfig(root, BILINGUAL, ['journeys'])).rejects.toThrow(
 			`${CATEGORIES_CONFIG_PATH}: categories.1.id: "studies" is not one of content.taxonomy.categories [journeys]`,
@@ -268,6 +273,58 @@ describe('taxonomy loaders', () => {
 		await expect(loadPlacesConfig(country, BILINGUAL, taxonomy.placeKinds)).rejects.toThrow(
 			'src/content/config/places.yaml: places.0.kind: "country" is not one of content.taxonomy.placeKinds [land, spot]',
 		)
+	})
+
+	describe('dimensions', () => {
+		const events = { label: { en: 'Events', ru: 'События' } }
+		const fair = { id: 'tide-fair', label: { en: 'Tide Fair', ru: 'Ярмарка' } }
+		const base = () => ({
+			'categories.yaml': categoriesFile(BILINGUAL),
+			'places.yaml': { schemaVersion: 2, places: [] },
+			'tags.yaml': { schemaVersion: 2, tags: [] },
+		})
+
+		it('reads the dictionary of each declared dimension under its id', async () => {
+			const root = await writeConfig({
+				...base(),
+				'events.yaml': { schemaVersion: 1, events: [fair] },
+			})
+			expect(dimensionConfigPath('events')).toBe('src/content/config/events.yaml')
+			expect(await loadDimensionConfig(root, 'events', BILINGUAL)).toEqual([fair])
+			const taxonomy = { ...TAXONOMY, dimensions: { events } }
+			expect((await loadTaxonomyConfig(root, BILINGUAL, taxonomy)).dimensions).toEqual({
+				events: [fair],
+			})
+		})
+
+		it('names the file and the declaration when the dictionary is missing', async () => {
+			const root = await writeConfig(base())
+			await expect(
+				loadTaxonomyConfig(root, BILINGUAL, { ...TAXONOMY, dimensions: { events } }),
+			).rejects.toThrow(
+				'src/content/config/events.yaml: missing; content.taxonomy.dimensions.events of site.yaml declares it',
+			)
+		})
+
+		it('rejects a repeated id, a missing locale and a wrong version, with the file and field', async () => {
+			const repeated = await writeConfig({
+				'events.yaml': { schemaVersion: 1, events: [fair, fair] },
+			})
+			await expect(loadDimensionConfig(repeated, 'events', BILINGUAL)).rejects.toThrow(
+				'src/content/config/events.yaml: events.1.id: repeats "tide-fair"',
+			)
+			await expect(loadDimensionConfig(repeated, 'events', ['en'])).rejects.toThrow(
+				'src/content/config/events.yaml: events.0.label.ru: not one of content.locales [en]',
+			)
+			const other = await writeConfig({ 'events.yaml': { schemaVersion: 1, people: [fair] } })
+			await expect(loadDimensionConfig(other, 'events', BILINGUAL)).rejects.toThrow(
+				'src/content/config/events.yaml',
+			)
+			const old = await writeConfig({ 'events.yaml': { schemaVersion: 2, events: [] } })
+			await expect(loadDimensionConfig(old, 'events', BILINGUAL)).rejects.toThrow(
+				'src/content/config/events.yaml: schemaVersion 2 is not supported; supported: 1',
+			)
+		})
 	})
 
 	it('rejects a taxonomy file without a supported schemaVersion, naming it', async () => {

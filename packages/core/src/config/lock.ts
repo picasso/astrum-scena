@@ -12,6 +12,7 @@ import {
 	type ModulesSection,
 } from '../modules/registry.ts'
 import { COLLECTION_SOURCES } from './collection-sources.ts'
+import { dimensionIconIssues } from './lucide-icons.ts'
 import { assertSchemaVersion, assertSupportedVersion } from './schema-version.ts'
 import { siteSchema } from './site-schema.ts'
 import { readYaml, validate } from './yaml-file.ts'
@@ -204,6 +205,8 @@ export function resolveSiteLock(root: string): string {
 	assertSchemaVersion(raw, SITE_CONFIG_PATH, siteSchema.in, UPGRADE_HINT)
 	// parsing the effective config again puts a key a transform appended back in schema order
 	const site = siteSchema.parse(validate(siteSchema, raw, SITE_CONFIG_PATH))
+	const iconIssues = dimensionIconIssues(site.content.taxonomy.dimensions)
+	if (iconIssues.length > 0) throw siteConfigError(iconIssues)
 	// a version carried over from the lock fails here as it would in the loader
 	const collections = lockedCollections(root, site)
 	assertCollectionVersions(collections, site, SITE_LOCK_PATH)

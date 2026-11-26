@@ -194,6 +194,7 @@ describe('Cloudflare Pages redirect contract', () => {
 			categories: [],
 			places: [],
 			tags: [],
+			dimensions: {},
 		}
 		const content = { locales: ['en', 'ru'] as const, referenceLocale: 'ru' as const }
 		const routeSets = buildRedirectRouteSets(snapshot, content, [coursesModule])

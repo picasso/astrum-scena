@@ -212,6 +212,9 @@ export const photoSchemaFor = (locales: readonly Locale[]) =>
 			// records do not gain `unlisted: false`
 			unlisted: z.boolean().optional(),
 			tags: z.array(kebabIdSchema).default([]),
+			// values of the site's `content.taxonomy.dimensions` by dimension id; which dimensions and
+			// values exist is the integrity check's to report, since it holds their dictionaries
+			dimensions: z.record(kebabIdSchema, z.array(kebabIdSchema)).optional(),
 			media: mediaDescriptorSchema.optional(),
 			...sourceIdentityFields,
 		})
@@ -234,6 +237,15 @@ export const photoSchemaFor = (locales: readonly Locale[]) =>
 					path: ['tags'],
 				})
 			}
+			for (const [dimension, ids] of Object.entries(value.dimensions ?? {}))
+				ids.forEach((id, index) => {
+					if (ids.indexOf(id) !== index)
+						context.addIssue({
+							code: 'custom',
+							message: `repeats "${id}"`,
+							path: ['dimensions', dimension, index],
+						})
+				})
 		})
 
 // a value of one of the site's taxonomy enumerations (`content.taxonomy` of its lock); another value
@@ -425,6 +437,36 @@ export const tagsConfigSchemaFor = (locales: readonly Locale[], kinds: readonly 
 		})
 		.strict()
 
+export const dimensionValueSchemaFor = (locales: readonly Locale[]) =>
+	z
+		.object({
+			id: kebabIdSchema,
+			label: localizedText(locales),
+		})
+		.strict()
+
+// the flat dictionary of a dimension of `content.taxonomy.dimensions`, `src/content/config/<id>.yaml`:
+// its values under the dimension's own id, each id once
+export const dimensionConfigSchemaFor = (locales: readonly Locale[], dimension: string) =>
+	z
+		.object({
+			schemaVersion: z.literal(1),
+			[dimension]: z
+				.array(dimensionValueSchemaFor(locales))
+				.superRefine((values, context) => {
+					const ids = values.map((value) => value.id)
+					ids.forEach((id, index) => {
+						if (ids.indexOf(id) !== index)
+							context.addIssue({
+								code: 'custom',
+								path: [index, 'id'],
+								message: `repeats "${id}"`,
+							})
+					})
+				}),
+		})
+		.strict()
+
 export const featuredInlineCopySchemaFor = (locales: readonly Locale[]) =>
 	z
 		.object({
@@ -520,6 +562,7 @@ export type PhotoSchema = ReturnType<typeof photoSchemaFor>
 export type AlbumData = z.infer<AlbumSchema>
 export type ArticleData = z.infer<typeof articleSchema>
 export type Category = z.infer<ReturnType<typeof categorySchemaFor>>
+export type DimensionValue = z.infer<ReturnType<typeof dimensionValueSchemaFor>>
 export type FeaturedConfig = z.infer<ReturnType<typeof featuredConfigSchemaFor>>
 export type FeaturedInlineCopy = z.infer<ReturnType<typeof featuredInlineCopySchemaFor>>
 export type FocalPoint = z.infer<typeof focalPointSchema>

@@ -123,6 +123,84 @@ categories and give every place of `places.yaml` a parent as its kind requires, 
 site.lock.yaml` adds only `site.content.taxonomy`, and a site without `content.taxonomy` in
 `site.yaml` builds the same pages with the same markup as before.
 
+### `site`, `site.yaml`, `src/content/photos/**/*.{yaml,yml}`
+
+**Before:** `site.lock.yaml` has no dimensions under `site.content.taxonomy`, and the theme declares
+no `--color-dimension-*` token:
+
+```yaml
+# site.lock.yaml (excerpt)
+site:
+    content:
+        taxonomy:
+            tagKinds:
+                - subject
+```
+
+**After:** `site.content.taxonomy.dimensions` is part of the lock, `{}` for a site without
+dimensions; a lock without it fails with `site.lock.yaml: site.content.taxonomy.dimensions: missing;
+run astrum-scena config resolve`. A site that declares no dimensions edits nothing else: its photos
+need no `dimensions` and its theme no new token. A site that declares one adds its label (and
+optionally a Lucide icon) to `site.yaml`, its dictionary `src/content/config/<id>.yaml`, the theme
+token `--color-dimension-<id>` and the values on its photos; a photo with a repeated value in one
+dimension fails with `dimensions.<id>.1: repeats "<value>"`:
+
+```yaml
+# site.lock.yaml (excerpt), a site without dimensions
+site:
+    content:
+        taxonomy:
+            tagKinds:
+                - subject
+            dimensions: {}
+```
+
+```yaml
+# site.yaml (excerpt), a site with an events dimension
+content:
+    taxonomy:
+        dimensions:
+            events:
+                label:
+                    en: Events
+                icon: calendar-days
+```
+
+```yaml
+# src/content/config/events.yaml
+schemaVersion: 1
+events:
+    - id: tide-fair
+      label:
+          en: Tide Fair
+```
+
+```css
+/* src/theme/theme.css (excerpt) */
+:root {
+	--color-dimension-events: #7fc4ff;
+}
+```
+
+```yaml
+# src/content/photos/wide-tide.yaml (excerpt)
+dimensions:
+    events:
+        - tide-fair
+```
+
+**Order:** Together with the `site.content.taxonomy` entry above and before the first build with
+this release: declare any dimension in `site.yaml`, write its dictionary and theme token, then run
+`astrum-scena config resolve`, which writes `site.content.taxonomy.dimensions` into `site.lock.yaml`,
+and only then refer to the values from the photos. Do not rerun the image pipeline: the image digests
+do not read the taxonomy.
+
+**Writers:** `astrum-scena config resolve` of this release.
+
+**Verify:** `astrum-scena check config-lock` and `astrum-scena check content` pass; `git diff
+site.lock.yaml` adds only `site.content.taxonomy.dimensions` (`{}` without dimensions), and a site
+without dimensions builds the same photo pages with the same markup as before.
+
 ## [0.6.10]
 
 ### `schemaVersion` 4 of `site.yaml`, `site.yaml`, `site`, `site.schemaVersion`, `privacy.controller.name.(keys)`, `privacy.controller.name.en`, `privacy.controller.name.ru`, `seo.description.(keys)`, `seo.description.en`, `seo.description.ru`, `site.privacy.controller.name.(keys)`, `site.privacy.controller.name.en`, `site.privacy.controller.name.ru`, `site.seo.description.(keys)`, `site.seo.description.en`, `site.seo.description.ru`

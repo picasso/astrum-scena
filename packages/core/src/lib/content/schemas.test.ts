@@ -245,6 +245,21 @@ describe('content schemas', () => {
 		expect(result).toMatchObject({ favorite: false, tags: [] })
 	})
 
+	it('takes optional dimension values by dimension, each value once', () => {
+		const photo = { title: localized, status: 'draft' }
+		expect(photoSchema.parse(photo)).not.toHaveProperty('dimensions')
+		expect(
+			photoSchema.parse({ ...photo, dimensions: { events: ['tide-fair'] } }).dimensions,
+		).toEqual({ events: ['tide-fair'] })
+		expect(
+			issuesOf(photoSchema.safeParse({ ...photo, dimensions: { events: ['fair', 'fair'] } })),
+		).toEqual(['dimensions.events.1: repeats "fair"'])
+		expect(
+			photoSchema.safeParse({ ...photo, dimensions: { events: ['Tide Fair'] } }).success,
+		).toBe(false)
+		expect(photoSchema.safeParse({ ...photo, dimensions: { Events: [] } }).success).toBe(false)
+	})
+
 	it('requires publishedAt for a published photo', () => {
 		const input = { title: localized, status: 'published', publishedAt: '2026-07-26' }
 		delete (input as { publishedAt?: string }).publishedAt

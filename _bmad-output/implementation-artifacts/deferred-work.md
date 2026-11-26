@@ -489,3 +489,4 @@ legacy-аудиты, авторский голос, CSS-бюджет и заме
 - source_spec: `_bmad-output/implementation-artifacts/spec-6-11a-enumerations-from-config.md`
   summary: 6.11b — негеографическое измерение и набор демо: `content.taxonomy.dimensions.<id>` с меткой по локалям, плоский словарь `src/content/config/<id>.yaml` (`schemaVersion: 1`, `{id, label}`), ссылки фото `dimensions: { <id>: [ids] }` с проверкой `check content`, метки на странице фото (эталоны страницы фото переснимаются); демо — свои категории, виды мест и тегов и измерение `events` (критерии 6.11 №2–3).
   evidence: решение владельца 2026-11-25 при планировании 6.11: спек на всю историю ~2100 токенов; перечни категорий и видов независимы от измерения и поставляются отдельным PR, форма измерения выбрана владельцем (вариант с выводом на странице фото).
+  closed_by: spec-6-11b-non-geographic-dimension.md

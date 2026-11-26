@@ -4,9 +4,9 @@ tags:
       label:
           en: Dusk
           ru: Сумерки
-      kind: moment
+      kind: mood
     - id: geometry
       label:
           en: Geometry
           ru: Геометрия
-      kind: motif
+      kind: form

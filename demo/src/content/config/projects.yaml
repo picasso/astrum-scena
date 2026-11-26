@@ -1,0 +1,12 @@
+# the values of the `projects` dimension (site.yaml content.taxonomy.dimensions), shown as chips on
+# the photo page
+schemaVersion: 1
+projects:
+    - id: shoreline-series
+      label:
+          en: Shoreline Series
+          ru: Серия о побережье
+    - id: shape-studies
+      label:
+          en: Shape Studies
+          ru: Этюды форм

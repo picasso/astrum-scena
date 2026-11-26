@@ -1,10 +1,10 @@
 schemaVersion: 2
 categories:
-    - id: series
+    - id: journeys
       label:
-          en: Series
-          ru: Серии
-    - id: places
+          en: Journeys
+          ru: Путешествия
+    - id: studies
       label:
-          en: Places
-          ru: Места
+          en: Studies
+          ru: Этюды

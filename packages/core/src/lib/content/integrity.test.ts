@@ -43,6 +43,7 @@ function snapshot(): ContentSnapshot {
 		],
 		places: [],
 		tags: [],
+		dimensions: {},
 	}
 }
 
@@ -117,6 +118,49 @@ describe('content integrity', () => {
 		const result = validate(value)
 		expect(result.success).toBe(false)
 		if (!result.success) expect(result.errors.some((error) => error.code === code)).toBe(true)
+	})
+
+	describe('dimensions', () => {
+		const withEvents = (dimensions: Record<string, string[]>) => {
+			const value = snapshot()
+			value.dimensions = {
+				events: [{ id: 'tide-fair', label: { en: 'Tide Fair', ru: 'Ярмарка' } }],
+			}
+			value.photos[0]!.data.dimensions = dimensions
+			return validate(value)
+		}
+
+		it('accepts a photo that refers to declared values', () => {
+			expect(withEvents({ events: ['tide-fair'] })).toEqual({ success: true, errors: [] })
+		})
+
+		it('reports an unknown value with its path and the known values', () => {
+			expect(withEvents({ events: ['nope'] })).toMatchObject({
+				success: false,
+				errors: [
+					{
+						code: 'unknown-reference',
+						entityId: 'photo',
+						path: 'photos.photo.dimensions.events',
+						message: 'Unknown events "nope"; known: [tide-fair]',
+					},
+				],
+			})
+		})
+
+		it('reports an undeclared dimension with the declared ones', () => {
+			expect(withEvents({ people: ['ann'] })).toMatchObject({
+				success: false,
+				errors: [
+					{
+						code: 'unknown-reference',
+						path: 'photos.photo.dimensions.people',
+						message:
+							'Unknown dimension "people"; content.taxonomy.dimensions: [events]',
+					},
+				],
+			})
+		})
 	})
 
 	const articleEntry = (locale: Locale, extra: Record<string, unknown> = {}) => ({

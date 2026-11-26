@@ -183,7 +183,10 @@ describe('content taxonomy', () => {
 	}
 
 	it("resolves to the core's enumerations when the site declares none", () => {
-		expect(parsed(siteOn(content(undefined))).content.taxonomy).toEqual(DEFAULT_TAXONOMY)
+		expect(parsed(siteOn(content(undefined))).content.taxonomy).toEqual({
+			...DEFAULT_TAXONOMY,
+			dimensions: {},
+		})
 	})
 
 	it('takes a declared list whole and keeps the defaults of the others', () => {
@@ -197,6 +200,7 @@ describe('content taxonomy', () => {
 			categories: ['journeys', 'studies'],
 			placeKinds: ['land', 'spot'],
 			tagKinds: DEFAULT_TAXONOMY.tagKinds,
+			dimensions: {},
 		})
 	})
 
@@ -213,9 +217,59 @@ describe('content taxonomy', () => {
 				message: 'expected a kebab-case id such as `series`',
 			},
 		])
-		expect(issues({ dimensions: ['events'] })).toEqual([
-			{ path: 'content.taxonomy', message: expect.stringContaining('dimensions') },
+		expect(issues({ kinds: ['events'] })).toEqual([
+			{ path: 'content.taxonomy', message: expect.stringContaining('kinds') },
 		])
+	})
+
+	describe('dimensions', () => {
+		const events = { label: { en: 'Events', ru: 'События' }, icon: 'calendar-days' }
+
+		it('takes a dimension with its label in every locale and an optional icon', () => {
+			expect(
+				parsed(siteOn(content({ dimensions: { events, people: { label: events.label } } })))
+					.content.taxonomy.dimensions,
+			).toEqual({ events, people: { label: events.label } })
+		})
+
+		it('rejects a missing or extra locale of the label, with the path', () => {
+			expect(
+				issues({ dimensions: { events: { label: { en: 'Events', de: 'X' } } } }),
+			).toEqual([
+				{
+					path: 'content.taxonomy.dimensions.events.label.de',
+					message: 'not one of content.locales [en, ru]',
+				},
+				{
+					path: 'content.taxonomy.dimensions.events.label.ru',
+					message: 'missing the "ru" text required by content.locales',
+				},
+			])
+		})
+
+		it.each(['categories', 'places', 'tags', 'image-sets', 'place-gps-bounds'])(
+			'rejects "%s", the name of another file of src/content/config',
+			(id) => {
+				expect(issues({ dimensions: { [id]: events } })).toEqual([
+					{
+						path: `content.taxonomy.dimensions.${id}`,
+						message: expect.stringContaining(`"${id}" names another file`),
+					},
+				])
+			},
+		)
+
+		it('rejects an id or an icon name outside kebab case, with the path', () => {
+			expect(issues({ dimensions: { Events: events } })).toEqual([
+				{ path: 'content.taxonomy.dimensions.Events', message: expect.any(String) },
+			])
+			expect(issues({ dimensions: { events: { ...events, icon: 'Calendar' } } })).toEqual([
+				{
+					path: 'content.taxonomy.dimensions.events.icon',
+					message: 'expected a Lucide icon name such as `calendar-days`',
+				},
+			])
+		})
 	})
 })
 
@@ -244,7 +298,7 @@ describe('content catalog', () => {
 			locales: ['en', 'ru'],
 			referenceLocale: 'en',
 			catalog: { en: DEFAULT_LOCALE_CATALOG.en, ru: DEFAULT_LOCALE_CATALOG.ru },
-			taxonomy: DEFAULT_TAXONOMY,
+			taxonomy: { ...DEFAULT_TAXONOMY, dimensions: {} },
 		})
 	})
 

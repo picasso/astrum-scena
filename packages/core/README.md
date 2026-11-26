@@ -296,7 +296,17 @@ differs, and the effective config is the defaults with those overrides merged in
   `region`, `locality`), a kind's rank being its position and the first kind having no parent; and
   `tagKinds` (default `subject`, `condition`, `motif`, `moment`, `technique`). The lock holds the
   effective lists, which the content schemas, `astrum-scena check content` and the `/add-album`
-  helpers read; a value outside a list fails with the file, the field and the list.
+  helpers read; a value outside a list fails with the file, the field and the list. Its
+  `dimensions` (default none) declare flat taxonomies beside the places and tags, such as events or
+  people: `dimensions.<id>` has a `label` in every locale and an optional `icon`, the name of a
+  [Lucide](https://lucide.dev/icons) icon the core embeds from its `lucide-static` (an unknown name
+  fails with `site.yaml: content.taxonomy.dimensions.<id>.icon`). The id is kebab-case and not the
+  name of another file of `src/content/config/` (`categories`, `places`, `tags`, `image-sets`, `place-gps-bounds`). Its
+  values are the flat dictionary `src/content/config/<id>.yaml` (`schemaVersion: 1`, a list of
+  `{id, label}` under the dimension's id), a photo refers to them with
+  `dimensions: { <id>: [<value ids>] }`, `astrum-scena check content` rejects an unknown dimension or
+  value, and the photo page shows them as chips after the tags, colored by the theme's
+  `--color-dimension-<id>`.
 
 A default left in place is checked by the same cross-field rules as a written value, so changing one
 side of a coupled pair means writing the other too: `surfaces.articlesIndex: { kind: grid }` keeps the
@@ -585,7 +595,10 @@ surface, each derived from the source the core itself reads:
   the core's own primitives (`--container-max`) are not listed. The package ships this file, and the
   integration checks the theme against it whenever the site builds or runs `astro dev`: an unknown
   token, a layout token and a missing required one each fail with the file and the names
-  (`src/theme/theme.css: unknown tokens: --color-acent`); only names are checked, never values;
+  (`src/theme/theme.css: unknown tokens: --color-acent`); only names are checked, never values.
+  Beside the list, each dimension of `content.taxonomy.dimensions` requires the token
+  `--color-dimension-<id>`, the color of its chips, with no fallback to the tags' color; a
+  `--color-dimension-*` token of a dimension the site does not declare is unknown;
 - `i18n.json` — the keys of the core dictionaries, the ones a site dictionary may override;
 - `replacement-points.json` — the names of the replacement points a site may fill in
   `src/overrides/`; removing or renaming one is breaking, and their props are types in `exports.json`;

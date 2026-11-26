@@ -27,6 +27,13 @@ export const declaredTokens = (css: string): string[] =>
 export const layoutTokens = (): string[] =>
 	declaredTokens(serializeLayoutTokens({ prose: 0, medium: 0, standard: 0, gallery: 0 }))
 
+// the color of a dimension's chips: the site styles each dimension of `content.taxonomy.dimensions`
+// itself, so its token is required beside the exported list and no fallback stands in for it
+export const dimensionTokenName = (dimension: string): string => `--color-dimension-${dimension}`
+
+export const dimensionTokens = (dimensions: readonly string[]): TokenList =>
+	Object.fromEntries(dimensions.map((dimension) => [dimensionTokenName(dimension), 'required']))
+
 // every way the theme breaks the contract, each line naming the file and the tokens; empty when it holds
 export function themeTokenProblems(
 	themeCss: string,

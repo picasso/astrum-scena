@@ -4,10 +4,10 @@ places:
       name:
           en: Coastland
           ru: Прибрежье
-      kind: country
+      kind: land
     - id: amber-bay
       name:
           en: Amber Bay
           ru: Янтарная бухта
-      kind: locality
+      kind: shore
       parentId: coastland

@@ -48,6 +48,7 @@ import {
 } from '../../packages/core/src/lib/content/factcheck.ts'
 import {
 	CATEGORIES_CONFIG_PATH,
+	dimensionConfigPath,
 	FEATURED_HOME_PATH,
 	PLACES_CONFIG_PATH,
 	TAGS_CONFIG_PATH,
@@ -56,6 +57,7 @@ import {
 	albumSchemaFor,
 	articleSchema,
 	categoriesConfigSchemaFor,
+	dimensionConfigSchemaFor,
 	featuredConfigSchemaFor,
 	legalSchema,
 	pageSchema,
@@ -143,6 +145,8 @@ const SITE_FILE_SCHEMAS: Record<string, Schema> = {
 	),
 	[PLACES_CONFIG_PATH]: placesConfigSchemaFor(CATALOG_LOCALES, DEFAULT_TAXONOMY.placeKinds),
 	[TAGS_CONFIG_PATH]: tagsConfigSchemaFor(CATALOG_LOCALES, DEFAULT_TAXONOMY.tagKinds),
+	// a dictionary per dimension of `content.taxonomy.dimensions`, its values under the dimension's id
+	[dimensionConfigPath('<dimension>')]: dimensionConfigSchemaFor(CATALOG_LOCALES, '<dimension>'),
 	[IMAGE_SETS_CONFIG_PATH]: imageSetsFileSchema,
 	[FEATURED_HOME_PATH]: featuredConfigSchemaFor(CATALOG_LOCALES),
 	[IMAGES_PUBLIC_RELATIVE_PATH]: imagePublicConfigSchema,

@@ -575,7 +575,7 @@ const filesUnder = (site: string, dir: string): string[] =>
 		: []
 
 export function withOneLocale<T>(site: string, action: () => T): T {
-	const { locales, referenceLocale, catalog, taxonomy } = loadSiteSection(site, 'content')
+	const { locales, referenceLocale, catalog } = loadSiteSection(site, 'content')
 	const others = locales.filter((locale) => locale !== referenceLocale)
 	const contentFiles = filesUnder(site, CONTENT_DIR)
 	const yamlFiles = contentFiles.filter((file) => YAML_FILE.test(file))
@@ -605,7 +605,8 @@ export function withOneLocale<T>(site: string, action: () => T): T {
 				locales: [referenceLocale],
 				referenceLocale,
 				catalog: effectiveCatalog([referenceLocale], catalog),
-				taxonomy,
+				// the dimensions' labels keep the reference text like any other config text
+				taxonomy: config.content.taxonomy,
 			},
 		})
 		for (const file of yamlFiles) writeFileSync(join(site, file), oneLocale(saved.get(file)!))

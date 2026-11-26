@@ -1,0 +1,12 @@
+# the values of the `events` dimension (site.yaml content.taxonomy.dimensions), shown as chips on the
+# photo page
+schemaVersion: 1
+events:
+    - id: tide-fair
+      label:
+          en: Tide Fair
+          ru: Ярмарка прилива
+    - id: dune-walk
+      label:
+          en: Dune Walk
+          ru: Прогулка по дюнам

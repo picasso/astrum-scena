@@ -29,18 +29,24 @@ site:
         referenceLocale: en
         taxonomy:
             categories:
-                - series
-                - places
+                - journeys
+                - studies
             placeKinds:
-                - country
-                - region
-                - locality
+                - land
+                - shore
             tagKinds:
-                - subject
-                - condition
-                - motif
-                - moment
-                - technique
+                - mood
+                - form
+            dimensions:
+                events:
+                    label:
+                        en: Events
+                        ru: События
+                    icon: calendar-days
+                projects:
+                    label:
+                        en: Projects
+                        ru: Проекты
         catalog:
             en:
                 script: latin

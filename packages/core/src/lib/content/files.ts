@@ -1,3 +1,4 @@
+import { existsSync } from 'node:fs'
 import { readdir, readFile } from 'node:fs/promises'
 import path from 'node:path'
 
@@ -21,6 +22,8 @@ import {
 	albumSchemaFor,
 	articleSchema,
 	categoriesConfigSchemaFor,
+	dimensionConfigSchemaFor,
+	type DimensionValue,
 	legalSchema,
 	type Locale,
 	pageSchema,
@@ -138,11 +141,16 @@ async function loadLocalizedEntries<T>(
 	)
 }
 
-// the only readers of the taxonomy files (`pnpm check:taxonomy-readers`), so a consumer that needs one
-// of them, such as GPS bounds over the places, reads it without the other two
+// the only readers of the taxonomy files and the dimensions' dictionaries
+// (`pnpm check:taxonomy-readers`), so a consumer that needs one of them, such as GPS bounds over the
+// places, reads it without the others
 export const CATEGORIES_CONFIG_PATH = 'src/content/config/categories.yaml'
 export const PLACES_CONFIG_PATH = 'src/content/config/places.yaml'
 export const TAGS_CONFIG_PATH = 'src/content/config/tags.yaml'
+
+// the dictionary of a dimension of `content.taxonomy.dimensions`, named by its id
+export const dimensionConfigPath = (dimension: string): string =>
+	`src/content/config/${dimension}.yaml`
 
 // read by `loadFeaturedHome`; declared here, in a module the scripts load, so the API snapshot keys the
 // featured schema by the same path
@@ -197,17 +205,39 @@ export async function loadTagsConfig(
 	return (await loadConfigFile(root, TAGS_CONFIG_PATH, tagsConfigSchemaFor(locales, kinds))).tags
 }
 
+// a declared dimension without its dictionary names both the file and the declaration
+export async function loadDimensionConfig(
+	root: string,
+	dimension: string,
+	locales: readonly Locale[] = lockedLocales(root),
+): Promise<DimensionValue[]> {
+	const file = dimensionConfigPath(dimension)
+	if (!existsSync(path.join(root, file)))
+		throw new Error(
+			`${file}: missing; content.taxonomy.dimensions.${dimension} of site.yaml declares it`,
+		)
+	const config = await loadConfigFile(root, file, dimensionConfigSchemaFor(locales, dimension))
+	return config[dimension] as DimensionValue[]
+}
+
 export async function loadTaxonomyConfig(
 	root: string,
 	locales: readonly Locale[] = lockedLocales(root),
 	taxonomy: TaxonomyConfig = lockedTaxonomy(root),
 ) {
-	const [categories, places, tags] = await Promise.all([
+	const ids = Object.keys(taxonomy.dimensions)
+	const [categories, places, tags, ...dimensions] = await Promise.all([
 		loadCategoriesConfig(root, locales, taxonomy.categories),
 		loadPlacesConfig(root, locales, taxonomy.placeKinds),
 		loadTagsConfig(root, locales, taxonomy.tagKinds),
+		...ids.map((id) => loadDimensionConfig(root, id, locales)),
 	])
-	return { categories, places, tags }
+	return {
+		categories,
+		places,
+		tags,
+		dimensions: Object.fromEntries(ids.map((id, index) => [id, dimensions[index]!])),
+	}
 }
 
 // the modules whose collections a snapshot reads: those the site's lock enables

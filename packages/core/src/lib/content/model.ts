@@ -3,6 +3,7 @@ import type {
 	AlbumData,
 	ArticleData,
 	Category,
+	DimensionValue,
 	PageData,
 	PhotoData,
 	Place,
@@ -24,4 +25,6 @@ export type ContentSnapshot = {
 	categories: Category[]
 	places: Place[]
 	tags: Tag[]
+	// the dictionary of each dimension of `content.taxonomy.dimensions`, by its id
+	dimensions: Record<string, DimensionValue[]>
 }

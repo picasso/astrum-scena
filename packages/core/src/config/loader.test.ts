@@ -311,7 +311,7 @@ describe('upgrade from the three-file shape', () => {
 		expect(favicon).toEqual({ background: '#1b1b1f', foreground: '#fcbf00' })
 		const { catalog, taxonomy, ...content } = site.content
 		expect(catalog).toEqual(effectiveCatalog(content.locales, {}))
-		expect(taxonomy).toEqual(DEFAULT_TAXONOMY)
+		expect(taxonomy).toEqual({ ...DEFAULT_TAXONOMY, dimensions: {} })
 		expect({ ...site, theme, content }).toEqual(
 			without(withCoursesModule(unversioned('src/config/site.yaml')), 'schemaVersion'),
 		)
@@ -319,6 +319,8 @@ describe('upgrade from the three-file shape', () => {
 		expect(loadSeoConfig(root)).toEqual(seo)
 		expect(images).toEqual(unversioned('config/images.yaml'))
 		expect(loadImageConfig(root)).toEqual(images)
-		expect(loadSiteConfig(root)).toEqual(loadSiteConfig(siteRoot))
+		// the demo has declared its own taxonomy since the merge
+		const demo = loadSiteConfig(siteRoot)
+		expect(loadSiteConfig(root)).toEqual({ ...demo, content: { ...demo.content, taxonomy } })
 	})
 })

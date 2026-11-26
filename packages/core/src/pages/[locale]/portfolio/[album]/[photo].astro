@@ -39,7 +39,8 @@ const model = await buildPhotoPageModel(
 const meta = buildLocaleMeta(Astro.url.pathname, Astro.site!.href, site.content.locales)
 const showStrip = site.photo.dominantStrip === 'on'
 const showRelated = site.photo.showRelated === 'on' && model.related.length > 0
-const hasMeta = model.placeHierarchy.length > 0 || model.tags.length > 0 || Boolean(model.captured)
+const chips = model.tags.length + model.dimensions.length
+const hasMeta = model.placeHierarchy.length > 0 || chips > 0 || Boolean(model.captured)
 const footerPromo = footerPromoContext(`photo:${albumId}/${photoId}`, model.albumPhotoIds)
 ---
 
@@ -118,10 +119,27 @@ const footerPromo = footerPromoContext(`photo:${albumId}/${photoId}`, model.albu
 								</p>
 							)}
 							{model.captured && <p class="photo__captured">{model.captured}</p>}
-							{model.tags.length > 0 && (
+							{chips > 0 && (
 								<ul class="photo__tags">
 									{model.tags.map((tag) => (
 										<li class="photo__tag">{tag.label}</li>
+									))}
+									{model.dimensions.map((value) => (
+										<li
+											class="photo__tag photo__tag--dimension"
+											data-dimension={value.dimension}
+											title={value.title}
+											style={`color: var(--color-dimension-${value.dimension})`}
+										>
+											{value.icon && (
+												<span
+													class="photo__tag-icon"
+													aria-hidden="true"
+													set:html={value.icon}
+												/>
+											)}
+											{value.label}
+										</li>
 									))}
 								</ul>
 							)}

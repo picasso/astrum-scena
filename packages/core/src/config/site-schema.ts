@@ -672,6 +672,8 @@ export const siteSchema = z
 		value.social.forEach((link, index) =>
 			requireLocales(link.label, ['social', index, 'label']),
 		)
+		for (const [id, dimension] of Object.entries(value.content.taxonomy.dimensions))
+			requireLocales(dimension.label, ['content', 'taxonomy', 'dimensions', id, 'label'])
 		const enabled = Object.keys(value.modules)
 		for (const issue of [
 			...dependencyIssues(enabled),

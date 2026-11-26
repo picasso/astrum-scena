@@ -11,6 +11,7 @@ import type { AstroIntegration } from 'astro'
 import { loadSiteConfig, siteLockPath } from './config/loader.ts'
 import type { Locale } from './config/locale-schema.ts'
 import { siteConfigError } from './config/lock.ts'
+import { dimensionIconIssues, lucideIconsDir } from './config/lucide-icons.ts'
 import { defaultLocale, type SiteConfig } from './config/site-schema.ts'
 import { CORE_ROOT } from './core-root.ts'
 import { loadDictionaries } from './i18n/dictionaries.ts'
@@ -21,6 +22,7 @@ import {
 	coreSegments,
 	GLOBAL_CSS,
 	INTEGRATION_NAME,
+	LUCIDE_ICONS_MODULE,
 	OVERRIDES_MODULE,
 	overridesModuleSource,
 	SITE_ROOT_MODULE,
@@ -57,6 +59,7 @@ export type {
 
 const RESOLVED_SITE_ROOT_MODULE = `\0${SITE_ROOT_MODULE}`
 const RESOLVED_OVERRIDES_MODULE = `\0${OVERRIDES_MODULE}`
+const RESOLVED_LUCIDE_ICONS_MODULE = `\0${LUCIDE_ICONS_MODULE}`
 
 // runtime modules import the site root from here (src/config/site-root.ts)
 function siteRootModule(siteRoot: string) {
@@ -67,6 +70,19 @@ function siteRootModule(siteRoot: string) {
 		load: (id: string) =>
 			id === RESOLVED_SITE_ROOT_MODULE
 				? `export const siteRoot = ${JSON.stringify(siteRoot)}`
+				: undefined,
+	}
+}
+
+// the dimensions' icons, read by the photo page (src/config/lucide-icons.ts)
+function lucideIconsModule(dir: string) {
+	return {
+		name: 'astrum-scena:lucide-icons',
+		resolveId: (id: string) =>
+			id === LUCIDE_ICONS_MODULE ? RESOLVED_LUCIDE_ICONS_MODULE : undefined,
+		load: (id: string) =>
+			id === RESOLVED_LUCIDE_ICONS_MODULE
+				? `export const lucideIconsDir = ${JSON.stringify(dir)}`
 				: undefined,
 	}
 }
@@ -169,6 +185,9 @@ export default function astrumScena(): AstroIntegration {
 				const site = loadSiteConfig(siteRoot)
 				const { content, origin } = site
 				const imagesOrigin = externalImageOrigin(loadImagePublicConfig(siteRoot).config)
+				// the lock may name an icon the installed core no longer has
+				const iconIssues = dimensionIconIssues(content.taxonomy.dimensions)
+				if (iconIssues.length > 0) throw siteConfigError(iconIssues)
 
 				// the modules the lock enables, read once; their content, names, routes and menu
 				// segments are checked here, before anything compiles
@@ -241,9 +260,10 @@ export default function astrumScena(): AstroIntegration {
 					vite: {
 						plugins: [
 							siteRootModule(siteRoot),
+							lucideIconsModule(lucideIconsDir()),
 							overridesModule(replacements),
 							siteSources(siteRoot),
-							themeTokensPlugin(siteRoot),
+							themeTokensPlugin(siteRoot, Object.keys(content.taxonomy.dimensions)),
 							tailwindcss(),
 							configYamlDependency(siteRoot, content.locales),
 							variantCssPlugin({

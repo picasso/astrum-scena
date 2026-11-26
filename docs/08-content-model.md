@@ -60,6 +60,7 @@ Published album может ссылаться только на published photos
 | `colorMode`                     | `color \| black-and-white`, conditional    | обязательно для `published`                        |
 | `favorite`                      | boolean                                    | default `false`, только явное редакционное решение |
 | `tags`                          | unique controlled IDs                      | default `[]`, порядок семантики не несёт           |
+| `dimensions`                    | `{ <dimension>: [value IDs] }`, optional   | значения измерений сайта, без повторов             |
 | `media`                         | `MediaDescriptor`, optional                | переходный fixture-контракт до S9                  |
 | `source.legacyId`               | string, optional                           | provenance                                         |
 
@@ -147,7 +148,12 @@ image descriptor или route, а правка данных не трогает 
 `site.lock.yaml`. Умолчания ядра: категории `series`, `places`; виды мест
 `country | region | locality`; виды тегов `subject | condition | motif | moment | technique`.
 
-Live integrity gate проверяет photo/place/tag/album references против фактически загруженного
+Каждое измерение `content.taxonomy.dimensions` (по умолчанию их нет) имеет свой плоский словарь
+`src/content/config/<id>.yaml`: `schemaVersion: 1` и список `{id, label}` под ключом измерения, ID без
+повторов, метка в каждой локали. Фотография ссылается на значения полем `dimensions`; добавочное поле
+не меняет версию коллекции `photos`. Подробности — в [`07-taxonomy.md`](07-taxonomy.md#измерения).
+
+Live integrity gate проверяет photo/place/tag/dimension/album references против фактически загруженного
 snapshot. Featured test fixture проверяется отдельно и не входит в live repository gate S8.
 
 ## Derived API

@@ -110,6 +110,7 @@ function snapshot(): ContentSnapshot {
 		categories: [],
 		places: [],
 		tags: [],
+		dimensions: {},
 	}
 }
 

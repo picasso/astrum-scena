@@ -4,10 +4,12 @@ import path from 'node:path'
 
 import { afterAll, describe, expect, it, vi } from 'vitest'
 
+import { loadSiteSection } from '../config/loader.ts'
 import { siteRoot } from '../config/site-root.ts'
 import { GLOBAL_CSS } from '../integration-parts.ts'
 import {
 	declaredTokens,
+	dimensionTokens,
 	layoutTokens,
 	parseTokenList,
 	THEME_FILE,
@@ -27,10 +29,31 @@ const VALID = ':root { --color-accent: #fff; --color-alt: #000; }'
 
 const demoTheme = readFileSync(path.join(siteRoot, THEME_FILE), 'utf8')
 const coreTokens = parseTokenList(readFileSync(CORE_TOKENS_FILE, 'utf8'), CORE_TOKENS_FILE)
+const demoDimensions = Object.keys(loadSiteSection(siteRoot, 'content').taxonomy.dimensions)
 
 describe('themeTokenProblems', () => {
-	it("passes the demo's theme against the exported list", () => {
-		expect(themeTokenProblems(demoTheme, coreTokens, layoutTokens())).toEqual([])
+	it("passes the demo's theme against the exported list and its dimensions", () => {
+		expect(
+			themeTokenProblems(
+				demoTheme,
+				{ ...coreTokens, ...dimensionTokens(demoDimensions) },
+				layoutTokens(),
+			),
+		).toEqual([])
+	})
+
+	it('requires a color token per dimension and rejects one of a dimension the site lacks', () => {
+		const tokens = { ...TOKENS, ...dimensionTokens(['events']) }
+		expect(themeTokenProblems(VALID, tokens, LAYOUT)).toEqual([
+			'src/theme/theme.css: missing required tokens: --color-dimension-events',
+		])
+		expect(
+			themeTokenProblems(
+				`${VALID} :root { --color-dimension-events: blue; --color-dimension-people: red; }`,
+				tokens,
+				LAYOUT,
+			),
+		).toEqual(['src/theme/theme.css: unknown tokens: --color-dimension-people'])
 	})
 
 	it('names an unknown token with the file', () => {
@@ -128,7 +151,7 @@ describe('themeTokensPlugin', () => {
 
 	const transformOf = (root: string) => {
 		const addWatchFile = vi.fn()
-		const plugin = themeTokensPlugin(root)
+		const plugin = themeTokensPlugin(root, demoDimensions)
 		const transform = (id: string) => plugin.transform.call({ addWatchFile }, '', id)
 		return { transform, addWatchFile }
 	}

@@ -269,6 +269,12 @@ export function validateContentSnapshot(
 	const places = new Set(snapshot.places.map((place) => place.id))
 	const tags = new Set(snapshot.tags.map((tag) => tag.id))
 	const categories = new Set(snapshot.categories.map((category) => category.id))
+	const dimensions = new Map(
+		Object.entries(snapshot.dimensions).map(([id, values]) => [
+			id,
+			new Set(values.map((value) => value.id)),
+		]),
+	)
 
 	for (const album of snapshot.albums) {
 		if (['recent-works', 'favorites'].includes(album.id)) {
@@ -335,6 +341,27 @@ export function validateContentSnapshot(
 					message: `Unknown tag "${tag}"`,
 				})
 			}
+		}
+		for (const [dimension, ids] of Object.entries(photo.data.dimensions ?? {})) {
+			const values = dimensions.get(dimension)
+			const at = `photos.${photo.id}.dimensions.${dimension}`
+			if (!values) {
+				addError(errors, {
+					code: 'unknown-reference',
+					entityId: photo.id,
+					path: at,
+					message: `Unknown dimension "${dimension}"; content.taxonomy.dimensions: [${[...dimensions.keys()].join(', ')}]`,
+				})
+				continue
+			}
+			for (const id of ids)
+				if (!values.has(id))
+					addError(errors, {
+						code: 'unknown-reference',
+						entityId: photo.id,
+						path: at,
+						message: `Unknown ${dimension} "${id}"; known: [${[...values].join(', ')}]`,
+					})
 		}
 	}
 

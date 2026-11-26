@@ -16,7 +16,6 @@ import { dirname, join, resolve } from 'node:path'
 import { describe, expect, it } from 'vitest'
 
 import { GATES, IMAGE_COMMANDS } from '../packages/core/src/cli/registry.ts'
-import { writeSiteFiles } from '../packages/core/src/config/fixtures/site-files.ts'
 import { loadSiteConfig, loadSiteSection } from '../packages/core/src/config/loader.ts'
 import { SERVICE_COPY_LOCALE } from '../packages/core/src/config/locale-schema.ts'
 import { type CoreManifest, declaredSpecifiers } from '../packages/core/src/eslint.ts'
@@ -611,17 +610,23 @@ describe('the demo without the courses module', () => {
 		})
 	})
 
-	it("keeps the site's taxonomy lists in the one-locale config", () => {
+	it("keeps the site's taxonomy in the one-locale config, a dimension's label in the reference locale", () => {
 		withDemoCopy((site) => {
-			const config = loadSiteConfig(site)
-			const taxonomy = {
-				categories: ['journeys', 'studies'],
-				placeKinds: ['land', 'spot'],
-				tagKinds: ['mood', 'light'],
-			}
-			writeSiteFiles(site, { ...config, content: { ...config.content, taxonomy } })
+			const { referenceLocale, taxonomy } = loadSiteConfig(site).content
+			expect(Object.keys(taxonomy.dimensions)).not.toEqual([])
 			withOneLocale(site, () => {
-				expect(loadSiteConfig(site).content.taxonomy).toEqual(taxonomy)
+				expect(loadSiteConfig(site).content.taxonomy).toEqual({
+					...taxonomy,
+					dimensions: Object.fromEntries(
+						Object.entries(taxonomy.dimensions).map(([id, dimension]) => [
+							id,
+							{
+								...dimension,
+								label: { [referenceLocale]: dimension.label[referenceLocale] },
+							},
+						]),
+					),
+				})
 			})
 		})
 	})

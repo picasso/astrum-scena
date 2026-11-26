@@ -11,7 +11,7 @@ import { resolveGallery } from '../../lib/blocks/gallery/build-data.ts'
 import { GALLERY_MIN_TILE_PX } from '../../lib/blocks/gallery/geometry.ts'
 import { loadImageSets } from '../../lib/blocks/gallery/image-sets.ts'
 import { parseGalleryProps } from '../../lib/blocks/gallery/schema.ts'
-import { loadTaxonomyConfig } from '../../lib/content/files.ts'
+import { loadPlacesConfig } from '../../lib/content/files.ts'
 import type { Locale } from '../../lib/content/schemas.ts'
 import { loadImageCatalog } from '../../lib/images/catalog.ts'
 import { indexById } from '../../lib/portfolio/publication.ts'
@@ -27,10 +27,10 @@ import GalleryItem from './gallery-item.astro'
 const props = parseGalleryProps(Astro.props)
 const locale = (Astro.currentLocale ?? defaultLocale(site)) as Locale
 
-const [photos, albums, taxonomy, imageSets] = await Promise.all([
+const [photos, albums, places, imageSets] = await Promise.all([
 	getCollection('photos'),
 	getCollection('albums'),
-	loadTaxonomyConfig(siteRoot, site.content.locales, site.content.taxonomy),
+	loadPlacesConfig(siteRoot, site.content.locales, site.content.taxonomy.placeKinds),
 	loadImageSets(siteRoot),
 ])
 const catalog = loadImageCatalog(siteRoot)
@@ -40,7 +40,7 @@ const vm = resolveGallery(props, {
 	photos,
 	photosById: indexById(photos),
 	albums,
-	places: taxonomy.places,
+	places,
 	locale,
 	imageSets,
 })
