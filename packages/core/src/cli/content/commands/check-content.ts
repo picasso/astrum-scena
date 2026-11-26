@@ -10,7 +10,7 @@ import type { CliContext } from '../../context.ts'
 // the content of the site parses against its schemas and holds together: references, locales, legal
 // texts and markup, and nothing belongs to a module the lock leaves disabled, which the build rejects
 export async function checkContent(context: CliContext): Promise<number> {
-	const { locales, referenceLocale } = loadSiteSection(context.root, 'content')
+	const { locales, referenceLocale, taxonomy } = loadSiteSection(context.root, 'content')
 	const modules = lockedModules(context.root)
 	let snapshot
 	try {
@@ -27,6 +27,7 @@ export async function checkContent(context: CliContext): Promise<number> {
 			referenceLocale,
 			locales,
 			modules,
+			taxonomy,
 		)
 	} catch (error) {
 		context.err(`check content FAIL: ${(error as Error).message}`)

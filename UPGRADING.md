@@ -38,6 +38,91 @@ the core version a breaking release bumps to.
 
 ## [Unreleased]
 
+### `site.content.taxonomy`, `src/content/config/categories.yaml`, `places` of `src/content/config/places.yaml`
+
+**Before:** The album categories (`series`, `places`), the place kinds (`country`, `region`,
+`locality`) and the tag kinds (`subject`, `condition`, `motif`, `moment`, `technique`) are fixed in
+the core, `site.lock.yaml` has no taxonomy, and `src/content/config/categories.yaml` may label only
+some of the categories:
+
+```yaml
+# site.lock.yaml (excerpt)
+site:
+    content:
+        locales:
+            - en
+        referenceLocale: en
+```
+
+```yaml
+# src/content/config/categories.yaml, on a site with `locales: [en]`
+schemaVersion: 2
+categories:
+    - id: series
+      label:
+          en: Series
+```
+
+**After:** The lists come from `site.yaml` `content.taxonomy` (optional; `categories`, `placeKinds`
+and `tagKinds`, each a non-empty list of distinct kebab-case ids that replaces the default whole), and
+the core's defaults are the lists above. `site.lock.yaml` holds the effective lists; a lock without
+them fails with `site.lock.yaml: site.content.taxonomy: missing; run astrum-scena config resolve`.
+The rank of a place kind is its position in `placeKinds`, and `places.yaml` follows it: a place of
+the first kind has no `parentId`, any other has one, and a parent in the file has a lower rank;
+otherwise it fails with the path, e.g. `places.2.parentId: a locality place requires a parentId
+(content.taxonomy.placeKinds [country, region, locality])`.
+`categories.yaml` labels exactly the declared categories: an undeclared id fails with
+`categories.1.id: "studies" is not one of content.taxonomy.categories [series, places]` and a
+declared one without a label with
+`src/content/config/categories.yaml: categories: missing "places" of content.taxonomy.categories [series, places]`.
+A site that keeps the defaults and labels both categories edits nothing; one that labels only some
+either labels the rest or declares only those it uses:
+
+```yaml
+# site.lock.yaml (excerpt)
+site:
+    content:
+        locales:
+            - en
+        referenceLocale: en
+        taxonomy:
+            categories:
+                - series
+                - places
+            placeKinds:
+                - country
+                - region
+                - locality
+            tagKinds:
+                - subject
+                - condition
+                - motif
+                - moment
+                - technique
+```
+
+```yaml
+# site.yaml (excerpt), a site with only the series category
+content:
+    locales:
+        - en
+    referenceLocale: en
+    taxonomy:
+        categories:
+            - series
+```
+
+**Order:** Before the first build with this release: declare `content.taxonomy` in `site.yaml` when
+the site needs other lists than the defaults, make `categories.yaml` label exactly the declared
+categories and give every place of `places.yaml` a parent as its kind requires, then run `astrum-scena config resolve`, which writes `site.content.taxonomy` into
+`site.lock.yaml`. Do not rerun the image pipeline: the image digests do not read the taxonomy.
+
+**Writers:** `astrum-scena config resolve` of this release.
+
+**Verify:** `astrum-scena check config-lock` and `astrum-scena check content` pass; `git diff
+site.lock.yaml` adds only `site.content.taxonomy`, and a site without `content.taxonomy` in
+`site.yaml` builds the same pages with the same markup as before.
+
 ## [0.6.10]
 
 ### `schemaVersion` 4 of `site.yaml`, `site.yaml`, `site`, `site.schemaVersion`, `privacy.controller.name.(keys)`, `privacy.controller.name.en`, `privacy.controller.name.ru`, `seo.description.(keys)`, `seo.description.en`, `seo.description.ru`, `site.privacy.controller.name.(keys)`, `site.privacy.controller.name.en`, `site.privacy.controller.name.ru`, `site.seo.description.(keys)`, `site.seo.description.en`, `site.seo.description.ru`

@@ -5,6 +5,8 @@ import path from 'node:path'
 import { afterAll, describe, expect, it } from 'vitest'
 import { parse as parseYaml } from 'yaml'
 
+import { writeSiteFiles } from '../../config/fixtures/site-files.ts'
+import { loadSiteConfig } from '../../config/loader.ts'
 import { runAstrumScena } from '../test-fixtures.ts'
 import {
 	loadPlaceGpsBounds,
@@ -88,6 +90,29 @@ describe('check place-gps-bounds', () => {
 		const present = await runAstrumScena(site, ['check', 'place-gps-bounds'])
 		expect(present.status, present.stderr).toBe(0)
 		expect(present.stdout).toContain('places: 1')
+	})
+
+	it("reads the places with the lock's own place kinds", async () => {
+		const { site } = makeImageSite(scratch, 'gate-custom-kinds')
+		const config = loadSiteConfig(site)
+		writeSiteFiles(site, {
+			...config,
+			content: {
+				...config.content,
+				taxonomy: { ...config.content.taxonomy, placeKinds: ['land', 'spot'] },
+			},
+		})
+		const places = path.join(site, 'src/content/config/places.yaml')
+		writeFileSync(
+			places,
+			readFileSync(places, 'utf8')
+				.replace('kind: country', 'kind: land')
+				.replace('kind: locality', 'kind: spot'),
+		)
+		writeFileSync(path.join(site, PLACE_GPS_BOUNDS_PATH), BOUNDS)
+		const result = await runAstrumScena(site, ['check', 'place-gps-bounds'])
+		expect(result.status, result.stderr).toBe(0)
+		expect(result.stdout).toContain('places: 1')
 	})
 
 	it('fails on an unknown placeId, naming the file and the id', async () => {

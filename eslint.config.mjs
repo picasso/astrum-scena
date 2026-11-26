@@ -72,6 +72,26 @@ const catalogImport = {
 		"Do not import the core's default locale catalog: read the effective `content.catalog` of the site config.",
 }
 
+// the taxonomy enumerations (album categories, place and tag kinds) come from site.yaml
+// `content.taxonomy`, whose defaults only the config layer declares
+const TAXONOMY_DEFAULTS =
+	'/^(series|places|country|region|locality|subject|condition|motif|moment|technique)$/'
+// code outside the config layer reads the effective lists, never the defaults; a member read catches
+// the namespace import (`taxonomy.DEFAULT_TAXONOMY`)
+const taxonomyBans = [
+	{
+		selector: `:matches(Literal[value=${TAXONOMY_DEFAULTS}], TemplateLiteral[expressions.length=0] > TemplateElement[value.cooked=${TAXONOMY_DEFAULTS}])`,
+		message:
+			'Do not hardcode a taxonomy enumeration value: take the lists from site.yaml `content.taxonomy`.',
+	},
+	{
+		selector:
+			':matches(ImportSpecifier[imported.name=DEFAULT_TAXONOMY], MemberExpression[computed=false] > Identifier.property[name=DEFAULT_TAXONOMY])',
+		message:
+			"Do not import the core's default taxonomy: read the effective `content.taxonomy` of the site config.",
+	},
+]
+
 // the derivative engine runs on sharp at prepare time; reached from runtime code, even through
 // another lib module, it would pull sharp into the site build. `lib/images/build` is the core's only
 // `build` directory, so any `build` segment names it, whatever `./` pieces surround it. The CLI runs
@@ -90,14 +110,15 @@ const configLoaderImport = {
 
 // besides the config layer, the declarations of the dictionaries the core ships: one JSON per
 // locale of the default catalog, imported by name
-const LOCALE_EXEMPT = [
+const TAXONOMY_EXEMPT = [
 	`${CORE}/config/**`,
-	`${CORE}/i18n/dictionaries.ts`,
-	`${CORE}/modules/*/manifest.ts`,
 	'**/*.test.{ts,tsx}',
 	'**/test-fixtures.ts',
 	'**/fixtures/**',
 ]
+// the declarations of the shipped dictionaries, exempt from the locale bans only
+const LOCALE_DECLARATIONS = [`${CORE}/i18n/dictionaries.ts`, `${CORE}/modules/*/manifest.ts`]
+const LOCALE_EXEMPT = [...TAXONOMY_EXEMPT, ...LOCALE_DECLARATIONS]
 
 // adapters may read sources; reusable computations cannot reach these modules at runtime.
 const ADAPTERS = [
@@ -164,13 +185,15 @@ const boundaries = (files, patterns, extra = NO_EXTRA) => {
 	}
 	const base = rulesFor(patterns)
 	const inCore = files.every((file) => file.startsWith(`${CORE}/`))
-	const localeBans = inCore ? [...localeLiterals, catalogImport] : localeLiterals
+	const literalBans = inCore
+		? [...localeLiterals, catalogImport, ...taxonomyBans]
+		: localeLiterals
 	const objects = [
 		{ files, rules: { ...base.imports, 'no-restricted-syntax': ['error', ...base.syntax] } },
 		{
 			files,
 			ignores: LOCALE_EXEMPT,
-			rules: { 'no-restricted-syntax': ['error', ...base.syntax, ...localeBans] },
+			rules: { 'no-restricted-syntax': ['error', ...base.syntax, ...literalBans] },
 		},
 	]
 	if (!inCore) return objects
@@ -185,7 +208,13 @@ const boundaries = (files, patterns, extra = NO_EXTRA) => {
 		{
 			files,
 			ignores: [...LOCALE_EXEMPT, ...IMAGE_BUILD_EXEMPT],
-			rules: { 'no-restricted-syntax': ['error', ...build.syntax, ...localeBans] },
+			rules: { 'no-restricted-syntax': ['error', ...build.syntax, ...literalBans] },
+		},
+		// the dictionary declarations of these files (a nested list matches files matching both)
+		{
+			files: files.flatMap((file) => LOCALE_DECLARATIONS.map((declared) => [file, declared])),
+			ignores: [...TAXONOMY_EXEMPT, ...IMAGE_BUILD_EXEMPT],
+			rules: { 'no-restricted-syntax': ['error', ...build.syntax, ...taxonomyBans] },
 		},
 	]
 }

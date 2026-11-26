@@ -84,4 +84,25 @@ describe('defineCoreCollections', () => {
 			false,
 		)
 	})
+
+	it("builds the album category from the lock's content.taxonomy", async () => {
+		const custom = {
+			...config,
+			content: {
+				...config.content,
+				taxonomy: { ...config.content.taxonomy, categories: ['journeys', 'studies'] },
+			},
+		}
+		type Parser = { safeParse(value: unknown): { success: boolean } }
+		const album = (await defineFor(custom)).albums.schema as Parser
+		const entry = {
+			title: { en: 'Album', ru: 'Альбом' },
+			description: { en: '', ru: '' },
+			status: 'draft',
+			coverId: 'one',
+			photoIds: ['one'],
+		}
+		expect(album.safeParse({ ...entry, category: 'studies' }).success).toBe(true)
+		expect(album.safeParse({ ...entry, category: 'series' }).success).toBe(false)
+	})
 })

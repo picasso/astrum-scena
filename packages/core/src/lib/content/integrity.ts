@@ -257,9 +257,13 @@ export function validateContentSnapshot(
 	checkUniqueEntryIds('articles', snapshot.articles, errors)
 	checkUniqueEntryIds('pages', snapshot.pages, errors)
 	checkUniqueEntryIds('courses', snapshot.courses, errors)
-	checkUniqueDictionaryIds('categories', snapshot.categories, errors)
-	checkUniqueDictionaryIds('places', snapshot.places, errors)
-	checkUniqueDictionaryIds('tags', snapshot.tags, errors)
+	const dictionaries = {
+		categories: snapshot.categories,
+		places: snapshot.places,
+		tags: snapshot.tags,
+	}
+	for (const [name, values] of Object.entries(dictionaries))
+		checkUniqueDictionaryIds(name, values, errors)
 
 	const photos = new Map(snapshot.photos.map((photo) => [photo.id, photo]))
 	const places = new Set(snapshot.places.map((place) => place.id))
@@ -280,7 +284,7 @@ export function validateContentSnapshot(
 				code: 'unknown-reference',
 				entityId: album.id,
 				path: `albums.${album.id}.category`,
-				message: `Unknown category "${album.data.category}"`,
+				message: `Unknown category "${album.data.category}"; known: ${[...categories].join(', ')}`,
 			})
 		}
 		const seenPhotoIds = new Set<string>()

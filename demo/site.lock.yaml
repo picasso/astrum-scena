@@ -27,6 +27,20 @@ site:
             - en
             - ru
         referenceLocale: en
+        taxonomy:
+            categories:
+                - series
+                - places
+            placeKinds:
+                - country
+                - region
+                - locality
+            tagKinds:
+                - subject
+                - condition
+                - motif
+                - moment
+                - technique
         catalog:
             en:
                 script: latin

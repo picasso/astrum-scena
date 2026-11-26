@@ -35,7 +35,7 @@ invariant. Slug не участвует в построении physical entry I
 
 | Поле              | Тип                                                | Правило                                                   |
 | ----------------- | -------------------------------------------------- | --------------------------------------------------------- |
-| `category`        | `series \| places`                                 | ровно одна утверждённая категория                         |
+| `category`        | ID из `content.taxonomy.categories`                | ровно одна объявленная категория                          |
 | `title`           | `{ <locale> }`                                     | непустой в каждой локали                                  |
 | `description`     | `{ <locale> }`                                     | ключ каждой локали обязателен, пустая строка допустима    |
 | `excerpt`         | `{ <locale> }`, optional                           | текст карточки в `details`; пусто → из description        |
@@ -138,9 +138,14 @@ image descriptor или route, а правка данных не трогает 
 `src/content/config/categories.yaml`, `places.yaml`, `tags.yaml` — ручные, не принадлежащие
 импортёру файлы:
 
-- categories: ровно `series`, `places`;
-- places: `country | region | locality`, optional `parentId`, циклы запрещены;
-- tags: controlled ID и kind `subject | condition | motif | moment | technique`.
+- categories: ровно категории `content.taxonomy.categories`;
+- places: kind из `content.taxonomy.placeKinds` (от корня иерархии вниз; у первого вида нет
+  `parentId`, у остальных родитель с меньшим рангом), циклы запрещены;
+- tags: controlled ID и kind из `content.taxonomy.tagKinds`.
+
+Перечни объявляются в `site.yaml` `content.taxonomy`, эффективные значения пишутся в
+`site.lock.yaml`. Умолчания ядра: категории `series`, `places`; виды мест
+`country | region | locality`; виды тегов `subject | condition | motif | moment | technique`.
 
 Live integrity gate проверяет photo/place/tag/album references против фактически загруженного
 snapshot. Featured test fixture проверяется отдельно и не входит в live repository gate S8.

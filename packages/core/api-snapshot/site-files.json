@@ -777,12 +777,74 @@
 							"referenceLocale": {
 								"pattern": "^[a-z]{2,3}$",
 								"type": "string"
+							},
+							"taxonomy": {
+								"additionalProperties": false,
+								"default": {},
+								"properties": {
+									"categories": {
+										"default": [
+											"series",
+											"places"
+										],
+										"items": {
+											"pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+											"type": "string"
+										},
+										"minItems": 1,
+										"type": "array",
+										"x-refinements": [
+											"dc41d32456e8"
+										]
+									},
+									"placeKinds": {
+										"default": [
+											"country",
+											"region",
+											"locality"
+										],
+										"items": {
+											"pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+											"type": "string"
+										},
+										"minItems": 1,
+										"type": "array",
+										"x-refinements": [
+											"dc41d32456e8"
+										]
+									},
+									"tagKinds": {
+										"default": [
+											"subject",
+											"condition",
+											"motif",
+											"moment",
+											"technique"
+										],
+										"items": {
+											"pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+											"type": "string"
+										},
+										"minItems": 1,
+										"type": "array",
+										"x-refinements": [
+											"dc41d32456e8"
+										]
+									}
+								},
+								"required": [
+									"categories",
+									"placeKinds",
+									"tagKinds"
+								],
+								"type": "object"
 							}
 						},
 						"required": [
 							"catalog",
 							"locales",
-							"referenceLocale"
+							"referenceLocale",
+							"taxonomy"
 						],
 						"type": "object",
 						"x-refinements": [
@@ -3238,6 +3300,62 @@
 					"referenceLocale": {
 						"pattern": "^[a-z]{2,3}$",
 						"type": "string"
+					},
+					"taxonomy": {
+						"additionalProperties": false,
+						"default": {},
+						"properties": {
+							"categories": {
+								"default": [
+									"series",
+									"places"
+								],
+								"items": {
+									"pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+									"type": "string"
+								},
+								"minItems": 1,
+								"type": "array",
+								"x-refinements": [
+									"dc41d32456e8"
+								]
+							},
+							"placeKinds": {
+								"default": [
+									"country",
+									"region",
+									"locality"
+								],
+								"items": {
+									"pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+									"type": "string"
+								},
+								"minItems": 1,
+								"type": "array",
+								"x-refinements": [
+									"dc41d32456e8"
+								]
+							},
+							"tagKinds": {
+								"default": [
+									"subject",
+									"condition",
+									"motif",
+									"moment",
+									"technique"
+								],
+								"items": {
+									"pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+									"type": "string"
+								},
+								"minItems": 1,
+								"type": "array",
+								"x-refinements": [
+									"dc41d32456e8"
+								]
+							}
+						},
+						"type": "object"
 					}
 				},
 				"required": [
@@ -5444,7 +5562,10 @@
 			"categories",
 			"schemaVersion"
 		],
-		"type": "object"
+		"type": "object",
+		"x-refinements": [
+			"55d994fcf218"
+		]
 	},
 	"src/content/config/image-sets.yaml": {
 		"additionalProperties": {
@@ -5612,7 +5733,10 @@
 					],
 					"type": "object"
 				},
-				"type": "array"
+				"type": "array",
+				"x-refinements": [
+					"e79ce5dcb028"
+				]
 			},
 			"schemaVersion": {
 				"const": 2,

@@ -16,6 +16,7 @@ import { dirname, join, resolve } from 'node:path'
 import { describe, expect, it } from 'vitest'
 
 import { GATES, IMAGE_COMMANDS } from '../packages/core/src/cli/registry.ts'
+import { writeSiteFiles } from '../packages/core/src/config/fixtures/site-files.ts'
 import { loadSiteConfig, loadSiteSection } from '../packages/core/src/config/loader.ts'
 import { SERVICE_COPY_LOCALE } from '../packages/core/src/config/locale-schema.ts'
 import { type CoreManifest, declaredSpecifiers } from '../packages/core/src/eslint.ts'
@@ -607,6 +608,21 @@ describe('the demo without the courses module', () => {
 				})
 				expect(snapshot(site)).toBe(before)
 			}
+		})
+	})
+
+	it("keeps the site's taxonomy lists in the one-locale config", () => {
+		withDemoCopy((site) => {
+			const config = loadSiteConfig(site)
+			const taxonomy = {
+				categories: ['journeys', 'studies'],
+				placeKinds: ['land', 'spot'],
+				tagKinds: ['mood', 'light'],
+			}
+			writeSiteFiles(site, { ...config, content: { ...config.content, taxonomy } })
+			withOneLocale(site, () => {
+				expect(loadSiteConfig(site).content.taxonomy).toEqual(taxonomy)
+			})
 		})
 	})
 

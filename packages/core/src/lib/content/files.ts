@@ -9,6 +9,7 @@ import { loadSiteSection } from '../../config/loader.ts'
 import { LOCALE_FILE_PATTERN } from '../../config/locale-schema.ts'
 import { UPGRADE_HINT } from '../../config/lock.ts'
 import { assertSchemaVersion, type VersionedSchema } from '../../config/schema-version.ts'
+import type { TaxonomyConfig } from '../../config/taxonomy.ts'
 import { validate } from '../../config/yaml-file.ts'
 import { COURSES_COLLECTION } from '../../modules/courses/manifest.ts'
 import { courseSchema } from '../../modules/courses/schema.ts'
@@ -151,6 +152,10 @@ export const FEATURED_HOME_PATH = 'src/content/featured/home.yaml'
 export const lockedLocales = (root: string): readonly Locale[] =>
 	loadSiteSection(root, 'content').locales
 
+// the enumerations of the site's taxonomy: `content.taxonomy` of its lock
+export const lockedTaxonomy = (root: string): TaxonomyConfig =>
+	loadSiteSection(root, 'content').taxonomy
+
 async function loadConfigFile<T>(
 	root: string,
 	relativePath: string,
@@ -164,33 +169,43 @@ async function loadConfigFile<T>(
 export async function loadCategoriesConfig(
 	root: string,
 	locales: readonly Locale[] = lockedLocales(root),
+	categories: readonly string[] = lockedTaxonomy(root).categories,
 ) {
-	return (await loadConfigFile(root, CATEGORIES_CONFIG_PATH, categoriesConfigSchemaFor(locales)))
-		.categories
+	return (
+		await loadConfigFile(
+			root,
+			CATEGORIES_CONFIG_PATH,
+			categoriesConfigSchemaFor(locales, categories),
+		)
+	).categories
 }
 
 export async function loadPlacesConfig(
 	root: string,
 	locales: readonly Locale[] = lockedLocales(root),
+	kinds: readonly string[] = lockedTaxonomy(root).placeKinds,
 ) {
-	return (await loadConfigFile(root, PLACES_CONFIG_PATH, placesConfigSchemaFor(locales))).places
+	return (await loadConfigFile(root, PLACES_CONFIG_PATH, placesConfigSchemaFor(locales, kinds)))
+		.places
 }
 
 export async function loadTagsConfig(
 	root: string,
 	locales: readonly Locale[] = lockedLocales(root),
+	kinds: readonly string[] = lockedTaxonomy(root).tagKinds,
 ) {
-	return (await loadConfigFile(root, TAGS_CONFIG_PATH, tagsConfigSchemaFor(locales))).tags
+	return (await loadConfigFile(root, TAGS_CONFIG_PATH, tagsConfigSchemaFor(locales, kinds))).tags
 }
 
 export async function loadTaxonomyConfig(
 	root: string,
 	locales: readonly Locale[] = lockedLocales(root),
+	taxonomy: TaxonomyConfig = lockedTaxonomy(root),
 ) {
 	const [categories, places, tags] = await Promise.all([
-		loadCategoriesConfig(root, locales),
-		loadPlacesConfig(root, locales),
-		loadTagsConfig(root, locales),
+		loadCategoriesConfig(root, locales, taxonomy.categories),
+		loadPlacesConfig(root, locales, taxonomy.placeKinds),
+		loadTagsConfig(root, locales, taxonomy.tagKinds),
 	])
 	return { categories, places, tags }
 }
@@ -205,18 +220,23 @@ export async function loadContentSnapshot(
 	root: string,
 	modules: readonly ModuleManifest[] = lockedModules(root),
 	locales: readonly Locale[] = lockedLocales(root),
+	taxonomy: TaxonomyConfig = lockedTaxonomy(root),
 ): Promise<ContentSnapshot> {
 	const at = (source: { base: string }) => path.resolve(root, source.base)
 	const enabled = moduleCollections(modules)
 	const [albums, photos, articles, pages, courses, config] = await Promise.all([
-		loadDataEntries(root, at(COLLECTION_SOURCES.albums), albumSchemaFor(locales)),
+		loadDataEntries(
+			root,
+			at(COLLECTION_SOURCES.albums),
+			albumSchemaFor(locales, taxonomy.categories),
+		),
 		loadDataEntries(root, at(COLLECTION_SOURCES.photos), photoSchemaFor(locales)),
 		loadLocalizedEntries(root, at(COLLECTION_SOURCES.articles), articleSchema),
 		loadLocalizedEntries(root, at(COLLECTION_SOURCES.pages), pageSchema),
 		enabled[COURSES_COLLECTION]
 			? loadLocalizedEntries(root, at(enabled[COURSES_COLLECTION].source), courseSchema)
 			: [],
-		loadTaxonomyConfig(root, locales),
+		loadTaxonomyConfig(root, locales, taxonomy),
 	])
 	return { albums, photos, articles, pages, courses, ...config }
 }
@@ -317,8 +337,9 @@ export async function assertValidRepositoryContent(
 	referenceLocale: Locale,
 	locales: readonly Locale[] = lockedLocales(root),
 	modules?: readonly ModuleManifest[],
+	taxonomy: TaxonomyConfig = lockedTaxonomy(root),
 ): Promise<ContentSnapshot> {
-	const snapshot = await loadContentSnapshot(root, modules, locales)
+	const snapshot = await loadContentSnapshot(root, modules, locales, taxonomy)
 	const result = validateContentSnapshot(snapshot, referenceLocale, locales)
 	const legalErrors = await legalContentErrors(root, locales)
 	if (legalErrors.length > 0)

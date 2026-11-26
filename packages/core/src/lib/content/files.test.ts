@@ -4,6 +4,7 @@ import path from 'node:path'
 
 import { describe, expect, it } from 'vitest'
 
+import { taxonomyConfigSchema } from '../../config/taxonomy.ts'
 import { coursesModule } from '../../modules/courses/manifest.ts'
 import {
 	assertValidRepositoryContent,
@@ -25,6 +26,16 @@ import { validateContentSnapshot } from './integrity'
 import type { Locale } from './schemas'
 
 const BILINGUAL: Locale[] = ['en', 'ru']
+// the core's enumerations, which a temporary root without a lock is given explicitly
+const TAXONOMY = taxonomyConfigSchema.parse({})
+// a categories.yaml with exactly the declared categories, labelled by their ids
+const categoriesFile = (locales: readonly Locale[]) => ({
+	schemaVersion: 2,
+	categories: TAXONOMY.categories.map((id) => ({
+		id,
+		label: Object.fromEntries(locales.map((locale) => [locale, id])),
+	})),
+})
 
 describe('content files', () => {
 	it('reads only the leading frontmatter block', () => {
@@ -86,7 +97,7 @@ describe('content files', () => {
 				serializeYamlDocument({ schemaVersion: 2, tags: [] }),
 			),
 		])
-		const snapshot = await loadContentSnapshot(root, [], BILINGUAL)
+		const snapshot = await loadContentSnapshot(root, [], BILINGUAL, TAXONOMY)
 		expect(snapshot.albums[0]?.id).toBe('nested/album')
 		const result = validateContentSnapshot(snapshot, 'ru', BILINGUAL)
 		expect(result.success).toBe(false)
@@ -110,7 +121,7 @@ describe('content files', () => {
 		await Promise.all([
 			writeFile(
 				path.join(content, 'config/categories.yaml'),
-				serializeYamlDocument({ schemaVersion: 2, categories: [] }),
+				serializeYamlDocument(categoriesFile(BILINGUAL)),
 			),
 			writeFile(
 				path.join(content, 'config/places.yaml'),
@@ -134,7 +145,7 @@ describe('content files', () => {
 			}),
 		)
 		// the root is a temporary directory, so a label from the working directory would start with ../
-		await expect(loadContentSnapshot(root, [], BILINGUAL)).rejects.toThrow(
+		await expect(loadContentSnapshot(root, [], BILINGUAL, TAXONOMY)).rejects.toThrow(
 			/^src\/content\/albums\/broken\.yaml: layout: /,
 		)
 	})
@@ -148,7 +159,7 @@ describe('one-locale content', () => {
 			await mkdir(path.dirname(path.join(content, file)), { recursive: true })
 			await writeFile(path.join(content, file), serializeYamlDocument(data))
 		}
-		await write('config/categories.yaml', { schemaVersion: 2, categories: [] })
+		await write('config/categories.yaml', categoriesFile(['en']))
 		await write('config/places.yaml', { schemaVersion: 2, places: [] })
 		await write('config/tags.yaml', { schemaVersion: 2, tags: [] })
 		await write('albums/album.yaml', {
@@ -160,7 +171,7 @@ describe('one-locale content', () => {
 			photoIds: ['photo'],
 		})
 		await write('photos/photo.yaml', { title: { en: 'Photo' }, status: 'draft' })
-		const snapshot = await loadContentSnapshot(root, [], ['en'])
+		const snapshot = await loadContentSnapshot(root, [], ['en'], TAXONOMY)
 		expect(snapshot.albums[0]?.data.title).toEqual({ en: 'Album' })
 		expect(snapshot.photos[0]?.data.title).toEqual({ en: 'Photo' })
 
@@ -169,7 +180,7 @@ describe('one-locale content', () => {
 			alt: { en: 'Alt', ru: 'Альт' },
 			status: 'draft',
 		})
-		await expect(loadContentSnapshot(root, [], ['en'])).rejects.toThrow(
+		await expect(loadContentSnapshot(root, [], ['en'], TAXONOMY)).rejects.toThrow(
 			'src/content/photos/photo.yaml: alt.ru: not one of content.locales [en]',
 		)
 	})
@@ -189,9 +200,9 @@ describe('taxonomy loaders', () => {
 	}
 
 	it('loads the places without the categories and tags files', async () => {
-		const place = { id: 'harbor', name: { en: 'Harbor', ru: 'Гавань' }, kind: 'locality' }
+		const place = { id: 'harbor', name: { en: 'Harbor', ru: 'Гавань' }, kind: 'country' }
 		const root = await writeConfig({ 'places.yaml': { schemaVersion: 2, places: [place] } })
-		expect(await loadPlacesConfig(root, BILINGUAL)).toEqual([place])
+		expect(await loadPlacesConfig(root, BILINGUAL, TAXONOMY.placeKinds)).toEqual([place])
 	})
 
 	it('rejects a places entry that fails its schema', async () => {
@@ -201,23 +212,62 @@ describe('taxonomy loaders', () => {
 				places: [{ id: 'harbor', name: { en: 'Harbor' }, kind: 'city' }],
 			},
 		})
-		await expect(loadPlacesConfig(root, BILINGUAL)).rejects.toThrow()
+		await expect(loadPlacesConfig(root, BILINGUAL, TAXONOMY.placeKinds)).rejects.toThrow()
 	})
 
 	it('assembles each file into its own field', async () => {
-		const category = { id: 'series', label: { en: 'Series', ru: 'Серии' } }
-		const place = { id: 'harbor', name: { en: 'Harbor', ru: 'Гавань' }, kind: 'locality' }
+		const { categories } = categoriesFile(BILINGUAL)
+		const place = { id: 'harbor', name: { en: 'Harbor', ru: 'Гавань' }, kind: 'country' }
 		const tag = { id: 'fog', label: { en: 'Fog', ru: 'Туман' }, kind: 'condition' }
 		const root = await writeConfig({
-			'categories.yaml': { schemaVersion: 2, categories: [category] },
+			'categories.yaml': { schemaVersion: 2, categories },
 			'places.yaml': { schemaVersion: 2, places: [place] },
 			'tags.yaml': { schemaVersion: 2, tags: [tag] },
 		})
-		expect(await loadTaxonomyConfig(root, BILINGUAL)).toEqual({
-			categories: [category],
+		expect(await loadTaxonomyConfig(root, BILINGUAL, TAXONOMY)).toEqual({
+			categories,
 			places: [place],
 			tags: [tag],
 		})
+	})
+
+	// a site with its own enumerations (`content.taxonomy`): the dictionaries hold its ids and kinds,
+	// and a value outside them fails with the file, the field and the list
+	it("checks the dictionaries against the site's own enumerations", async () => {
+		const taxonomy = {
+			categories: ['journeys', 'studies'],
+			placeKinds: ['land', 'spot'],
+			tagKinds: ['mood'],
+		}
+		const label = (text: string) => ({ en: text, ru: text })
+		const journeys = { id: 'journeys', label: label('Journeys') }
+		const studies = { id: 'studies', label: label('Studies') }
+		const place = { id: 'coast', name: label('Coast'), kind: 'land' }
+		const tag = { id: 'calm', label: label('Calm'), kind: 'mood' }
+		const root = await writeConfig({
+			'categories.yaml': { schemaVersion: 2, categories: [journeys, studies] },
+			'places.yaml': { schemaVersion: 2, places: [place] },
+			'tags.yaml': { schemaVersion: 2, tags: [tag] },
+		})
+		expect(await loadTaxonomyConfig(root, BILINGUAL, taxonomy)).toEqual({
+			categories: [journeys, studies],
+			places: [place],
+			tags: [tag],
+		})
+		await expect(loadCategoriesConfig(root, BILINGUAL, ['journeys'])).rejects.toThrow(
+			`${CATEGORIES_CONFIG_PATH}: categories.1.id: "studies" is not one of content.taxonomy.categories [journeys]`,
+		)
+		await expect(
+			loadCategoriesConfig(root, BILINGUAL, ['journeys', 'studies', 'portraits']),
+		).rejects.toThrow(
+			`${CATEGORIES_CONFIG_PATH}: categories: missing "portraits" of content.taxonomy.categories [journeys, studies, portraits]`,
+		)
+		const country = await writeConfig({
+			'places.yaml': { schemaVersion: 2, places: [{ ...place, kind: 'country' }] },
+		})
+		await expect(loadPlacesConfig(country, BILINGUAL, taxonomy.placeKinds)).rejects.toThrow(
+			'src/content/config/places.yaml: places.0.kind: "country" is not one of content.taxonomy.placeKinds [land, spot]',
+		)
 	})
 
 	it('rejects a taxonomy file without a supported schemaVersion, naming it', async () => {
@@ -225,39 +275,41 @@ describe('taxonomy loaders', () => {
 			'categories.yaml': { categories: [] },
 			'tags.yaml': { schemaVersion: 1, tags: [] },
 		})
-		await expect(loadCategoriesConfig(root, BILINGUAL)).rejects.toThrow(
+		await expect(loadCategoriesConfig(root, BILINGUAL, TAXONOMY.categories)).rejects.toThrow(
 			`${CATEGORIES_CONFIG_PATH}: missing schemaVersion; supported: 2`,
 		)
-		await expect(loadTagsConfig(root, BILINGUAL)).rejects.toThrow(
+		await expect(loadTagsConfig(root, BILINGUAL, TAXONOMY.tagKinds)).rejects.toThrow(
 			`${TAGS_CONFIG_PATH}: schemaVersion 1 is not supported; supported: 2; see UPGRADING.md`,
 		)
 	})
 
 	it('reads the texts of a one-locale site and names a locale outside it', async () => {
-		const place = { id: 'harbor', name: { en: 'Harbor' }, kind: 'locality' }
+		const place = { id: 'harbor', name: { en: 'Harbor' }, kind: 'country' }
 		const root = await writeConfig({ 'places.yaml': { schemaVersion: 2, places: [place] } })
-		expect(await loadPlacesConfig(root, ['en'])).toEqual([place])
-		await expect(loadPlacesConfig(root, BILINGUAL)).rejects.toThrow(
+		expect(await loadPlacesConfig(root, ['en'], TAXONOMY.placeKinds)).toEqual([place])
+		await expect(loadPlacesConfig(root, BILINGUAL, TAXONOMY.placeKinds)).rejects.toThrow(
 			'src/content/config/places.yaml: places.0.name.ru: missing the "ru" text required by content.locales',
 		)
 		const tag = { id: 'fog', label: { en: 'Fog', ru: 'Туман' }, kind: 'condition' }
 		const tagged = await writeConfig({ 'tags.yaml': { schemaVersion: 2, tags: [tag] } })
-		await expect(loadTagsConfig(tagged, ['en'])).rejects.toThrow(
+		await expect(loadTagsConfig(tagged, ['en'], TAXONOMY.tagKinds)).rejects.toThrow(
 			'src/content/config/tags.yaml: tags.0.label.ru: not one of content.locales [en]',
 		)
 	})
 
 	it('fails with the path when the places file is missing', async () => {
 		const root = await writeConfig({
-			'categories.yaml': { schemaVersion: 2, categories: [] },
+			'categories.yaml': categoriesFile(BILINGUAL),
 			'tags.yaml': { schemaVersion: 2, tags: [] },
 		})
 		const missing = expect.objectContaining({
 			code: 'ENOENT',
 			message: expect.stringContaining(path.join('src/content/config', 'places.yaml')),
 		})
-		await expect(loadPlacesConfig(root, BILINGUAL)).rejects.toEqual(missing)
-		await expect(loadTaxonomyConfig(root, BILINGUAL)).rejects.toEqual(missing)
+		await expect(loadPlacesConfig(root, BILINGUAL, TAXONOMY.placeKinds)).rejects.toEqual(
+			missing,
+		)
+		await expect(loadTaxonomyConfig(root, BILINGUAL, TAXONOMY)).rejects.toEqual(missing)
 	})
 })
 
@@ -314,17 +366,21 @@ describe('class attributes in content', () => {
 	it('fails repository validation on a class attribute', async () => {
 		const legal = serializeMarkdownDocument({ title: 'Image rights' }, 'Text')
 		const root = await writeContent({
-			'config/categories.yaml': serializeYamlDocument({ schemaVersion: 2, categories: [] }),
+			'config/categories.yaml': serializeYamlDocument(categoriesFile(['en'])),
 			'config/places.yaml': serializeYamlDocument({ schemaVersion: 2, places: [] }),
 			'config/tags.yaml': serializeYamlDocument({ schemaVersion: 2, tags: [] }),
 			'legal/rights.en.md': legal,
 		})
-		await expect(assertValidRepositoryContent(root, 'en', ['en'], [])).resolves.toBeDefined()
+		await expect(
+			assertValidRepositoryContent(root, 'en', ['en'], [], TAXONOMY),
+		).resolves.toBeDefined()
 		await writeFile(
 			path.join(root, 'src/content/legal/rights.en.md'),
 			`${legal}<span class="lead">x</span>\n`,
 		)
-		await expect(assertValidRepositoryContent(root, 'en', ['en'], [])).rejects.toThrow(
+		await expect(
+			assertValidRepositoryContent(root, 'en', ['en'], [], TAXONOMY),
+		).rejects.toThrow(
 			/Content markup failed:\n- src\/content\/legal\/rights\.en\.md:6: class attribute/,
 		)
 	})
@@ -392,7 +448,7 @@ describe('module content', () => {
 	const writeSite = async (files: Record<string, string>) => {
 		const root = await mkdtemp(path.join(os.tmpdir(), 'content-modules-test-'))
 		const taxonomy = {
-			'config/categories.yaml': serializeYamlDocument({ schemaVersion: 2, categories: [] }),
+			'config/categories.yaml': serializeYamlDocument(categoriesFile(BILINGUAL)),
 			'config/places.yaml': serializeYamlDocument({ schemaVersion: 2, places: [] }),
 			'config/tags.yaml': serializeYamlDocument({ schemaVersion: 2, tags: [] }),
 		}
@@ -407,17 +463,17 @@ describe('module content', () => {
 		const root = await writeSite({
 			'courses/night.en.md': doc({ translationKey: 'night', courseStatus: 'current' }),
 		})
-		expect((await loadContentSnapshot(root, [coursesModule], BILINGUAL)).courses).toEqual([
-			expect.objectContaining({ id: 'night-en' }),
-		])
-		expect((await loadContentSnapshot(root, [], BILINGUAL)).courses).toEqual([])
+		expect(
+			(await loadContentSnapshot(root, [coursesModule], BILINGUAL, TAXONOMY)).courses,
+		).toEqual([expect.objectContaining({ id: 'night-en' })])
+		expect((await loadContentSnapshot(root, [], BILINGUAL, TAXONOMY)).courses).toEqual([])
 	})
 
 	it('rejects the old page kind of a course', async () => {
 		const root = await writeSite({
 			'pages/night.en.md': doc({ translationKey: 'night', kind: 'course' }),
 		})
-		await expect(loadContentSnapshot(root, [], BILINGUAL)).rejects.toThrow(
+		await expect(loadContentSnapshot(root, [], BILINGUAL, TAXONOMY)).rejects.toThrow(
 			/pages[\\/]night\.en\.md: \(root\): Unrecognized key: "kind"/,
 		)
 	})

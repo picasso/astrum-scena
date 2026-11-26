@@ -61,10 +61,12 @@ This skill inherits [`../astrum-scena-shared/safety.md`](../astrum-scena-shared/
   one **exists** (reuse its id); a close one (a small spelling difference, or one name containing the
   other) is **close** (propose reuse, the owner decides); otherwise it is **new**.
 - **A new place or tag.** It carries a non-empty name (place) or label (tag) in every locale of the
-  site and a kind the core accepts. A place's id comes from its name like a photo id, a collision
-  resolved by its parent's id; a region or locality names a parent higher in the hierarchy
-  (country → region → locality), and a country has none. A tag's id comes from its label, a collision
-  resolved by its kind. Written only after the owner confirms it.
+  site and a kind of the site's lists: `site.content.taxonomy.placeKinds` or
+  `site.content.taxonomy.tagKinds` of `site.lock.yaml`. A place's id comes from its name like a photo
+  id, a collision resolved by its parent's id; the place kinds run from the root of the hierarchy down
+  (the core's default is country → region → locality), so a place of the first kind has no parent and
+  any other names a parent of an earlier kind. A tag's id comes from its label, a collision resolved by its kind.
+  Written only after the owner confirms it.
 - **The registry row of a new master** is one JSON line appended to `data/images/masters.jsonl`
   (whose first line is `{"schemaVersion":1}`):
   `{"id":"<photo-id>","masterFilename":"<basename>","masterSha256":"<sha256>"}`.
@@ -77,10 +79,11 @@ This skill inherits [`../astrum-scena-shared/safety.md`](../astrum-scena-shared/
 ### Phase 0 — Status (read-only)
 
 Resolve the album id and report: the existing photo and album ids, the places and tags of
-`src/content/config/`, the categories of `src/content/config/categories.yaml`, the locales of the site
-(`content` of `site.yaml`) and whether the masters root is available (`IMAGES_MASTERS_ROOT` and
-`IMAGES_ARCHIVE_ROOT` in the environment or the site's `.env`, or the paths the owner gives). Write
-nothing.
+`src/content/config/`, the categories of `src/content/config/categories.yaml`, the locales and the
+taxonomy lists of the site (`site.content.locales` and `site.content.taxonomy` of `site.lock.yaml`;
+the core's defaults are the categories `series` and `places`) and whether the masters root is
+available (`IMAGES_MASTERS_ROOT` and `IMAGES_ARCHIVE_ROOT` in the environment or the site's `.env`, or
+the paths the owner gives). Write nothing.
 
 ### Phase 1 — Masters (sha256, duplicates) → STOP on a collision
 
@@ -107,7 +110,7 @@ overrides. A collision no token resolves is a **STOP** until the owner sets the 
 Match each place and tag name by the rule above. `exists` → reuse the id; `close` → propose the reuse,
 the owner decides; `new` → draft the record by the rule above and write it into
 `src/content/config/places.yaml` or `tags.yaml` only after the owner confirms. The album category is an
-id of `categories.yaml`.
+id of `site.content.taxonomy.categories` of `site.lock.yaml`, which `categories.yaml` labels.
 
 ### Phase 4 — Registry and photo drafts (before the build) → STOP on reuse
 

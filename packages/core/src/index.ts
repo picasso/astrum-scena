@@ -174,7 +174,12 @@ export default function astrumScena(): AstroIntegration {
 				// segments are checked here, before anything compiles
 				const modules = enabledModules(site)
 				await assertModuleContent(siteRoot, modules)
-				const snapshot = await loadContentSnapshot(siteRoot, modules, content.locales)
+				const snapshot = await loadContentSnapshot(
+					siteRoot,
+					modules,
+					content.locales,
+					content.taxonomy,
+				)
 				assertNoCollisions(site, modules, snapshot)
 				assertMenuSegments(site, modules, snapshot)
 				// unlisted documents, albums and photos are built but kept out of the sitemap (ADR-0010)

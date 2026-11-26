@@ -82,7 +82,11 @@ export async function buildPhotoPageModel(
 ): Promise<PhotoPageModel> {
 	const { album, photo, related } = await resolvePublishedPhoto(albumId, photoId)
 	const catalog = loadImageCatalog(siteRoot)
-	const taxonomy = await loadTaxonomyConfig(siteRoot)
+	const taxonomy = await loadTaxonomyConfig(
+		siteRoot,
+		config.content.locales,
+		config.content.taxonomy,
+	)
 
 	const text = projectPhotoText(photo.data, locale)
 	const displayName = resolvePhotoDisplayName(photo.data, locale, taxonomy.places)

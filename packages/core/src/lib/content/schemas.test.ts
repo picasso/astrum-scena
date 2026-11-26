@@ -1,10 +1,12 @@
 import { describe, expect, it } from 'vitest'
 
+import { DEFAULT_TAXONOMY } from '../../config/taxonomy.ts'
 import { ALBUM_LAYOUTS } from '../../config/variants.ts'
 import {
 	albumSchemaFor,
 	articleSchema,
 	categoriesConfigSchemaFor,
+	categorySchemaFor,
 	featuredConfigSchemaFor,
 	featuredItemSchemaFor,
 	isoDateSchema,
@@ -12,11 +14,15 @@ import {
 	pageSchema,
 	partialCapturedAtSchema,
 	photoSchemaFor,
+	placeSchemaFor,
 	placesConfigSchemaFor,
+	tagSchemaFor,
 	tagsConfigSchemaFor,
 } from './schemas'
 
-const albumSchema = albumSchemaFor(['en', 'ru'])
+const { categories, placeKinds, tagKinds } = DEFAULT_TAXONOMY
+
+const albumSchema = albumSchemaFor(['en', 'ru'], categories)
 const featuredItemSchema = featuredItemSchemaFor(['en', 'ru'])
 const photoSchema = photoSchemaFor(['en', 'ru'])
 
@@ -24,6 +30,114 @@ const localized = { en: 'Title', ru: 'Название' }
 
 const issuesOf = (result: { error?: { issues: { path: PropertyKey[]; message: string }[] } }) =>
 	result.error?.issues.map((issue) => `${issue.path.join('.')}: ${issue.message}`)
+
+// the enumerations come from site.yaml `content.taxonomy`; these are a site's own, not the core's
+describe('taxonomy enumerations from content.taxonomy', () => {
+	const locales = ['en']
+	const label = { en: 'Label' }
+	const album = {
+		title: { en: 'Album' },
+		description: { en: '' },
+		status: 'draft',
+		coverId: 'one',
+		photoIds: ['one'],
+	}
+
+	it("accepts an album category of the site's list and names the list for another", () => {
+		const schema = albumSchemaFor(locales, ['journeys', 'studies'])
+		expect(schema.parse({ ...album, category: 'studies' }).category).toBe('studies')
+		expect(issuesOf(schema.safeParse({ ...album, category: 'series' }))).toEqual([
+			'category: "series" is not one of content.taxonomy.categories [journeys, studies]',
+		])
+	})
+
+	it('labels exactly the declared categories', () => {
+		const schema = categoriesConfigSchemaFor(locales, ['journeys'])
+		expect(categorySchemaFor(locales, ['journeys']).parse({ id: 'journeys', label }).id).toBe(
+			'journeys',
+		)
+		expect(
+			issuesOf(
+				schema.safeParse({
+					schemaVersion: 2,
+					categories: [
+						{ id: 'journeys', label },
+						{ id: 'studies', label },
+					],
+				}),
+			),
+		).toEqual([
+			'categories.1.id: "studies" is not one of content.taxonomy.categories [journeys]',
+		])
+		expect(issuesOf(schema.safeParse({ schemaVersion: 2, categories: [] }))).toEqual([
+			'categories: missing "journeys" of content.taxonomy.categories [journeys]',
+		])
+	})
+
+	it('checks the place hierarchy against the ranks of placeKinds', () => {
+		const schema = placesConfigSchemaFor(locales, ['land', 'spot'])
+		const land = { id: 'coastland', name: label, kind: 'land' }
+		const spot = { id: 'cove', name: label, kind: 'spot', parentId: 'coastland' }
+		expect(schema.safeParse({ schemaVersion: 2, places: [land, spot] }).success).toBe(true)
+		const list = '(content.taxonomy.placeKinds [land, spot])'
+		expect(
+			issuesOf(
+				schema.safeParse({
+					schemaVersion: 2,
+					places: [
+						land,
+						spot,
+						{ id: 'pier', name: label, kind: 'spot' },
+						{ id: 'northland', name: label, kind: 'land', parentId: 'coastland' },
+						{ id: 'jetty', name: label, kind: 'spot', parentId: 'cove' },
+					],
+				}),
+			),
+		).toEqual([
+			`places.2.parentId: a spot place requires a parentId ${list}`,
+			`places.3.parentId: a land place, the root of the hierarchy, has no parentId ${list}`,
+			`places.4.parentId: parent "cove" (spot) must be higher in the hierarchy than a spot ${list}`,
+		])
+	})
+
+	it('names a value that is not a string by its type', () => {
+		expect(
+			issuesOf(
+				albumSchemaFor(locales, ['journeys']).safeParse({
+					...album,
+					category: { toString: null },
+				}),
+			),
+		).toEqual([
+			'category: a value of type object is not one of content.taxonomy.categories [journeys]',
+		])
+	})
+
+	it("takes the place and tag kinds of the site's lists", () => {
+		const place = { id: 'coast', name: label, kind: 'land' }
+		expect(placeSchemaFor(locales, ['land', 'spot']).parse(place).kind).toBe('land')
+		expect(
+			issuesOf(
+				placesConfigSchemaFor(locales, ['land', 'spot']).safeParse({
+					schemaVersion: 2,
+					places: [{ ...place, kind: 'country' }],
+				}),
+			),
+		).toEqual([
+			'places.0.kind: "country" is not one of content.taxonomy.placeKinds [land, spot]',
+		])
+		const tag = { id: 'calm', label, kind: 'mood' }
+		expect(tagSchemaFor(locales, ['mood']).parse(tag).kind).toBe('mood')
+		expect(
+			issuesOf(
+				tagsConfigSchemaFor(locales, ['mood']).safeParse({
+					schemaVersion: 2,
+					tags: [{ ...tag, kind: 'subject' }],
+				}),
+			),
+		).toEqual(['tags.0.kind: "subject" is not one of content.taxonomy.tagKinds [mood]'])
+	})
+})
 
 describe('localized data shapes from content.locales', () => {
 	const album = {
@@ -39,9 +153,10 @@ describe('localized data shapes from content.locales', () => {
 		expect(
 			photoSchemaFor(['en']).parse({ title: { en: 'Title' }, status: 'draft' }).title,
 		).toEqual({ en: 'Title' })
-		expect(albumSchemaFor(['en']).safeParse({ ...album, title: { en: 'Album' } }).success).toBe(
-			true,
-		)
+		expect(
+			albumSchemaFor(['en'], categories).safeParse({ ...album, title: { en: 'Album' } })
+				.success,
+		).toBe(true)
 	})
 
 	it('rejects a locale outside content.locales, naming the field and the locale', () => {
@@ -68,35 +183,36 @@ describe('localized data shapes from content.locales', () => {
 	it('rejects a blank title in any active locale and allows an empty description', () => {
 		const result = photoSchema.safeParse({ title: { en: 'Title', ru: ' ' }, status: 'draft' })
 		expect(issuesOf(result)).toEqual(['title.ru: the "ru" text must not be empty'])
-		expect(albumSchemaFor(['en']).safeParse({ ...album, title: { en: '' } }).success).toBe(
-			false,
-		)
 		expect(
-			albumSchemaFor(['en']).parse({ ...album, title: { en: 'Album' } }).description,
+			albumSchemaFor(['en'], categories).safeParse({ ...album, title: { en: '' } }).success,
+		).toBe(false)
+		expect(
+			albumSchemaFor(['en'], categories).parse({ ...album, title: { en: 'Album' } })
+				.description,
 		).toEqual({ en: '' })
 	})
 
 	it('builds the taxonomy and featured files at version 2 from the locales', () => {
 		const label = { en: 'Series' }
 		expect(
-			categoriesConfigSchemaFor(['en']).safeParse({
+			categoriesConfigSchemaFor(['en'], ['series']).safeParse({
 				schemaVersion: 2,
 				categories: [{ id: 'series', label }],
 			}).success,
 		).toBe(true)
 		expect(
 			issuesOf(
-				placesConfigSchemaFor(['en']).safeParse({
+				placesConfigSchemaFor(['en'], placeKinds).safeParse({
 					schemaVersion: 2,
 					places: [
-						{ id: 'harbor', name: { en: 'Harbor', ru: 'Гавань' }, kind: 'locality' },
+						{ id: 'harbor', name: { en: 'Harbor', ru: 'Гавань' }, kind: 'country' },
 					],
 				}),
 			),
 		).toEqual(['places.0.name.ru: not one of content.locales [en]'])
-		expect(tagsConfigSchemaFor(['en']).safeParse({ schemaVersion: 1, tags: [] }).success).toBe(
-			false,
-		)
+		expect(
+			tagsConfigSchemaFor(['en'], tagKinds).safeParse({ schemaVersion: 1, tags: [] }).success,
+		).toBe(false)
 		const slide = {
 			id: 'slide',
 			align: 'left',

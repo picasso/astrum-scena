@@ -5,6 +5,7 @@ import { LANGUAGE_SWITCHER_MODES, switcherDisplay } from './language-switcher.ts
 import { DEFAULT_LOCALE_CATALOG, SERVICE_COPY_LOCALE } from './locale-schema.ts'
 import { MENU_ANIMATIONS, MENU_THEME_MODES, MENU_WIDTH_LADDER, MENU_WIDTH_MODES } from './menu.ts'
 import { defaultLocale, siteSchema } from './site-schema.ts'
+import { DEFAULT_TAXONOMY } from './taxonomy.ts'
 import {
 	ALBUM_LAYOUTS,
 	CARD_GRID_RATIOS,
@@ -165,6 +166,59 @@ describe('content locales', () => {
 	})
 })
 
+describe('content taxonomy', () => {
+	const content = (taxonomy: unknown) => ({
+		locales: ['en', 'ru'],
+		referenceLocale: 'en',
+		taxonomy,
+	})
+	const issues = (taxonomy: unknown) => {
+		const result = siteSchema.safeParse(siteOn(content(taxonomy)))
+		return result.success
+			? []
+			: result.error.issues.map((issue) => ({
+					path: issue.path.join('.'),
+					message: issue.message,
+				}))
+	}
+
+	it("resolves to the core's enumerations when the site declares none", () => {
+		expect(parsed(siteOn(content(undefined))).content.taxonomy).toEqual(DEFAULT_TAXONOMY)
+	})
+
+	it('takes a declared list whole and keeps the defaults of the others', () => {
+		expect(
+			parsed(
+				siteOn(
+					content({ categories: ['journeys', 'studies'], placeKinds: ['land', 'spot'] }),
+				),
+			).content.taxonomy,
+		).toEqual({
+			categories: ['journeys', 'studies'],
+			placeKinds: ['land', 'spot'],
+			tagKinds: DEFAULT_TAXONOMY.tagKinds,
+		})
+	})
+
+	it('rejects an empty list, a repeated id and an id outside kebab case, with the path', () => {
+		expect(issues({ tagKinds: [] })).toEqual([
+			{ path: 'content.taxonomy.tagKinds', message: 'must list at least one id' },
+		])
+		expect(issues({ categories: ['series', 'series'] })).toEqual([
+			{ path: 'content.taxonomy.categories.1', message: 'repeats "series"' },
+		])
+		expect(issues({ placeKinds: ['Land'] })).toEqual([
+			{
+				path: 'content.taxonomy.placeKinds.0',
+				message: 'expected a kebab-case id such as `series`',
+			},
+		])
+		expect(issues({ dimensions: ['events'] })).toEqual([
+			{ path: 'content.taxonomy', message: expect.stringContaining('dimensions') },
+		])
+	})
+})
+
 describe('content catalog', () => {
 	const DE = { script: 'latin', ogLocale: 'de_DE', intl: 'de-DE', charWidthPx: 7.4 }
 	const issues = (content: unknown) => {
@@ -190,6 +244,7 @@ describe('content catalog', () => {
 			locales: ['en', 'ru'],
 			referenceLocale: 'en',
 			catalog: { en: DEFAULT_LOCALE_CATALOG.en, ru: DEFAULT_LOCALE_CATALOG.ru },
+			taxonomy: DEFAULT_TAXONOMY,
 		})
 	})
 

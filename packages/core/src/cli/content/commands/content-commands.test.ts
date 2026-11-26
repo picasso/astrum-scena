@@ -3,6 +3,7 @@ import { tmpdir } from 'node:os'
 import path from 'node:path'
 
 import { afterAll, describe, expect, it } from 'vitest'
+import { stringify } from 'yaml'
 
 import { writeSiteFiles } from '../../../config/fixtures/site-files.ts'
 import { loadSiteConfig, loadSiteSection } from '../../../config/loader.ts'
@@ -108,6 +109,45 @@ describe('check content', () => {
 		const result = await runAstrumScena(site, ['check', 'content'])
 		expect(result.status).toBe(1)
 		expect(result.stderr).toContain('src/content/albums/coastal-light.yaml: layout: ')
+	})
+
+	it("checks the albums against the site's own categories", async () => {
+		const site = makeSite()
+		const config = loadSiteConfig(site)
+		writeSiteFiles(site, {
+			...config,
+			content: {
+				...config.content,
+				taxonomy: { ...config.content.taxonomy, categories: ['journeys', 'studies'] },
+			},
+		})
+		const label = (text: string) =>
+			Object.fromEntries(config.content.locales.map((locale) => [locale, text]))
+		writeFileSync(
+			path.join(site, 'src/content/config/categories.yaml'),
+			stringify({
+				schemaVersion: 2,
+				categories: [
+					{ id: 'journeys', label: label('Journeys') },
+					{ id: 'studies', label: label('Studies') },
+				],
+			}),
+		)
+		const setCategory = (album: string, category: string) =>
+			edit(path.join(site, `src/content/albums/${album}.yaml`), (source) =>
+				source.replace(/^category: .*$/m, `category: ${category}`),
+			)
+		setCategory('coastal-light', 'studies')
+		setCategory('geometry-studies', 'journeys')
+		const passed = await runAstrumScena(site, ['check', 'content'])
+		expect(passed.status, passed.stderr).toBe(0)
+
+		setCategory('geometry-studies', 'series')
+		const failed = await runAstrumScena(site, ['check', 'content'])
+		expect(failed.status).toBe(1)
+		expect(failed.stderr).toContain(
+			'src/content/albums/geometry-studies.yaml: category: "series" is not one of content.taxonomy.categories [journeys, studies]',
+		)
 	})
 
 	it('fails on content of a module the lock leaves disabled, as the build does', async () => {

@@ -1,16 +1,18 @@
 import { describe, expect, it } from 'vitest'
 
+import { DEFAULT_TAXONOMY } from '../../config/taxonomy.ts'
 import type { Place, Tag } from './schemas.ts'
 import {
 	proposePlace,
 	proposeTag,
 	resolvePlaceName,
 	resolveTagName,
-	type TaxonomyLocales,
 	TaxonomyProposalError,
+	type TaxonomySite,
 } from './taxonomy-resolve.ts'
 
-const SITE: TaxonomyLocales = { locales: ['en', 'ru'], referenceLocale: 'en' }
+const KINDS = { placeKinds: DEFAULT_TAXONOMY.placeKinds, tagKinds: DEFAULT_TAXONOMY.tagKinds }
+const SITE: TaxonomySite = { locales: ['en', 'ru'], referenceLocale: 'en', ...KINDS }
 
 const PLACES: Place[] = [
 	{ id: 'italy', name: { en: 'Italy', ru: 'Италия' }, kind: 'country' },
@@ -148,12 +150,13 @@ describe('proposePlace on the site locales', () => {
 			proposePlace({ name: { en: 'France' }, kind: 'country' }, PLACES, {
 				locales: ['en'],
 				referenceLocale: 'en',
+				...KINDS,
 			}),
 		).toEqual({ id: 'france', name: { en: 'France' }, kind: 'country' })
 	})
 
 	it('names a locale outside content.locales and a missing one', () => {
-		const site: TaxonomyLocales = { locales: ['en'], referenceLocale: 'en' }
+		const site: TaxonomySite = { locales: ['en'], referenceLocale: 'en', ...KINDS }
 		expect(() =>
 			proposePlace({ name: { en: 'France', ru: 'Франция' }, kind: 'country' }, PLACES, site),
 		).toThrow('place name.ru: not one of content.locales [en]')
@@ -168,6 +171,7 @@ describe('proposePlace on the site locales', () => {
 			proposePlace({ name, kind: 'country' }, PLACES, {
 				locales: ['en', 'ru'],
 				referenceLocale: 'ru',
+				...KINDS,
 			}).id,
 		).toBe('lake-garda')
 	})
@@ -178,6 +182,7 @@ describe('proposePlace on the site locales', () => {
 			proposePlace({ name, kind: 'country' }, PLACES, {
 				locales: ['en', 'ru'],
 				referenceLocale: 'ru',
+				...KINDS,
 			}).id,
 		).toBe('garda-lago')
 	})
@@ -217,5 +222,71 @@ describe('proposeTag', () => {
 		expect(() =>
 			proposeTag({ label: { en: '', ru: 'Туман' }, kind: 'motif' }, TAGS, SITE),
 		).toThrow(TaxonomyProposalError)
+	})
+})
+
+// a site with its own kinds (`content.taxonomy`): a kind's rank is its position in the list, and the
+// first kind is the root of the hierarchy
+describe('proposals on the site kinds', () => {
+	const site: TaxonomySite = {
+		locales: ['en'],
+		referenceLocale: 'en',
+		placeKinds: ['land', 'spot'],
+		tagKinds: ['mood'],
+	}
+	const places: Place[] = [{ id: 'coastland', name: { en: 'Coastland' }, kind: 'land' }]
+
+	it('builds a root kind without a parent and a lower one under it', () => {
+		expect(proposePlace({ name: { en: 'Northland' }, kind: 'land' }, places, site)).toEqual({
+			id: 'northland',
+			name: { en: 'Northland' },
+			kind: 'land',
+		})
+		expect(
+			proposePlace(
+				{ name: { en: 'Amber Bay' }, kind: 'spot', parentId: 'coastland' },
+				places,
+				site,
+			),
+		).toEqual({
+			id: 'amber-bay',
+			name: { en: 'Amber Bay' },
+			kind: 'spot',
+			parentId: 'coastland',
+		})
+	})
+
+	it('rejects a root with a parent, a lower kind without one and a parent of the same rank', () => {
+		expect(() =>
+			proposePlace(
+				{ name: { en: 'Northland' }, kind: 'land', parentId: 'coastland' },
+				places,
+				site,
+			),
+		).toThrow('a land place must not have a parentId')
+		expect(() => proposePlace({ name: { en: 'Cove' }, kind: 'spot' }, places, site)).toThrow(
+			'a spot place requires a parentId',
+		)
+		const spots: Place[] = [
+			...places,
+			{ id: 'cove', name: { en: 'Cove' }, kind: 'spot', parentId: 'coastland' },
+		]
+		expect(() =>
+			proposePlace({ name: { en: 'Pier' }, kind: 'spot', parentId: 'cove' }, spots, site),
+		).toThrow('parent "cove" (spot) must be higher in the hierarchy than a spot')
+	})
+
+	it('names the list for a kind outside it', () => {
+		expect(() =>
+			proposePlace({ name: { en: 'France' }, kind: 'country' }, places, site),
+		).toThrow('"country" is not one of content.taxonomy.placeKinds [land, spot]')
+		expect(proposeTag({ label: { en: 'Calm' }, kind: 'mood' }, [], site)).toEqual({
+			id: 'calm',
+			label: { en: 'Calm' },
+			kind: 'mood',
+		})
+		expect(() => proposeTag({ label: { en: 'Fog' }, kind: 'subject' }, [], site)).toThrow(
+			'"subject" is not one of content.taxonomy.tagKinds [mood]',
+		)
 	})
 })

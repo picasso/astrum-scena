@@ -1,6 +1,7 @@
 import { REQUIRED_DENIED_FIELDS } from '../images-schema.ts'
 import { DEFAULT_LOCALE_CATALOG, effectiveCatalog, type Locale } from '../locale-schema.ts'
 import type { SiteConfig } from '../site-schema.ts'
+import { taxonomyConfigSchema } from '../taxonomy.ts'
 
 // a complete, valid site config built for tests; it never follows the real site.yaml, so a test that
 // needs a whole config takes this and overrides only the fields it is about
@@ -8,11 +9,16 @@ export function buildSiteConfig(overrides: Partial<SiteConfig> = {}): SiteConfig
 	return { ...structuredClone(SITE_CONFIG), ...overrides }
 }
 
-// the `content` section a site.yaml with these locales and no catalog resolves to
+// the `content` section a site.yaml with these locales and no catalog or taxonomy resolves to
 export const contentConfig = (
 	locales: [Locale, ...Locale[]],
 	referenceLocale: Locale,
-): SiteConfig['content'] => ({ locales, referenceLocale, catalog: effectiveCatalog(locales, {}) })
+): SiteConfig['content'] => ({
+	locales,
+	referenceLocale,
+	catalog: effectiveCatalog(locales, {}),
+	taxonomy: taxonomyConfigSchema.parse({}),
+})
 
 const SITE_CONFIG: SiteConfig = {
 	schemaVersion: 4,

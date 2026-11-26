@@ -19,6 +19,7 @@ import { effectiveCatalog } from './locale-schema.ts'
 import { COLLECTION_VERSIONS, RETIRED_CONFIG_FILES, SITE_LOCK_PATH } from './lock.ts'
 import { siteRoot } from './site-root.ts'
 import { type SiteConfig, siteSchema } from './site-schema.ts'
+import { DEFAULT_TAXONOMY } from './taxonomy.ts'
 
 // loadImageConfig of lib/images/build is this slice; config tests do not import lib
 const loadImageConfig = (root: string) => loadSiteSection(root, 'images')
@@ -308,8 +309,9 @@ describe('upgrade from the three-file shape', () => {
 		// defaults the core gained after the merge are not in the old file
 		const { favicon, ...theme } = site.theme
 		expect(favicon).toEqual({ background: '#1b1b1f', foreground: '#fcbf00' })
-		const { catalog, ...content } = site.content
+		const { catalog, taxonomy, ...content } = site.content
 		expect(catalog).toEqual(effectiveCatalog(content.locales, {}))
+		expect(taxonomy).toEqual(DEFAULT_TAXONOMY)
 		expect({ ...site, theme, content }).toEqual(
 			without(withCoursesModule(unversioned('src/config/site.yaml')), 'schemaVersion'),
 		)

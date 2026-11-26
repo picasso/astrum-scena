@@ -29,6 +29,7 @@ import { localeCoverageIssues } from './localized-text.ts'
 import { iconNameSchema, menuSchema } from './menu.ts'
 import { privacySchema } from './privacy.ts'
 import { seoSchema } from './seo-schema.ts'
+import { taxonomyConfigSchema } from './taxonomy.ts'
 import {
 	ALBUM_LAYOUTS,
 	CARD_GRID_RATIOS,
@@ -473,6 +474,7 @@ const viewerSchema = z
 // of Tier-1 document-level fields (coverId, publishedAt, source, kind). `catalog` overrides fields of
 // the core's locale defaults and adds the codes the core has no default for, each with every field;
 // the lock holds the effective entry of each locale the site builds and of the service copy's language.
+// `taxonomy` holds the enumerations of the content's taxonomy (config/taxonomy.ts).
 const contentConfigSchema = z
 	.object({
 		// a tuple with a rest element types the list as non-empty
@@ -483,6 +485,7 @@ const contentConfigSchema = z
 			}),
 		referenceLocale: localeCodeSchema,
 		catalog: z.record(localeCodeSchema, localeCatalogEntrySchema.partial()).default({}),
+		taxonomy: taxonomyConfigSchema,
 	})
 	.strict()
 	.refine((value) => value.locales.includes(value.referenceLocale), {

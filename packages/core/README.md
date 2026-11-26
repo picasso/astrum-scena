@@ -288,7 +288,15 @@ differs, and the effective config is the defaults with those overrides merged in
   field by field (`catalog: { en: { ogLocale: en_GB } }`); a locale of `content.locales` (two or
   three lowercase letters) without an entry fails with its path, and a new code needs every field.
   The lock holds the entries of the site's locales and of `en`, the language of `/status/`. The core
-  ships UI texts and language names for `en` and `ru` only.
+  ships UI texts and language names for `en` and `ru` only;
+- `content.taxonomy` declares the enumerations of the photo taxonomy, each a non-empty list of
+  distinct kebab-case ids that replaces the default whole: `categories`, the album categories
+  (default `series`, `places`), whose labels `src/content/config/categories.yaml` holds for exactly
+  these ids; `placeKinds`, the place kinds from the root of the hierarchy down (default `country`,
+  `region`, `locality`), a kind's rank being its position and the first kind having no parent; and
+  `tagKinds` (default `subject`, `condition`, `motif`, `moment`, `technique`). The lock holds the
+  effective lists, which the content schemas, `astrum-scena check content` and the `/add-album`
+  helpers read; a value outside a list fails with the file, the field and the list.
 
 A default left in place is checked by the same cross-field rules as a written value, so changing one
 side of a coupled pair means writing the other too: `surfaces.articlesIndex: { kind: grid }` keeps the
@@ -563,7 +571,9 @@ surface, each derived from the source the core itself reads:
   elsewhere, the lock included; the first
   line of a `.jsonl` file holds only it), as do the generated `src/generated/images-public.json` and
   `images-release.json`; the core checks it before the schema and rejects a missing or unsupported
-  version with the file and the versions it reads;
+  version with the file and the versions it reads. The schemas built from the site's lists (an
+  album's `category` and the ids and kinds of the taxonomy files) show the core's default
+  `content.taxonomy`, whose lists a site may replace;
 - `mdx-components.json` — the global MDX components and the schema of their props;
 - `directives.json` — the Markdown container directives (`:::name`) with their attributes: whether
   each is required and, for an enumerated one, its values;
