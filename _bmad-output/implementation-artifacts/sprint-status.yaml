@@ -90,9 +90,9 @@ development_status:
   6-10a-localized-data-shapes: review
   6-10b-single-locale-site: review
   6-10c-locale-catalog-from-config: review
-  6-11-domain-enumerations-from-config: review
-  6-11a-enumerations-from-config: review
-  6-11b-non-geographic-dimension: review
+  6-11-domain-enumerations-from-config: done
+  6-11a-enumerations-from-config: done
+  6-11b-non-geographic-dimension: done
   6-12-generated-demo-photos: backlog
   6-13-core-written-files-and-the-site-formatter: backlog
   6-14-contact-handler-export: backlog
