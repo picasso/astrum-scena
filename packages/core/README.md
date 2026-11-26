@@ -645,7 +645,9 @@ byte-stable value below. A different formatting of a YAML file or a report the c
 breaking by itself.
 
 - **Until the first site adopts the core** the version is `0.<epic>.<story>` of the story that
-  releases it (the first release is `0.6.9`). Any higher version may be breaking, so a site pins the
+  releases it (the first release is `0.6.9`). A story that changes the core releases it: its pull
+  request bumps the version, and the merge to `main` publishes it; a repository version bump that
+  changes the core without a new core version fails `check:api-breaking`. Any higher version may be breaking, so a site pins the
   exact version and reads `UPGRADING.md` before it moves: a release with a section there is breaking,
   one without needs no action.
 - **From `1.0.0`**, the release in which the first site adopts the core, the version follows semver:

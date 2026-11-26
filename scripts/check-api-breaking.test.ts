@@ -384,7 +384,8 @@ it(
 	'accepts a **Breaking:** entry in the section of the repository version this branch bumps to',
 	() => {
 		write(`${SNAPSHOT}/i18n.json`, '["nav.home"]\n')
-		upgrading([transition('`nav.portfolio`')])
+		coreVersion('0.4.0')
+		upgrading([], ['0.4.0', transition('`nav.portfolio`')])
 		releasedChangelog('1.6.3', '- **Breaking:** the i18n key `nav.portfolio` is removed.')
 		const unbumped = run()
 		expect(unbumped.status).toBe(1)
@@ -392,6 +393,24 @@ it(
 		expect(unbumped.stderr).toContain('under `## [Unreleased]`')
 
 		repoVersion('1.6.3')
+		const released = run()
+		expect(released.status, released.stderr).toBe(0)
+	},
+	TIMEOUT,
+)
+
+it(
+	'fails a repository release that changes the core without a new core version',
+	() => {
+		write(`${SNAPSHOT}/i18n.json`, '["nav.home", "nav.portfolio", "nav.extra"]\n')
+		releasedChangelog('1.6.3', '- The i18n key `nav.extra` is added.')
+		repoVersion('1.6.3')
+		const unreleased = run()
+		expect(unreleased.status).toBe(1)
+		expect(unreleased.stderr).toContain('a story release without a core release')
+		expect(unreleased.stderr).toContain('keeps its npm version 0.3.1')
+
+		coreVersion('0.3.2')
 		const released = run()
 		expect(released.status, released.stderr).toBe(0)
 	},

@@ -9,6 +9,7 @@ import {
 	parseVersion,
 	removedEntries,
 	sectionHeadings,
+	unreleasedCoreErrors,
 	versionBumpErrors,
 } from './upgrading.ts'
 
@@ -277,5 +278,20 @@ describe('removedEntries', () => {
 			'`b`',
 		])
 		expect(removedEntries(base, upgrading(['Unreleased', entry('`b`')]))).toEqual(['`a`'])
+	})
+})
+
+describe('unreleasedCoreErrors', () => {
+	it('fails a story release that changes the core without bumping it', () => {
+		expect(unreleasedCoreErrors('1.6.10', '1.6.11', '0.6.10', '0.6.10', true)).toEqual([
+			"the release 1.6.11 changes the core but keeps its npm version 0.6.10; bump it to the story's 0.<epic>.<story> in the same pull request",
+		])
+	})
+
+	it('passes a bumped core, an untouched core or no story release', () => {
+		expect(unreleasedCoreErrors('1.6.10', '1.6.11', '0.6.10', '0.6.11', true)).toEqual([])
+		expect(unreleasedCoreErrors('1.6.10', '1.6.11', '0.6.10', '0.6.10', false)).toEqual([])
+		expect(unreleasedCoreErrors('1.6.10', '1.6.10', '0.6.10', '0.6.10', true)).toEqual([])
+		expect(unreleasedCoreErrors(undefined, '1.6.11', '0.6.10', '0.6.10', true)).toEqual([])
 	})
 })

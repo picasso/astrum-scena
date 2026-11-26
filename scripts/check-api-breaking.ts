@@ -16,6 +16,7 @@ import {
 	removedEntries,
 	sectionHeadings,
 	UNRELEASED,
+	unreleasedCoreErrors,
 	UPGRADING_FILE,
 	versionBumpErrors,
 } from './lib/upgrading.ts'
@@ -26,9 +27,11 @@ import {
 // and in an entry under `## [Unreleased]` of UPGRADING.md (or of the section of the version this branch
 // bumps the core to); compatible changes are only listed. A surface
 // the merge base has no snapshot of is new, not changed. A changed npm version of the core must follow
-// the version policy against UPGRADING.md.
+// the version policy against UPGRADING.md, and a bump of the repository version that changes the core
+// must bump the core's npm version too.
 
-const CORE_PACKAGE = 'packages/core/package.json'
+const CORE_DIR = 'packages/core'
+const CORE_PACKAGE = `${CORE_DIR}/package.json`
 const REPO_PACKAGE = 'package.json'
 
 function baseRef(argv: readonly string[] = process.argv.slice(2)): string {
@@ -132,6 +135,20 @@ function main(): void {
 		report(
 			`the core version ${fromVersion} → ${toVersion}`,
 			bump,
+			'See the version policy in packages/core/README.md.',
+		)
+	const coreChanged = git('diff', '--name-only', mergeBase, '--', CORE_DIR).trim() !== ''
+	const unreleased = unreleasedCoreErrors(
+		fromRepoVersion,
+		toRepoVersion,
+		fromVersion,
+		toVersion,
+		coreChanged,
+	)
+	if (unreleased.length > 0)
+		report(
+			'a story release without a core release',
+			unreleased,
 			'See the version policy in packages/core/README.md.',
 		)
 	if (!process.exitCode) console.log('check:api-breaking OK')
