@@ -257,14 +257,24 @@ export function validateContentSnapshot(
 	checkUniqueEntryIds('articles', snapshot.articles, errors)
 	checkUniqueEntryIds('pages', snapshot.pages, errors)
 	checkUniqueEntryIds('courses', snapshot.courses, errors)
-	checkUniqueDictionaryIds('categories', snapshot.categories, errors)
-	checkUniqueDictionaryIds('places', snapshot.places, errors)
-	checkUniqueDictionaryIds('tags', snapshot.tags, errors)
+	const dictionaries = {
+		categories: snapshot.categories,
+		places: snapshot.places,
+		tags: snapshot.tags,
+	}
+	for (const [name, values] of Object.entries(dictionaries))
+		checkUniqueDictionaryIds(name, values, errors)
 
 	const photos = new Map(snapshot.photos.map((photo) => [photo.id, photo]))
 	const places = new Set(snapshot.places.map((place) => place.id))
 	const tags = new Set(snapshot.tags.map((tag) => tag.id))
 	const categories = new Set(snapshot.categories.map((category) => category.id))
+	const dimensions = new Map(
+		Object.entries(snapshot.dimensions).map(([id, values]) => [
+			id,
+			new Set(values.map((value) => value.id)),
+		]),
+	)
 
 	for (const album of snapshot.albums) {
 		if (['recent-works', 'favorites'].includes(album.id)) {
@@ -280,7 +290,7 @@ export function validateContentSnapshot(
 				code: 'unknown-reference',
 				entityId: album.id,
 				path: `albums.${album.id}.category`,
-				message: `Unknown category "${album.data.category}"`,
+				message: `Unknown category "${album.data.category}"; known: ${[...categories].join(', ')}`,
 			})
 		}
 		const seenPhotoIds = new Set<string>()
@@ -331,6 +341,27 @@ export function validateContentSnapshot(
 					message: `Unknown tag "${tag}"`,
 				})
 			}
+		}
+		for (const [dimension, ids] of Object.entries(photo.data.dimensions ?? {})) {
+			const values = dimensions.get(dimension)
+			const at = `photos.${photo.id}.dimensions.${dimension}`
+			if (!values) {
+				addError(errors, {
+					code: 'unknown-reference',
+					entityId: photo.id,
+					path: at,
+					message: `Unknown dimension "${dimension}"; content.taxonomy.dimensions: [${[...dimensions.keys()].join(', ')}]`,
+				})
+				continue
+			}
+			for (const id of ids)
+				if (!values.has(id))
+					addError(errors, {
+						code: 'unknown-reference',
+						entityId: photo.id,
+						path: at,
+						message: `Unknown ${dimension} "${id}"; known: [${[...values].join(', ')}]`,
+					})
 		}
 	}
 

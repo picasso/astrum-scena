@@ -3,11 +3,12 @@ import { tmpdir } from 'node:os'
 import path from 'node:path'
 
 import { afterAll, describe, expect, it } from 'vitest'
+import { stringify } from 'yaml'
 
 import { writeSiteFiles } from '../../../config/fixtures/site-files.ts'
 import { loadSiteConfig, loadSiteSection } from '../../../config/loader.ts'
 import { siteRoot as demoRoot } from '../../../config/site-root.ts'
-import { lockedModules } from '../../../lib/content/files.ts'
+import { loadDimensionConfig, lockedModules } from '../../../lib/content/files.ts'
 import { digestTranslationSource } from '../../../lib/content/translation-freshness.ts'
 import { buildDocumentPairs, parseDocumentFile } from '../../../lib/content/translation-marker.ts'
 import {
@@ -108,6 +109,64 @@ describe('check content', () => {
 		const result = await runAstrumScena(site, ['check', 'content'])
 		expect(result.status).toBe(1)
 		expect(result.stderr).toContain('src/content/albums/coastal-light.yaml: layout: ')
+	})
+
+	it("rejects a value of another dimension's dictionary, with the path and the allowed values", async () => {
+		const site = makeSite()
+		const [dimension, other] = Object.keys(loadSiteSection(site, 'content').taxonomy.dimensions)
+		const allowed = (await loadDimensionConfig(site, dimension!)).map((value) => value.id)
+		const foreign = (await loadDimensionConfig(site, other!))[0]!.id
+		expect(allowed).not.toContain(foreign)
+		edit(path.join(site, 'src/content/photos/amber-dunes.yaml'), (source) =>
+			source.replace(
+				/^dimensions:\n[\s\S]*$/m,
+				`dimensions:\n    ${dimension}:\n        - ${foreign}\n`,
+			),
+		)
+		const result = await runAstrumScena(site, ['check', 'content'])
+		expect(result.status).toBe(1)
+		expect(result.stderr).toContain(
+			`[unknown-reference] photos.amber-dunes.dimensions.${dimension}: Unknown ${dimension} "${foreign}"; known: [${allowed.join(', ')}]`,
+		)
+	})
+
+	it("checks the albums against the site's own categories", async () => {
+		const site = makeSite()
+		const config = loadSiteConfig(site)
+		writeSiteFiles(site, {
+			...config,
+			content: {
+				...config.content,
+				taxonomy: { ...config.content.taxonomy, categories: ['journeys', 'studies'] },
+			},
+		})
+		const label = (text: string) =>
+			Object.fromEntries(config.content.locales.map((locale) => [locale, text]))
+		writeFileSync(
+			path.join(site, 'src/content/config/categories.yaml'),
+			stringify({
+				schemaVersion: 2,
+				categories: [
+					{ id: 'journeys', label: label('Journeys') },
+					{ id: 'studies', label: label('Studies') },
+				],
+			}),
+		)
+		const setCategory = (album: string, category: string) =>
+			edit(path.join(site, `src/content/albums/${album}.yaml`), (source) =>
+				source.replace(/^category: .*$/m, `category: ${category}`),
+			)
+		setCategory('coastal-light', 'studies')
+		setCategory('geometry-studies', 'journeys')
+		const passed = await runAstrumScena(site, ['check', 'content'])
+		expect(passed.status, passed.stderr).toBe(0)
+
+		setCategory('geometry-studies', 'series')
+		const failed = await runAstrumScena(site, ['check', 'content'])
+		expect(failed.status).toBe(1)
+		expect(failed.stderr).toContain(
+			'src/content/albums/geometry-studies.yaml: category: "series" is not one of content.taxonomy.categories [journeys, studies]',
+		)
 	})
 
 	it('fails on content of a module the lock leaves disabled, as the build does', async () => {

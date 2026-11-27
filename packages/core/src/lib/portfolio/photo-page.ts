@@ -1,4 +1,6 @@
 import { localeEntry } from '../../config/locale-schema.ts'
+import { lucideIconSvg } from '../../config/lucide-icons.ts'
+import { lucideIconsDir } from '../../config/lucide-icons-dir.ts'
 import { siteRoot } from '../../config/site-root.ts'
 import type { SiteConfig } from '../../config/site-schema.ts'
 import { loadTaxonomyConfig } from '../content/files.ts'
@@ -16,7 +18,13 @@ import {
 } from './locale.ts'
 import { SURFACE_SIZES } from './sizes.ts'
 import { resolveSurfaceMedia } from './surface.ts'
-import { type ResolvedTag, resolvePlaceHierarchy, resolveTagLabels } from './taxonomy.ts'
+import {
+	type ResolvedDimensionValue,
+	resolveDimensionValues,
+	type ResolvedTag,
+	resolvePlaceHierarchy,
+	resolveTagLabels,
+} from './taxonomy.ts'
 import { buildViewerData } from './viewer-data.ts'
 
 // model of the contextual photo page `/{locale}/portfolio/{album}/{photo}/`, shared by both locales
@@ -49,6 +57,8 @@ export type PhotoPageModel = {
 	captured?: string
 	placeHierarchy: string[]
 	tags: ResolvedTag[]
+	// chips after the tags, in the order the config declares the dimensions
+	dimensions: ResolvedDimensionValue[]
 	dominantColor: string
 	primaryModel: PictureModel
 	primaryViewer: PhotoViewer
@@ -82,7 +92,11 @@ export async function buildPhotoPageModel(
 ): Promise<PhotoPageModel> {
 	const { album, photo, related } = await resolvePublishedPhoto(albumId, photoId)
 	const catalog = loadImageCatalog(siteRoot)
-	const taxonomy = await loadTaxonomyConfig(siteRoot)
+	const taxonomy = await loadTaxonomyConfig(
+		siteRoot,
+		config.content.locales,
+		config.content.taxonomy,
+	)
 
 	const text = projectPhotoText(photo.data, locale)
 	const displayName = resolvePhotoDisplayName(photo.data, locale, taxonomy.places)
@@ -112,6 +126,13 @@ export async function buildPhotoPageModel(
 		? resolvePlaceHierarchy(photo.data.placeId, taxonomy.places, locale)
 		: []
 	const tags = resolveTagLabels(photo.data.tags, taxonomy.tags, locale)
+	const dimensions = resolveDimensionValues(
+		photo.data.dimensions ?? {},
+		config.content.taxonomy.dimensions,
+		taxonomy.dimensions,
+		locale,
+		(name) => lucideIconSvg(lucideIconsDir, name),
+	)
 	const captured = photo.data.capturedAt
 		? formatCapturedAt(photo.data.capturedAt, localeEntry(config.content.catalog, locale).intl)
 		: undefined
@@ -140,6 +161,7 @@ export async function buildPhotoPageModel(
 		captured,
 		placeHierarchy,
 		tags,
+		dimensions,
 		dominantColor: entry.dominantColor,
 		primaryModel,
 		primaryViewer,

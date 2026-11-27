@@ -1,9 +1,13 @@
 import { ESLint } from 'eslint'
 import { describe, expect, it } from 'vitest'
 
+import { DEFAULT_TAXONOMY } from '../packages/core/src/config/taxonomy.ts'
+
 const eslint = new ESLint({ cwd: process.cwd() })
 
 const CORE = 'packages/core/src'
+
+const DEFAULT_TAXONOMY_VALUES = Object.values(DEFAULT_TAXONOMY).flat()
 
 const messagesOf = async (code: string, filePath: string) => {
 	const [result] = await eslint.lintText(code, { filePath })
@@ -177,6 +181,73 @@ describe('eslint.config.mjs style rules', () => {
 		).not.toContain(rule)
 		for (const file of ['e2e/probe.spec.ts', 'e2e/probe.test.ts', 'playwright.config.ts'])
 			expect(await ruleIds(literal, file), file).toContain(rule)
+	})
+
+	it('bans the default taxonomy enumerations in the core outside the config layer and tests', async () => {
+		const banned = (messages: Awaited<ReturnType<typeof messagesOf>>) =>
+			messages.some((message) => message.message.includes('content.taxonomy'))
+		for (const value of DEFAULT_TAXONOMY_VALUES)
+			expect(
+				banned(
+					await messagesOf(`export const value = '${value}'\n`, `${CORE}/lib/probe.ts`),
+				),
+				value,
+			).toBe(true)
+		for (const code of [
+			"export type Kind = 'country' | 'region'\n",
+			'export const kind = `locality`\n',
+			"export const isRoot = (kind: string) => kind === 'country'\n",
+		])
+			expect(banned(await messagesOf(code, `${CORE}/lib/probe.ts`)), code).toBe(true)
+		expect(
+			banned(
+				await messagesOf(
+					"---\nconst category = 'series'\n---\n",
+					`${CORE}/components/probe.astro`,
+				),
+			),
+		).toBe(true)
+		for (const file of [`${CORE}/modules/courses/manifest.ts`, `${CORE}/i18n/dictionaries.ts`])
+			expect(banned(await messagesOf("export const kind = 'country'\n", file)), file).toBe(
+				true,
+			)
+		for (const file of [
+			`${CORE}/config/probe.ts`,
+			`${CORE}/lib/probe.test.ts`,
+			`${CORE}/lib/blocks/probe/test-fixtures.ts`,
+			'scripts/probe.ts',
+		])
+			expect(banned(await messagesOf("export const kind = 'country'\n", file)), file).toBe(
+				false,
+			)
+		for (const code of [
+			"export const id = 'seaside-places'\n",
+			'export const read = (snapshot: { places: string[] }) => snapshot.places\n',
+		])
+			expect(banned(await messagesOf(code, `${CORE}/lib/probe.ts`)), code).toBe(false)
+	})
+
+	it("bans importing the core's default taxonomy outside the config layer and tests", async () => {
+		const banned = (messages: Awaited<ReturnType<typeof messagesOf>>) =>
+			messages.some((message) => message.message.includes('default taxonomy'))
+		const named =
+			"import { DEFAULT_TAXONOMY } from '../config/taxonomy.ts'\nexport const lists = DEFAULT_TAXONOMY\n"
+		const namespace =
+			"import * as taxonomy from '../config/taxonomy.ts'\nexport const lists = taxonomy.DEFAULT_TAXONOMY\n"
+		for (const code of [named, namespace])
+			for (const file of [
+				`${CORE}/lib/probe.ts`,
+				`${CORE}/components/probe.ts`,
+				`${CORE}/modules/courses/manifest.ts`,
+			])
+				expect(banned(await messagesOf(code, file)), file).toBe(true)
+		for (const file of [
+			`${CORE}/config/probe.ts`,
+			`${CORE}/lib/probe.test.ts`,
+			`${CORE}/lib/blocks/probe/test-fixtures.ts`,
+			'scripts/probe.ts',
+		])
+			expect(banned(await messagesOf(named, file)), file).toBe(false)
 	})
 
 	it("bans importing the core's default locale catalog outside the config layer and tests", async () => {

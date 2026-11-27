@@ -299,6 +299,11 @@
 		--cf-field-ring: var(--color-accent);
 
 		--color-image-border-alt: #6b7280;
+
+		/* Chips of the `events` and `projects` dimensions (site.yaml content.taxonomy.dimensions) on the
+		 * photo page. */
+		--color-dimension-events: #7fc4ff;
+		--color-dimension-projects: #8fd694;
 	}
 
 	/* --- LIGHT ------------------------------------------------------------------------------------ */
@@ -313,6 +318,8 @@
 		--color-accent: #ecae80;
 		--color-alt: #ef7674;
 		--color-link: #e59254; /* color.adjust(#ecae80, -10% L) */
+		--color-dimension-events: #2f7fc4;
+		--color-dimension-projects: #3f8f4a;
 		--color-link-hover: #ef7674;
 		--color-menulink: #696969;
 		--color-menulink-hover: #ef7674;

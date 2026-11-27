@@ -30,6 +30,7 @@ import {
 	siteLockSchema,
 } from '../../packages/core/src/config/lock.ts'
 import { siteSchema } from '../../packages/core/src/config/site-schema.ts'
+import { DEFAULT_TAXONOMY } from '../../packages/core/src/config/taxonomy.ts'
 import { CONSUMER_ENV } from '../../packages/core/src/consumer-env.ts'
 import { moduleKeys, siteDictionarySchema } from '../../packages/core/src/i18n/dictionaries.ts'
 import { SITE_DICTIONARY_PATH } from '../../packages/core/src/i18n/site-dictionary-path.ts'
@@ -47,6 +48,7 @@ import {
 } from '../../packages/core/src/lib/content/factcheck.ts'
 import {
 	CATEGORIES_CONFIG_PATH,
+	dimensionConfigPath,
 	FEATURED_HOME_PATH,
 	PLACES_CONFIG_PATH,
 	TAGS_CONFIG_PATH,
@@ -55,6 +57,7 @@ import {
 	albumSchemaFor,
 	articleSchema,
 	categoriesConfigSchemaFor,
+	dimensionConfigSchemaFor,
 	featuredConfigSchemaFor,
 	legalSchema,
 	pageSchema,
@@ -119,7 +122,7 @@ const collectionFiles = ({ base, pattern }: { base: string; pattern: string }, p
 	`${path.posix.join(base, pattern)}${part}`
 
 // a schema built from the site's `content.locales` is taken with the codes of the core's default
-// catalog
+// catalog, and one built from its `content.taxonomy` with the core's default enumerations
 const CATALOG_LOCALES = Object.keys(DEFAULT_LOCALE_CATALOG)
 
 // keyed by the site file a schema validates, not by the schema's name
@@ -128,14 +131,22 @@ const SITE_FILE_SCHEMAS: Record<string, Schema> = {
 	[SITE_CONFIG_PATH]: siteSchema,
 	// the effective config resolve writes from it, with the versions of the content collections
 	[SITE_LOCK_PATH]: siteLockSchema,
-	[collectionFiles(COLLECTION_SOURCES.albums)]: albumSchemaFor(CATALOG_LOCALES),
+	[collectionFiles(COLLECTION_SOURCES.albums)]: albumSchemaFor(
+		CATALOG_LOCALES,
+		DEFAULT_TAXONOMY.categories,
+	),
 	[collectionFiles(COLLECTION_SOURCES.photos)]: photoSchemaFor(CATALOG_LOCALES),
 	[collectionFiles(COLLECTION_SOURCES.articles, ' frontmatter')]: articleSchema,
 	[collectionFiles(COLLECTION_SOURCES.pages, ' frontmatter')]: pageSchema,
 	[collectionFiles(COLLECTION_SOURCES.legal, ' frontmatter')]: legalSchema,
-	[CATEGORIES_CONFIG_PATH]: categoriesConfigSchemaFor(CATALOG_LOCALES),
-	[PLACES_CONFIG_PATH]: placesConfigSchemaFor(CATALOG_LOCALES),
-	[TAGS_CONFIG_PATH]: tagsConfigSchemaFor(CATALOG_LOCALES),
+	[CATEGORIES_CONFIG_PATH]: categoriesConfigSchemaFor(
+		CATALOG_LOCALES,
+		DEFAULT_TAXONOMY.categories,
+	),
+	[PLACES_CONFIG_PATH]: placesConfigSchemaFor(CATALOG_LOCALES, DEFAULT_TAXONOMY.placeKinds),
+	[TAGS_CONFIG_PATH]: tagsConfigSchemaFor(CATALOG_LOCALES, DEFAULT_TAXONOMY.tagKinds),
+	// a dictionary per dimension of `content.taxonomy.dimensions`, its values under the dimension's id
+	[dimensionConfigPath('<dimension>')]: dimensionConfigSchemaFor(CATALOG_LOCALES, '<dimension>'),
 	[IMAGE_SETS_CONFIG_PATH]: imageSetsFileSchema,
 	[FEATURED_HOME_PATH]: featuredConfigSchemaFor(CATALOG_LOCALES),
 	[IMAGES_PUBLIC_RELATIVE_PATH]: imagePublicConfigSchema,

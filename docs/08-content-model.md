@@ -35,7 +35,7 @@ invariant. Slug не участвует в построении physical entry I
 
 | Поле              | Тип                                                | Правило                                                   |
 | ----------------- | -------------------------------------------------- | --------------------------------------------------------- |
-| `category`        | `series \| places`                                 | ровно одна утверждённая категория                         |
+| `category`        | ID из `content.taxonomy.categories`                | ровно одна объявленная категория                          |
 | `title`           | `{ <locale> }`                                     | непустой в каждой локали                                  |
 | `description`     | `{ <locale> }`                                     | ключ каждой локали обязателен, пустая строка допустима    |
 | `excerpt`         | `{ <locale> }`, optional                           | текст карточки в `details`; пусто → из description        |
@@ -60,6 +60,7 @@ Published album может ссылаться только на published photos
 | `colorMode`                     | `color \| black-and-white`, conditional    | обязательно для `published`                        |
 | `favorite`                      | boolean                                    | default `false`, только явное редакционное решение |
 | `tags`                          | unique controlled IDs                      | default `[]`, порядок семантики не несёт           |
+| `dimensions`                    | `{ <dimension>: [value IDs] }`, optional   | значения измерений сайта, без повторов             |
 | `media`                         | `MediaDescriptor`, optional                | переходный fixture-контракт до S9                  |
 | `source.legacyId`               | string, optional                           | provenance                                         |
 
@@ -138,11 +139,21 @@ image descriptor или route, а правка данных не трогает 
 `src/content/config/categories.yaml`, `places.yaml`, `tags.yaml` — ручные, не принадлежащие
 импортёру файлы:
 
-- categories: ровно `series`, `places`;
-- places: `country | region | locality`, optional `parentId`, циклы запрещены;
-- tags: controlled ID и kind `subject | condition | motif | moment | technique`.
+- categories: ровно категории `content.taxonomy.categories`;
+- places: kind из `content.taxonomy.placeKinds` (от корня иерархии вниз; у первого вида нет
+  `parentId`, у остальных родитель с меньшим рангом), циклы запрещены;
+- tags: controlled ID и kind из `content.taxonomy.tagKinds`.
 
-Live integrity gate проверяет photo/place/tag/album references против фактически загруженного
+Перечни объявляются в `site.yaml` `content.taxonomy`, эффективные значения пишутся в
+`site.lock.yaml`. Умолчания ядра: категории `series`, `places`; виды мест
+`country | region | locality`; виды тегов `subject | condition | motif | moment | technique`.
+
+Каждое измерение `content.taxonomy.dimensions` (по умолчанию их нет) имеет свой плоский словарь
+`src/content/config/<id>.yaml`: `schemaVersion: 1` и список `{id, label}` под ключом измерения, ID без
+повторов, метка в каждой локали. Фотография ссылается на значения полем `dimensions`; добавочное поле
+не меняет версию коллекции `photos`. Подробности — в [`07-taxonomy.md`](07-taxonomy.md#измерения).
+
+Live integrity gate проверяет photo/place/tag/dimension/album references против фактически загруженного
 snapshot. Featured test fixture проверяется отдельно и не входит в live repository gate S8.
 
 ## Derived API

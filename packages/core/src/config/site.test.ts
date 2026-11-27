@@ -5,6 +5,7 @@ import { LANGUAGE_SWITCHER_MODES, switcherDisplay } from './language-switcher.ts
 import { DEFAULT_LOCALE_CATALOG, SERVICE_COPY_LOCALE } from './locale-schema.ts'
 import { MENU_ANIMATIONS, MENU_THEME_MODES, MENU_WIDTH_LADDER, MENU_WIDTH_MODES } from './menu.ts'
 import { defaultLocale, siteSchema } from './site-schema.ts'
+import { DEFAULT_TAXONOMY } from './taxonomy.ts'
 import {
 	ALBUM_LAYOUTS,
 	CARD_GRID_RATIOS,
@@ -165,6 +166,113 @@ describe('content locales', () => {
 	})
 })
 
+describe('content taxonomy', () => {
+	const content = (taxonomy: unknown) => ({
+		locales: ['en', 'ru'],
+		referenceLocale: 'en',
+		taxonomy,
+	})
+	const issues = (taxonomy: unknown) => {
+		const result = siteSchema.safeParse(siteOn(content(taxonomy)))
+		return result.success
+			? []
+			: result.error.issues.map((issue) => ({
+					path: issue.path.join('.'),
+					message: issue.message,
+				}))
+	}
+
+	it("resolves to the core's enumerations when the site declares none", () => {
+		expect(parsed(siteOn(content(undefined))).content.taxonomy).toEqual({
+			...DEFAULT_TAXONOMY,
+			dimensions: {},
+		})
+	})
+
+	it('takes a declared list whole and keeps the defaults of the others', () => {
+		expect(
+			parsed(
+				siteOn(
+					content({ categories: ['journeys', 'studies'], placeKinds: ['land', 'spot'] }),
+				),
+			).content.taxonomy,
+		).toEqual({
+			categories: ['journeys', 'studies'],
+			placeKinds: ['land', 'spot'],
+			tagKinds: DEFAULT_TAXONOMY.tagKinds,
+			dimensions: {},
+		})
+	})
+
+	it('rejects an empty list, a repeated id and an id outside kebab case, with the path', () => {
+		expect(issues({ tagKinds: [] })).toEqual([
+			{ path: 'content.taxonomy.tagKinds', message: 'must list at least one id' },
+		])
+		expect(issues({ categories: ['series', 'series'] })).toEqual([
+			{ path: 'content.taxonomy.categories.1', message: 'repeats "series"' },
+		])
+		expect(issues({ placeKinds: ['Land'] })).toEqual([
+			{
+				path: 'content.taxonomy.placeKinds.0',
+				message: 'expected a kebab-case id such as `series`',
+			},
+		])
+		expect(issues({ kinds: ['events'] })).toEqual([
+			{ path: 'content.taxonomy', message: expect.stringContaining('kinds') },
+		])
+	})
+
+	describe('dimensions', () => {
+		const events = { label: { en: 'Events', ru: 'События' }, icon: 'calendar-days' }
+
+		it('takes a dimension with its label in every locale and an optional icon', () => {
+			expect(
+				parsed(siteOn(content({ dimensions: { events, people: { label: events.label } } })))
+					.content.taxonomy.dimensions,
+			).toEqual({ events, people: { label: events.label } })
+		})
+
+		it('rejects a missing or extra locale of the label, with the path', () => {
+			expect(
+				issues({ dimensions: { events: { label: { en: 'Events', de: 'X' } } } }),
+			).toEqual([
+				{
+					path: 'content.taxonomy.dimensions.events.label.de',
+					message: 'not one of content.locales [en, ru]',
+				},
+				{
+					path: 'content.taxonomy.dimensions.events.label.ru',
+					message: 'missing the "ru" text required by content.locales',
+				},
+			])
+		})
+
+		it.each(['categories', 'places', 'tags', 'image-sets', 'place-gps-bounds'])(
+			'rejects "%s", the name of another file of src/content/config',
+			(id) => {
+				expect(issues({ dimensions: { [id]: events } })).toEqual([
+					{
+						path: `content.taxonomy.dimensions.${id}`,
+						message: expect.stringContaining(`"${id}" names another file`),
+					},
+				])
+			},
+		)
+
+		it('rejects an id or an icon name outside kebab case, with the path', () => {
+			expect(issues({ dimensions: { Events: events } })).toEqual([
+				{ path: 'content.taxonomy.dimensions.Events', message: expect.any(String) },
+			])
+			expect(issues({ dimensions: { events: { ...events, icon: 'Calendar' } } })).toEqual([
+				{
+					path: 'content.taxonomy.dimensions.events.icon',
+					message: 'expected a Lucide icon name such as `calendar-days`',
+				},
+			])
+		})
+	})
+})
+
 describe('content catalog', () => {
 	const DE = { script: 'latin', ogLocale: 'de_DE', intl: 'de-DE', charWidthPx: 7.4 }
 	const issues = (content: unknown) => {
@@ -190,6 +298,7 @@ describe('content catalog', () => {
 			locales: ['en', 'ru'],
 			referenceLocale: 'en',
 			catalog: { en: DEFAULT_LOCALE_CATALOG.en, ru: DEFAULT_LOCALE_CATALOG.ru },
+			taxonomy: { ...DEFAULT_TAXONOMY, dimensions: {} },
 		})
 	})
 

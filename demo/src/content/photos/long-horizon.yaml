@@ -14,3 +14,6 @@ capturedAt: 2026-08
 colorMode: color
 tags:
     - dusk
+dimensions:
+    events:
+        - tide-fair

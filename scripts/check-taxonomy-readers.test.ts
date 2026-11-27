@@ -48,6 +48,12 @@ describe('findTaxonomyReaders', () => {
 		])
 	})
 
+	it("names a path into src/content/config built from a dimension's id", () => {
+		expect(
+			findTaxonomyReaders('a.ts', "read(`src/content/config/${dimension}.yaml`, 'utf8')"),
+		).toEqual([{ file: 'a.ts', line: 1, name: 'content/config/${dimension}' }])
+	})
+
 	it('ignores other files and words', () => {
 		expect(
 			findTaxonomyReaders(

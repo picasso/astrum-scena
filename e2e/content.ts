@@ -3,6 +3,7 @@ import path from 'node:path'
 
 import { parse as parseYaml } from 'yaml'
 
+import { localizedLabel } from '../packages/core/src/config/localized-label.ts'
 import { loadImageSets } from '../packages/core/src/lib/blocks/gallery/image-sets.ts'
 import type { GalleryProps } from '../packages/core/src/lib/blocks/gallery/schema.ts'
 import {
@@ -261,3 +262,36 @@ export function galleryPool(props: GalleryProps): string[] {
 
 // the demo page that shows the image blocks and the `page` MoreDocuments slot
 export const blocksPage = firstDocument('page', (document) => document.slug === 'blocks')
+
+// the labels of a photo's tags in the photo's order, as its page lists them
+export function tagLabels(photo: PhotoData, lang: Lang): string[] {
+	return photo.tags.map((id) => {
+		const tag = snapshot.tags.find((entry) => entry.id === id)
+		if (!tag) throw new Error(`the demo has no tag "${id}"`)
+		return localizedLabel(tag.label, lang)
+	})
+}
+
+export type DemoDimensionChip = {
+	dimension: string
+	icon?: string
+	title: (lang: Lang) => string
+	label: (lang: Lang) => string
+}
+
+// the chips a photo page shows after the tags: the photo's values of each dimension of the config, in
+// the config's order, labelled by the dimension's dictionary
+export function dimensionChips(photo: PhotoData): DemoDimensionChip[] {
+	return Object.entries(content.taxonomy.dimensions).flatMap(([dimension, config]) =>
+		(photo.dimensions?.[dimension] ?? []).map((id) => {
+			const value = snapshot.dimensions[dimension]?.find((entry) => entry.id === id)
+			if (!value) throw new Error(`the demo has no ${dimension} value "${id}"`)
+			return {
+				dimension,
+				...(config.icon === undefined ? {} : { icon: config.icon }),
+				title: (lang: Lang) => localizedLabel(config.label, lang),
+				label: (lang: Lang) => localizedLabel(value.label, lang),
+			}
+		}),
+	)
+}

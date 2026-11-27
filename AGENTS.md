@@ -123,7 +123,11 @@ spine and `EH-*` are items from the streamline catalog.
   `0.<epic>.<story>` of the releasing story until the first site (9.3), where any higher version may
   be breaking and a site pins it exactly, then semver from `1.0.0` — the policy is in
   `packages/core/README.md` (Versions); every breaking release gets a section in `UPGRADING.md`,
-  which `pnpm check:upgrading` validates.
+  which `pnpm check:upgrading` validates. A story that changes the core releases it in its own pull
+  request, never in a separate one: next to the `/ver` commit, a `build(core)` commit sets
+  `packages/core/package.json` to `0.<epic>.<story>` and opens its `UPGRADING.md` section above the
+  `[Unreleased]` transitions; merging to `main` publishes it, and `check:api-breaking` fails a repo
+  bump that changes the core without one.
 
 ## Code style
 

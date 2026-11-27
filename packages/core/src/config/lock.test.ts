@@ -95,6 +95,25 @@ describe('resolveSiteLock', () => {
 		)
 	})
 
+	it("writes the site's dimensions, and fails on an icon lucide-static lacks with its path", () => {
+		const base = buildSiteConfig()
+		const events = { label: { en: 'Events', ru: 'События' }, icon: 'calendar-days' }
+		const withEvents = (dimension: typeof events) => ({
+			...base,
+			content: {
+				...base.content,
+				taxonomy: { ...base.content.taxonomy, dimensions: { events: dimension } },
+			},
+		})
+		const lock = resolveConfig(withEvents(events)) as {
+			site: { content: { taxonomy: { dimensions: unknown } } }
+		}
+		expect(lock.site.content.taxonomy.dimensions).toEqual({ events })
+		expect(() => resolveConfig(withEvents({ ...events, icon: 'calendr' }))).toThrow(
+			'site.yaml: content.taxonomy.dimensions.events.icon: "calendr" is not a Lucide icon',
+		)
+	})
+
 	it('is byte-identical on a rerun over its own lock', () => {
 		const root = writeSiteFiles(makeRoot(), buildSiteConfig())
 		const first = readFileSync(path.join(root, SITE_LOCK_PATH), 'utf8')

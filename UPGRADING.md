@@ -38,6 +38,171 @@ the core version a breaking release bumps to.
 
 ## [Unreleased]
 
+## [0.6.11]
+
+### `site.content.taxonomy`, `src/content/config/categories.yaml`, `places` of `src/content/config/places.yaml`
+
+**Before:** The album categories (`series`, `places`), the place kinds (`country`, `region`,
+`locality`) and the tag kinds (`subject`, `condition`, `motif`, `moment`, `technique`) are fixed in
+the core, `site.lock.yaml` has no taxonomy, and `src/content/config/categories.yaml` may label only
+some of the categories:
+
+```yaml
+# site.lock.yaml (excerpt)
+site:
+    content:
+        locales:
+            - en
+        referenceLocale: en
+```
+
+```yaml
+# src/content/config/categories.yaml, on a site with `locales: [en]`
+schemaVersion: 2
+categories:
+    - id: series
+      label:
+          en: Series
+```
+
+**After:** The lists come from `site.yaml` `content.taxonomy` (optional; `categories`, `placeKinds`
+and `tagKinds`, each a non-empty list of distinct kebab-case ids that replaces the default whole), and
+the core's defaults are the lists above. `site.lock.yaml` holds the effective lists; a lock without
+them fails with `site.lock.yaml: site.content.taxonomy: missing; run astrum-scena config resolve`.
+The rank of a place kind is its position in `placeKinds`, and `places.yaml` follows it: a place of
+the first kind has no `parentId`, any other has one, and a parent in the file has a lower rank;
+otherwise it fails with the path, e.g. `places.2.parentId: a locality place requires a parentId
+(content.taxonomy.placeKinds [country, region, locality])`.
+`categories.yaml` labels exactly the declared categories: an undeclared id fails with
+`categories.1.id: "studies" is not one of content.taxonomy.categories [series, places]` and a
+declared one without a label with
+`src/content/config/categories.yaml: categories: missing "places" of content.taxonomy.categories [series, places]`.
+A site that keeps the defaults and labels both categories edits nothing; one that labels only some
+either labels the rest or declares only those it uses:
+
+```yaml
+# site.lock.yaml (excerpt)
+site:
+    content:
+        locales:
+            - en
+        referenceLocale: en
+        taxonomy:
+            categories:
+                - series
+                - places
+            placeKinds:
+                - country
+                - region
+                - locality
+            tagKinds:
+                - subject
+                - condition
+                - motif
+                - moment
+                - technique
+```
+
+```yaml
+# site.yaml (excerpt), a site with only the series category
+content:
+    locales:
+        - en
+    referenceLocale: en
+    taxonomy:
+        categories:
+            - series
+```
+
+**Order:** Before the first build with this release: declare `content.taxonomy` in `site.yaml` when
+the site needs other lists than the defaults, make `categories.yaml` label exactly the declared
+categories and give every place of `places.yaml` a parent as its kind requires, then run `astrum-scena config resolve`, which writes `site.content.taxonomy` into
+`site.lock.yaml`. Do not rerun the image pipeline: the image digests do not read the taxonomy.
+
+**Writers:** `astrum-scena config resolve` of this release.
+
+**Verify:** `astrum-scena check config-lock` and `astrum-scena check content` pass; `git diff
+site.lock.yaml` adds only `site.content.taxonomy`, and a site without `content.taxonomy` in
+`site.yaml` builds the same pages with the same markup as before.
+
+### `site`, `site.yaml`, `src/content/photos/**/*.{yaml,yml}`
+
+**Before:** `site.lock.yaml` has no dimensions under `site.content.taxonomy`, and the theme declares
+no `--color-dimension-*` token:
+
+```yaml
+# site.lock.yaml (excerpt)
+site:
+    content:
+        taxonomy:
+            tagKinds:
+                - subject
+```
+
+**After:** `site.content.taxonomy.dimensions` is part of the lock, `{}` for a site without
+dimensions; a lock without it fails with `site.lock.yaml: site.content.taxonomy.dimensions: missing;
+run astrum-scena config resolve`. A site that declares no dimensions edits nothing else: its photos
+need no `dimensions` and its theme no new token. A site that declares one adds its label (and
+optionally a Lucide icon) to `site.yaml`, its dictionary `src/content/config/<id>.yaml`, the theme
+token `--color-dimension-<id>` and the values on its photos; a photo with a repeated value in one
+dimension fails with `dimensions.<id>.1: repeats "<value>"`:
+
+```yaml
+# site.lock.yaml (excerpt), a site without dimensions
+site:
+    content:
+        taxonomy:
+            tagKinds:
+                - subject
+            dimensions: {}
+```
+
+```yaml
+# site.yaml (excerpt), a site with an events dimension
+content:
+    taxonomy:
+        dimensions:
+            events:
+                label:
+                    en: Events
+                icon: calendar-days
+```
+
+```yaml
+# src/content/config/events.yaml
+schemaVersion: 1
+events:
+    - id: tide-fair
+      label:
+          en: Tide Fair
+```
+
+```css
+/* src/theme/theme.css (excerpt) */
+:root {
+	--color-dimension-events: #7fc4ff;
+}
+```
+
+```yaml
+# src/content/photos/wide-tide.yaml (excerpt)
+dimensions:
+    events:
+        - tide-fair
+```
+
+**Order:** Together with the `site.content.taxonomy` entry above and before the first build with
+this release: declare any dimension in `site.yaml`, write its dictionary and theme token, then run
+`astrum-scena config resolve`, which writes `site.content.taxonomy.dimensions` into `site.lock.yaml`,
+and only then refer to the values from the photos. Do not rerun the image pipeline: the image digests
+do not read the taxonomy.
+
+**Writers:** `astrum-scena config resolve` of this release.
+
+**Verify:** `astrum-scena check config-lock` and `astrum-scena check content` pass; `git diff
+site.lock.yaml` adds only `site.content.taxonomy.dimensions` (`{}` without dimensions), and a site
+without dimensions builds the same photo pages with the same markup as before.
+
 ## [0.6.10]
 
 ### `schemaVersion` 4 of `site.yaml`, `site.yaml`, `site`, `site.schemaVersion`, `privacy.controller.name.(keys)`, `privacy.controller.name.en`, `privacy.controller.name.ru`, `seo.description.(keys)`, `seo.description.en`, `seo.description.ru`, `site.privacy.controller.name.(keys)`, `site.privacy.controller.name.en`, `site.privacy.controller.name.ru`, `site.seo.description.(keys)`, `site.seo.description.en`, `site.seo.description.ru`

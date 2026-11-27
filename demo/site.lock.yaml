@@ -27,6 +27,26 @@ site:
             - en
             - ru
         referenceLocale: en
+        taxonomy:
+            categories:
+                - journeys
+                - studies
+            placeKinds:
+                - land
+                - shore
+            tagKinds:
+                - mood
+                - form
+            dimensions:
+                events:
+                    label:
+                        en: Events
+                        ru: События
+                    icon: calendar-days
+                projects:
+                    label:
+                        en: Projects
+                        ru: Проекты
         catalog:
             en:
                 script: latin

@@ -1,7 +1,12 @@
 import { describe, expect, it } from 'vitest'
 
-import type { Place, Tag } from '../content/schemas.ts'
-import { resolvePlaceHierarchy, resolvePlaceName, resolveTagLabels } from './taxonomy.ts'
+import type { DimensionValue, Place, Tag } from '../content/schemas.ts'
+import {
+	resolveDimensionValues,
+	resolvePlaceHierarchy,
+	resolvePlaceName,
+	resolveTagLabels,
+} from './taxonomy.ts'
 
 const places: Place[] = [
 	{ id: 'venice', name: { en: 'Venice', ru: 'Венеция' }, kind: 'locality', parentId: 'italy' },
@@ -60,5 +65,76 @@ describe('resolveTagLabels', () => {
 
 	it('fails closed on an unknown tag', () => {
 		expect(() => resolveTagLabels(['sunrise', 'nope'], tags, 'en')).toThrow(/unknown tag/)
+	})
+})
+
+describe('resolveDimensionValues', () => {
+	const declared = {
+		events: { label: { en: 'Events', ru: 'События' }, icon: 'calendar-days' },
+		people: { label: { en: 'People', ru: 'Люди' } },
+	}
+	const dictionaries: Record<string, DimensionValue[]> = {
+		events: [
+			{ id: 'fair', label: { en: 'Fair', ru: 'Ярмарка' } },
+			{ id: 'walk', label: { en: 'Walk', ru: 'Прогулка' } },
+		],
+		people: [{ id: 'ann', label: { en: 'Ann', ru: 'Анна' } }],
+	}
+	const icon = (name: string) => `<svg data-name="${name}"></svg>`
+
+	it("lists the values in the config's order of dimensions and the photo's order of values", () => {
+		expect(
+			resolveDimensionValues(
+				{ people: ['ann'], events: ['walk', 'fair'] },
+				declared,
+				dictionaries,
+				'ru',
+				icon,
+			),
+		).toEqual([
+			{
+				dimension: 'events',
+				title: 'События',
+				icon: '<svg data-name="calendar-days"></svg>',
+				id: 'walk',
+				label: 'Прогулка',
+			},
+			{
+				dimension: 'events',
+				title: 'События',
+				icon: '<svg data-name="calendar-days"></svg>',
+				id: 'fair',
+				label: 'Ярмарка',
+			},
+			{ dimension: 'people', title: 'Люди', id: 'ann', label: 'Анна' },
+		])
+	})
+
+	it('gives nothing for a photo without dimensions', () => {
+		expect(resolveDimensionValues({}, declared, dictionaries, 'en', icon)).toEqual([])
+	})
+
+	it("reads only the photo's own dimensions, not inherited properties", () => {
+		const inherited = { ...declared, constructor: { label: { en: 'Built', ru: 'Построено' } } }
+		expect(
+			resolveDimensionValues({ events: ['fair'] }, inherited, dictionaries, 'en', icon),
+		).toEqual([
+			{
+				dimension: 'events',
+				title: 'Events',
+				icon: '<svg data-name="calendar-days"></svg>',
+				id: 'fair',
+				label: 'Fair',
+			},
+		])
+	})
+
+	it('fails closed on an unknown dimension or value', () => {
+		expect(() =>
+			resolveDimensionValues({ places: ['x'] }, declared, dictionaries, 'en', icon),
+		).toThrow('unknown dimension "places"')
+		expect(() =>
+			resolveDimensionValues({ events: ['nope'] }, declared, dictionaries, 'en', icon),
+		).toThrow('unknown events "nope"')
 	})
 })

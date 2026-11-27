@@ -605,6 +605,8 @@ export function withOneLocale<T>(site: string, action: () => T): T {
 				locales: [referenceLocale],
 				referenceLocale,
 				catalog: effectiveCatalog([referenceLocale], catalog),
+				// the dimensions' labels keep the reference text like any other config text
+				taxonomy: config.content.taxonomy,
 			},
 		})
 		for (const file of yamlFiles) writeFileSync(join(site, file), oneLocale(saved.get(file)!))

@@ -11,3 +11,8 @@ declare module 'virtual:astrum-scena/overrides' {
 	type Props = import('./overrides/points.ts').ReplacementPointProps
 	export const overrides: { [P in keyof Props]?: (props: Props[P]) => unknown }
 }
+
+// served by the integration (src/index.ts): the `icons/` folder of the core's lucide-static
+declare module 'virtual:astrum-scena/lucide-icons' {
+	export const lucideIconsDir: string
+}

@@ -235,3 +235,20 @@ export function versionBumpErrors(
 		]
 	return []
 }
+
+// a story release (a bump of the repository version) that changes the core ships it: merging to main
+// publishes only a core version npm does not have yet, so an unchanged one leaves the change unreleased
+export function unreleasedCoreErrors(
+	repoFrom: string | undefined,
+	repoTo: string | undefined,
+	coreFrom: string | undefined,
+	coreTo: string | undefined,
+	coreChanged: boolean,
+): string[] {
+	if (!coreChanged || repoFrom === undefined || repoTo === undefined || repoFrom === repoTo)
+		return []
+	if (coreFrom !== coreTo) return []
+	return [
+		`the release ${repoTo} changes the core but keeps its npm version ${coreTo}; bump it to the story's 0.<epic>.<story> in the same pull request`,
+	]
+}

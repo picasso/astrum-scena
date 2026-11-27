@@ -17,3 +17,8 @@ capturedAt: '2026'
 colorMode: color
 tags:
     - dusk
+dimensions:
+    events:
+        - tide-fair
+    projects:
+        - shoreline-series

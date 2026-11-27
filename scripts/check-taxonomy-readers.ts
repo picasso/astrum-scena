@@ -6,14 +6,17 @@ import { CORE_SRC } from './lib/site-root.ts'
 
 // gate: the taxonomy files of a site are read only by their loaders in the core (one loader, schema and
 // path per file), so a consumer such as GPS bounds over the places cannot grow a second reader with its
-// own path and parsing. Tests and fixtures name the files to build sites and are exempt.
+// own path and parsing. A dimension's dictionary is named by its id, so a path into
+// `src/content/config/` built at runtime is one of them. Tests and fixtures name the files to build
+// sites and are exempt.
 
 const LOADER_FILE = `${CORE_SRC}/lib/content/files.ts`
 const GATE_FILE = 'scripts/check-taxonomy-readers.ts'
 const SCANNED_TREES = [CORE_SRC, 'scripts']
-const LOADERS = 'loadCategoriesConfig, loadPlacesConfig or loadTagsConfig'
+const LOADERS = 'loadCategoriesConfig, loadPlacesConfig, loadTagsConfig or loadDimensionConfig'
 
-const TAXONOMY_FILE = /(?<![\w.-])(?:categories|places|tags)\.ya?ml(?![\w.-])/g
+const TAXONOMY_FILE =
+	/(?<![\w.-])(?:categories|places|tags)\.ya?ml(?![\w.-])|content\/config\/\$\{[^}]*\}/g
 const CODE_FILE = /\.(?:[cm]?[jt]sx?|astro)$/
 const TEST_FILE = /\.(?:test|spec)\.[cm]?[jt]sx?$/
 const FIXTURE_NAMES = new Set(['test-fixtures', '__fixtures__'])

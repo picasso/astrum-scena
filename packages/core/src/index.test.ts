@@ -221,6 +221,60 @@ describe('astrumScena integration', () => {
 		expect(compile).toThrow('src/theme/theme.css: unknown tokens: --color-acent')
 	})
 
+	it("requires the color token of each of the site's dimensions and no other", async () => {
+		const root = mkdtempSync(path.join(tmpdir(), 'astrum-scena-theme-'))
+		scratch.push(root)
+		cpSync(siteRoot, root, {
+			recursive: true,
+			filter: (source) => !/(^|\/)(node_modules|dist|\.astro)$/.test(source),
+		})
+		const theme = path.join(root, 'src', 'theme', 'theme.css')
+		const declared = readFileSync(theme, 'utf8')
+		expect(declared).toContain('--color-dimension-events:')
+		const compile = async (css: string) => {
+			writeFileSync(theme, css)
+			const { plugins } = await setUp(root)
+			const plugin = plugins.find(
+				(candidate) => candidate.name === 'astrum-scena:theme-tokens',
+			)!
+			const transform = plugin.transform as unknown as (
+				this: { addWatchFile: (id: string) => void },
+				code: string,
+				id: string,
+			) => void
+			return () =>
+				transform.call(
+					{ addWatchFile: () => {} },
+					'',
+					path.join(CORE_ROOT, 'src', 'styles', 'global.css'),
+				)
+		}
+		expect(await compile(declared)).not.toThrow()
+		expect(await compile(declared.replaceAll(/--color-dimension-events:[^;]*;/g, ''))).toThrow(
+			'src/theme/theme.css: missing required tokens: --color-dimension-events',
+		)
+		expect(
+			await compile(`${declared}\n:root {\n\t--color-dimension-people: red;\n}\n`),
+		).toThrow('src/theme/theme.css: unknown tokens: --color-dimension-people')
+	})
+
+	it('fails on a dimension icon the core has no Lucide icon for', async () => {
+		const root = mkdtempSync(path.join(tmpdir(), 'astrum-scena-icon-'))
+		scratch.push(root)
+		cpSync(siteRoot, root, {
+			recursive: true,
+			filter: (source) => !/(^|\/)(node_modules|dist|\.astro)$/.test(source),
+		})
+		const lock = path.join(root, SITE_LOCK_PATH)
+		writeFileSync(
+			lock,
+			readFileSync(lock, 'utf8').replace('icon: calendar-days', 'icon: calendr'),
+		)
+		await expect(setUp(root)).rejects.toThrow(
+			'site.yaml: content.taxonomy.dimensions.events.icon: "calendr" is not a Lucide icon',
+		)
+	})
+
 	it("renders the note and links default titles from the site's dictionary override", async () => {
 		const root = mkdtempSync(path.join(tmpdir(), 'astrum-scena-block-titles-'))
 		scratch.push(root)
@@ -344,9 +398,13 @@ describe('astrumScena integration', () => {
 describe('astro config', () => {
 	const base = buildSiteConfig()
 	// the demo content has no `about` page for the fixture's menu item
+	// the demo content follows the demo's own taxonomy
 	const site = buildSiteConfig({
 		origin: 'https://other.test',
-		content: contentConfig(['ru', 'en'], 'en'),
+		content: {
+			...contentConfig(['ru', 'en'], 'en'),
+			taxonomy: loadSiteSection(siteRoot, 'content').taxonomy,
+		},
 		menu: { ...base.menu, items: base.menu.items.filter((item) => item.segment !== 'about') },
 	})
 

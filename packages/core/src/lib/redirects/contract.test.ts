@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest'
 import { loadSiteSection } from '../../config/loader.ts'
 import { siteRoot } from '../../config/site-root.ts'
 import { defaultLocale } from '../../config/site-schema.ts'
+import { DEFAULT_TAXONOMY } from '../../config/taxonomy.ts'
 import { coursesModule } from '../../modules/courses/manifest.ts'
 import { courseSchema } from '../../modules/courses/schema.ts'
 import { loadContentSnapshot, lockedModules } from '../content/files.ts'
@@ -137,7 +138,7 @@ describe('Cloudflare Pages redirect contract', () => {
 				status,
 			}),
 		})
-		const album = albumSchemaFor(['en', 'ru']).parse({
+		const album = albumSchemaFor(['en', 'ru'], DEFAULT_TAXONOMY.categories).parse({
 			category: 'series',
 			title: { en: 'Album', ru: 'Альбом' },
 			description: { en: '', ru: '' },
@@ -145,7 +146,7 @@ describe('Cloudflare Pages redirect contract', () => {
 			coverId: 'featured-photo',
 			photoIds: ['featured-photo'],
 		})
-		const unlistedAlbum = albumSchemaFor(['en', 'ru']).parse({
+		const unlistedAlbum = albumSchemaFor(['en', 'ru'], DEFAULT_TAXONOMY.categories).parse({
 			category: 'series',
 			title: { en: 'Hidden album', ru: 'Скрытый альбом' },
 			description: { en: '', ru: '' },
@@ -193,6 +194,7 @@ describe('Cloudflare Pages redirect contract', () => {
 			categories: [],
 			places: [],
 			tags: [],
+			dimensions: {},
 		}
 		const content = { locales: ['en', 'ru'] as const, referenceLocale: 'ru' as const }
 		const routeSets = buildRedirectRouteSets(snapshot, content, [coursesModule])

@@ -610,6 +610,27 @@ describe('the demo without the courses module', () => {
 		})
 	})
 
+	it("keeps the site's taxonomy in the one-locale config, a dimension's label in the reference locale", () => {
+		withDemoCopy((site) => {
+			const { referenceLocale, taxonomy } = loadSiteConfig(site).content
+			expect(Object.keys(taxonomy.dimensions)).not.toEqual([])
+			withOneLocale(site, () => {
+				expect(loadSiteConfig(site).content.taxonomy).toEqual({
+					...taxonomy,
+					dimensions: Object.fromEntries(
+						Object.entries(taxonomy.dimensions).map(([id, dimension]) => [
+							id,
+							{
+								...dimension,
+								label: { [referenceLocale]: dimension.label[referenceLocale] },
+							},
+						]),
+					),
+				})
+			})
+		})
+	})
+
 	it('restores the site when the build throws', () => {
 		withDemoCopy((site) => {
 			const before = snapshot(site)

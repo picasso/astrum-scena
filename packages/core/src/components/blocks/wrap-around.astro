@@ -10,7 +10,7 @@ import { siteRoot } from '../../config/site-root.ts'
 import { contentGapVar } from '../../lib/blocks/content-gap.ts'
 import { parseWrapAroundProps } from '../../lib/blocks/wrap-around/schema.ts'
 import { resolveWrapAround } from '../../lib/blocks/wrap-around/view-model.ts'
-import { loadTaxonomyConfig } from '../../lib/content/files.ts'
+import { loadPlacesConfig } from '../../lib/content/files.ts'
 import type { Locale } from '../../lib/content/schemas.ts'
 import { loadImageCatalog } from '../../lib/images/catalog.ts'
 import { indexById } from '../../lib/portfolio/publication.ts'
@@ -25,10 +25,10 @@ import ResponsivePicture from '../portfolio/responsive-picture.astro'
 const props = parseWrapAroundProps(Astro.props)
 const locale = (Astro.currentLocale ?? defaultLocale(site)) as Locale
 
-const [photos, albums, taxonomy] = await Promise.all([
+const [photos, albums, places] = await Promise.all([
 	getCollection('photos'),
 	getCollection('albums'),
-	loadTaxonomyConfig(siteRoot, site.content.locales),
+	loadPlacesConfig(siteRoot, site.content.locales, site.content.taxonomy.placeKinds),
 ])
 const catalog = loadImageCatalog(siteRoot)
 
@@ -37,7 +37,7 @@ const vm = resolveWrapAround(props, {
 	photos,
 	albums,
 	photosById: indexById(photos),
-	places: taxonomy.places,
+	places,
 	locale,
 })
 

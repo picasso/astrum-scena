@@ -777,12 +777,113 @@
 							"referenceLocale": {
 								"pattern": "^[a-z]{2,3}$",
 								"type": "string"
+							},
+							"taxonomy": {
+								"additionalProperties": false,
+								"default": {},
+								"properties": {
+									"categories": {
+										"default": [
+											"series",
+											"places"
+										],
+										"items": {
+											"pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+											"type": "string"
+										},
+										"minItems": 1,
+										"type": "array",
+										"x-refinements": [
+											"dc41d32456e8"
+										]
+									},
+									"dimensions": {
+										"additionalProperties": {
+											"additionalProperties": false,
+											"properties": {
+												"icon": {
+													"pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+													"type": "string"
+												},
+												"label": {
+													"additionalProperties": {
+														"minLength": 1,
+														"type": "string",
+														"x-transforms": [
+															"da06e05e67eb"
+														]
+													},
+													"propertyNames": {
+														"pattern": "^[a-z]{2,3}$",
+														"type": "string"
+													},
+													"type": "object"
+												}
+											},
+											"required": [
+												"label"
+											],
+											"type": "object"
+										},
+										"default": {},
+										"propertyNames": {
+											"pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+											"type": "string"
+										},
+										"type": "object",
+										"x-refinements": [
+											"01fdf56d2d65"
+										]
+									},
+									"placeKinds": {
+										"default": [
+											"country",
+											"region",
+											"locality"
+										],
+										"items": {
+											"pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+											"type": "string"
+										},
+										"minItems": 1,
+										"type": "array",
+										"x-refinements": [
+											"dc41d32456e8"
+										]
+									},
+									"tagKinds": {
+										"default": [
+											"subject",
+											"condition",
+											"motif",
+											"moment",
+											"technique"
+										],
+										"items": {
+											"pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+											"type": "string"
+										},
+										"minItems": 1,
+										"type": "array",
+										"x-refinements": [
+											"dc41d32456e8"
+										]
+									}
+								},
+								"required": [
+									"categories",
+									"dimensions",
+									"placeKinds",
+									"tagKinds"
+								],
+								"type": "object"
 							}
 						},
 						"required": [
 							"catalog",
 							"locales",
-							"referenceLocale"
+							"referenceLocale",
+							"taxonomy"
 						],
 						"type": "object",
 						"x-refinements": [
@@ -2882,7 +2983,7 @@
 				],
 				"type": "object",
 				"x-refinements": [
-					"6a362df84611"
+					"e6dbc9b36901"
 				],
 				"x-transforms": [
 					"b968fb9b5d5e"
@@ -3238,6 +3339,100 @@
 					"referenceLocale": {
 						"pattern": "^[a-z]{2,3}$",
 						"type": "string"
+					},
+					"taxonomy": {
+						"additionalProperties": false,
+						"default": {},
+						"properties": {
+							"categories": {
+								"default": [
+									"series",
+									"places"
+								],
+								"items": {
+									"pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+									"type": "string"
+								},
+								"minItems": 1,
+								"type": "array",
+								"x-refinements": [
+									"dc41d32456e8"
+								]
+							},
+							"dimensions": {
+								"additionalProperties": {
+									"additionalProperties": false,
+									"properties": {
+										"icon": {
+											"pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+											"type": "string"
+										},
+										"label": {
+											"additionalProperties": {
+												"minLength": 1,
+												"type": "string",
+												"x-transforms": [
+													"da06e05e67eb"
+												]
+											},
+											"propertyNames": {
+												"pattern": "^[a-z]{2,3}$",
+												"type": "string"
+											},
+											"type": "object"
+										}
+									},
+									"required": [
+										"label"
+									],
+									"type": "object"
+								},
+								"default": {},
+								"propertyNames": {
+									"pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+									"type": "string"
+								},
+								"type": "object",
+								"x-refinements": [
+									"01fdf56d2d65"
+								]
+							},
+							"placeKinds": {
+								"default": [
+									"country",
+									"region",
+									"locality"
+								],
+								"items": {
+									"pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+									"type": "string"
+								},
+								"minItems": 1,
+								"type": "array",
+								"x-refinements": [
+									"dc41d32456e8"
+								]
+							},
+							"tagKinds": {
+								"default": [
+									"subject",
+									"condition",
+									"motif",
+									"moment",
+									"technique"
+								],
+								"items": {
+									"pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+									"type": "string"
+								},
+								"minItems": 1,
+								"type": "array",
+								"x-refinements": [
+									"dc41d32456e8"
+								]
+							}
+						},
+						"type": "object"
 					}
 				},
 				"required": [
@@ -5157,7 +5352,7 @@
 		],
 		"type": "object",
 		"x-refinements": [
-			"6a362df84611"
+			"e6dbc9b36901"
 		],
 		"x-transforms": [
 			"b968fb9b5d5e"
@@ -5399,6 +5594,53 @@
 			"c73bba4ee33b"
 		]
 	},
+	"src/content/config/<dimension>.yaml": {
+		"additionalProperties": false,
+		"properties": {
+			"<dimension>": {
+				"items": {
+					"additionalProperties": false,
+					"properties": {
+						"id": {
+							"pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+							"type": "string"
+						},
+						"label": {
+							"additionalProperties": {
+								"type": "string"
+							},
+							"propertyNames": {
+								"pattern": "^[a-z]{2,3}$",
+								"type": "string"
+							},
+							"type": "object",
+							"x-refinements": [
+								"d6b7290780a4"
+							]
+						}
+					},
+					"required": [
+						"id",
+						"label"
+					],
+					"type": "object"
+				},
+				"type": "array",
+				"x-refinements": [
+					"e36a204afa25"
+				]
+			},
+			"schemaVersion": {
+				"const": 1,
+				"type": "number"
+			}
+		},
+		"required": [
+			"<dimension>",
+			"schemaVersion"
+		],
+		"type": "object"
+	},
 	"src/content/config/categories.yaml": {
 		"additionalProperties": false,
 		"properties": {
@@ -5444,7 +5686,10 @@
 			"categories",
 			"schemaVersion"
 		],
-		"type": "object"
+		"type": "object",
+		"x-refinements": [
+			"55d994fcf218"
+		]
 	},
 	"src/content/config/image-sets.yaml": {
 		"additionalProperties": {
@@ -5612,7 +5857,10 @@
 					],
 					"type": "object"
 				},
-				"type": "array"
+				"type": "array",
+				"x-refinements": [
+					"e79ce5dcb028"
+				]
 			},
 			"schemaVersion": {
 				"const": 2,
@@ -6157,6 +6405,20 @@
 					"d6b7290780a4"
 				]
 			},
+			"dimensions": {
+				"additionalProperties": {
+					"items": {
+						"pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+						"type": "string"
+					},
+					"type": "array"
+				},
+				"propertyNames": {
+					"pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+					"type": "string"
+				},
+				"type": "object"
+			},
 			"favorite": {
 				"default": false,
 				"type": "boolean"
@@ -6315,7 +6577,7 @@
 		],
 		"type": "object",
 		"x-refinements": [
-			"3f36533a3705"
+			"699507db6d9e"
 		]
 	},
 	"src/generated/images-public.json": {

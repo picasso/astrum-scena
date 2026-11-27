@@ -53,6 +53,7 @@ export const PUBLIC_HOSTS = [
 	'jestjs.io',
 	'keepachangelog.com',
 	'launchdarkly.com',
+	'lucide.dev',
 	'nodejs.org',
 	'npmjs.com',
 	'npmjs.org',

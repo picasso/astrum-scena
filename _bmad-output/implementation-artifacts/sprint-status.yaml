@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 10-08-2026 21:47
-last_updated: 2026-11-23
+last_updated: 2026-11-26
 project: astrum-scena
 project_key: NOKEY
 tracking_system: file-system
@@ -90,7 +90,9 @@ development_status:
   6-10a-localized-data-shapes: review
   6-10b-single-locale-site: review
   6-10c-locale-catalog-from-config: review
-  6-11-domain-enumerations-from-config: backlog
+  6-11-domain-enumerations-from-config: done
+  6-11a-enumerations-from-config: done
+  6-11b-non-geographic-dimension: done
   6-12-generated-demo-photos: backlog
   6-13-core-written-files-and-the-site-formatter: backlog
   6-14-contact-handler-export: backlog

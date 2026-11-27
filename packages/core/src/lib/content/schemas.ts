@@ -212,6 +212,9 @@ export const photoSchemaFor = (locales: readonly Locale[]) =>
 			// records do not gain `unlisted: false`
 			unlisted: z.boolean().optional(),
 			tags: z.array(kebabIdSchema).default([]),
+			// values of the site's `content.taxonomy.dimensions` by dimension id; which dimensions and
+			// values exist is the integrity check's to report, since it holds their dictionaries
+			dimensions: z.record(kebabIdSchema, z.array(kebabIdSchema)).optional(),
 			media: mediaDescriptorSchema.optional(),
 			...sourceIdentityFields,
 		})
@@ -234,12 +237,30 @@ export const photoSchemaFor = (locales: readonly Locale[]) =>
 					path: ['tags'],
 				})
 			}
+			for (const [dimension, ids] of Object.entries(value.dimensions ?? {}))
+				ids.forEach((id, index) => {
+					if (ids.indexOf(id) !== index)
+						context.addIssue({
+							code: 'custom',
+							message: `repeats "${id}"`,
+							path: ['dimensions', dimension, index],
+						})
+				})
 		})
 
-export const albumSchemaFor = (locales: readonly Locale[]) =>
+// a value of one of the site's taxonomy enumerations (`content.taxonomy` of its lock); another value
+// fails with the list
+const enumerationOf = (values: readonly string[], name: string) =>
+	z.enum(values, {
+		error: (issue) =>
+			`${typeof issue.input === 'string' ? JSON.stringify(issue.input) : `a value of type ${issue.input === null ? 'null' : Array.isArray(issue.input) ? 'array' : typeof issue.input}`} is not one of content.taxonomy.${name} [${values.join(', ')}]`,
+	})
+
+// `categories` is the site's `content.taxonomy.categories`
+export const albumSchemaFor = (locales: readonly Locale[], categories: readonly string[]) =>
 	z
 		.object({
-			category: z.enum(['series', 'places']),
+			category: enumerationOf(categories, 'categories'),
 			title: localizedText(locales, { required: true }),
 			description: localizedText(locales),
 			// card excerpt for the Portfolio index `details` mode; when absent or empty in a locale it
@@ -319,54 +340,130 @@ export const pageSchema = localizedDocumentBaseSchema
 // route, outside [slug] routing, /status/, translation and factcheck
 export const legalSchema = z.object({ title: z.string().trim().min(1) }).strict()
 
-export const categorySchemaFor = (locales: readonly Locale[]) =>
+export const categorySchemaFor = (locales: readonly Locale[], categories: readonly string[]) =>
 	z
 		.object({
-			id: z.enum(['series', 'places']),
+			id: enumerationOf(categories, 'categories'),
 			label: localizedText(locales),
 		})
 		.strict()
 
-export const placeSchemaFor = (locales: readonly Locale[]) =>
+// `kinds` is the site's `content.taxonomy.placeKinds`, from the root of the hierarchy down
+export const placeSchemaFor = (locales: readonly Locale[], kinds: readonly string[]) =>
 	z
 		.object({
 			id: kebabIdSchema,
 			name: localizedText(locales),
-			kind: z.enum(['country', 'region', 'locality']),
+			kind: enumerationOf(kinds, 'placeKinds'),
 			parentId: kebabIdSchema.optional(),
 		})
 		.strict()
 
-export const tagSchemaFor = (locales: readonly Locale[]) =>
+export const tagSchemaFor = (locales: readonly Locale[], kinds: readonly string[]) =>
 	z
 		.object({
 			id: kebabIdSchema,
 			label: localizedText(locales),
-			kind: z.enum(['subject', 'condition', 'motif', 'moment', 'technique']),
+			kind: enumerationOf(kinds, 'tagKinds'),
 		})
 		.strict()
 
-export const categoriesConfigSchemaFor = (locales: readonly Locale[]) =>
+// the labels of exactly the declared categories: an undeclared id fails on its own, a declared one
+// without a label here
+export const categoriesConfigSchemaFor = (
+	locales: readonly Locale[],
+	categories: readonly string[],
+) =>
 	z
 		.object({
 			schemaVersion: z.literal(2),
-			categories: z.array(categorySchemaFor(locales)),
+			categories: z.array(categorySchemaFor(locales, categories)),
+		})
+		.strict()
+		.superRefine((value, context) => {
+			const listed = new Set(value.categories.map((category) => category.id))
+			for (const id of categories)
+				if (!listed.has(id))
+					context.addIssue({
+						code: 'custom',
+						path: ['categories'],
+						message: `missing "${id}" of content.taxonomy.categories [${categories.join(', ')}]`,
+					})
+		})
+
+// a kind's rank is its position in `kinds`: the first kind has no parent, any other kind has one of a
+// strictly lower rank; an unknown parent is the integrity check's to report
+export const placesConfigSchemaFor = (locales: readonly Locale[], kinds: readonly string[]) =>
+	z
+		.object({
+			schemaVersion: z.literal(2),
+			places: z.array(placeSchemaFor(locales, kinds)).superRefine((places, context) => {
+				const byId = new Map(places.map((place) => [place.id, place]))
+				const list = `content.taxonomy.placeKinds [${kinds.join(', ')}]`
+				places.forEach((place, index) => {
+					const rank = kinds.indexOf(place.kind)
+					const issue = (message: string) =>
+						context.addIssue({
+							code: 'custom',
+							path: [index, 'parentId'],
+							message: `${message} (${list})`,
+						})
+					if (rank === 0) {
+						if (place.parentId !== undefined)
+							issue(
+								`a ${place.kind} place, the root of the hierarchy, has no parentId`,
+							)
+						return
+					}
+					if (place.parentId === undefined) {
+						issue(`a ${place.kind} place requires a parentId`)
+						return
+					}
+					const parent = byId.get(place.parentId)
+					if (parent && kinds.indexOf(parent.kind) >= rank)
+						issue(
+							`parent "${parent.id}" (${parent.kind}) must be higher in the hierarchy than a ${place.kind}`,
+						)
+				})
+			}),
 		})
 		.strict()
 
-export const placesConfigSchemaFor = (locales: readonly Locale[]) =>
+export const tagsConfigSchemaFor = (locales: readonly Locale[], kinds: readonly string[]) =>
 	z
 		.object({
 			schemaVersion: z.literal(2),
-			places: z.array(placeSchemaFor(locales)),
+			tags: z.array(tagSchemaFor(locales, kinds)),
 		})
 		.strict()
 
-export const tagsConfigSchemaFor = (locales: readonly Locale[]) =>
+export const dimensionValueSchemaFor = (locales: readonly Locale[]) =>
 	z
 		.object({
-			schemaVersion: z.literal(2),
-			tags: z.array(tagSchemaFor(locales)),
+			id: kebabIdSchema,
+			label: localizedText(locales),
+		})
+		.strict()
+
+// the flat dictionary of a dimension of `content.taxonomy.dimensions`, `src/content/config/<id>.yaml`:
+// its values under the dimension's own id, each id once
+export const dimensionConfigSchemaFor = (locales: readonly Locale[], dimension: string) =>
+	z
+		.object({
+			schemaVersion: z.literal(1),
+			[dimension]: z
+				.array(dimensionValueSchemaFor(locales))
+				.superRefine((values, context) => {
+					const ids = values.map((value) => value.id)
+					ids.forEach((id, index) => {
+						if (ids.indexOf(id) !== index)
+							context.addIssue({
+								code: 'custom',
+								path: [index, 'id'],
+								message: `repeats "${id}"`,
+							})
+					})
+				}),
 		})
 		.strict()
 
@@ -465,6 +562,7 @@ export type PhotoSchema = ReturnType<typeof photoSchemaFor>
 export type AlbumData = z.infer<AlbumSchema>
 export type ArticleData = z.infer<typeof articleSchema>
 export type Category = z.infer<ReturnType<typeof categorySchemaFor>>
+export type DimensionValue = z.infer<ReturnType<typeof dimensionValueSchemaFor>>
 export type FeaturedConfig = z.infer<ReturnType<typeof featuredConfigSchemaFor>>
 export type FeaturedInlineCopy = z.infer<ReturnType<typeof featuredInlineCopySchemaFor>>
 export type FocalPoint = z.infer<typeof focalPointSchema>

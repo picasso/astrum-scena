@@ -12,10 +12,14 @@ export type { LocalizedText }
 // reference locale's
 export type TaxonomyLocales = { locales: readonly Locale[]; referenceLocale: Locale }
 
+// the site's locales and the kinds of its places and tags (`content.taxonomy` of its lock)
+export type TaxonomySite = TaxonomyLocales & {
+	placeKinds: readonly string[]
+	tagKinds: readonly string[]
+}
+
 // normalized Levenshtein similarity at which a name counts as close
 const CLOSE_THRESHOLD = 0.8
-// lower rank is higher in the hierarchy; a parent must rank strictly lower
-const PLACE_KIND_RANK: Record<Place['kind'], number> = { country: 0, region: 1, locality: 2 }
 
 function normalizeName(value: string): string {
 	return foldToAscii(value).toLowerCase().replace(/\s+/g, ' ').trim()
@@ -157,18 +161,30 @@ export type ProposePlaceInput = {
 	parentId?: string
 }
 
+// a kind's rank is its position in the site's list, lower being higher in the hierarchy
+function kindRank(kinds: readonly string[], kind: string, name: string): number {
+	const rank = kinds.indexOf(kind)
+	if (rank < 0)
+		throw new TaxonomyProposalError(
+			`"${kind}" is not one of content.taxonomy.${name} [${kinds.join(', ')}]`,
+		)
+	return rank
+}
+
 // the id comes from the reference-locale name (see `idBase`); a collision is resolved by the
-// parent id, not an ordinal
+// parent id, not an ordinal. The first kind of `placeKinds` is the root and has no parent; any other
+// kind names a parent of a lower rank
 export function proposePlace(
 	input: ProposePlaceInput,
 	places: readonly Place[],
-	site: TaxonomyLocales,
+	site: TaxonomySite,
 ): Place {
 	const base = idBase(input.name, 'place name', site)
+	const rank = kindRank(site.placeKinds, input.kind, 'placeKinds')
 
-	if (input.kind === 'country') {
+	if (rank === 0) {
 		if (input.parentId !== undefined) {
-			throw new TaxonomyProposalError('a country place must not have a parentId')
+			throw new TaxonomyProposalError(`a ${input.kind} place must not have a parentId`)
 		}
 	} else {
 		if (input.parentId === undefined) {
@@ -178,7 +194,7 @@ export function proposePlace(
 		if (!parent) {
 			throw new TaxonomyProposalError(`unknown parent place "${input.parentId}"`)
 		}
-		if (PLACE_KIND_RANK[parent.kind] >= PLACE_KIND_RANK[input.kind]) {
+		if (kindRank(site.placeKinds, parent.kind, 'placeKinds') >= rank) {
 			throw new TaxonomyProposalError(
 				`parent "${parent.id}" (${parent.kind}) must be higher in the hierarchy than a ${input.kind}`,
 			)
@@ -188,7 +204,7 @@ export function proposePlace(
 	const existing = new Set(places.map((place) => place.id))
 	const id = resolveSlugCollision(base, existing, input.parentId ? [input.parentId] : [])
 
-	return placeSchemaFor(site.locales).parse({
+	return placeSchemaFor(site.locales, site.placeKinds).parse({
 		id,
 		name: input.name,
 		kind: input.kind,
@@ -203,13 +219,14 @@ export type ProposeTagInput = {
 
 // the id comes from the reference-locale label (see `idBase`); a collision is resolved by the
 // tag kind
-export function proposeTag(
-	input: ProposeTagInput,
-	tags: readonly Tag[],
-	site: TaxonomyLocales,
-): Tag {
+export function proposeTag(input: ProposeTagInput, tags: readonly Tag[], site: TaxonomySite): Tag {
 	const base = idBase(input.label, 'tag label', site)
+	kindRank(site.tagKinds, input.kind, 'tagKinds')
 	const existing = new Set(tags.map((tag) => tag.id))
 	const id = resolveSlugCollision(base, existing, [input.kind])
-	return tagSchemaFor(site.locales).parse({ id, label: input.label, kind: input.kind })
+	return tagSchemaFor(site.locales, site.tagKinds).parse({
+		id,
+		label: input.label,
+		kind: input.kind,
+	})
 }

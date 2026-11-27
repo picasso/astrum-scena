@@ -131,6 +131,23 @@
 		opacity: 0.7;
 	}
 
+	/* A dimension's chip takes the shape of a tag; its color comes inline from the site's
+	 * --color-dimension-<id>, and its Lucide icon stands before the text in that color. */
+	.photo__tag--dimension {
+		display: inline-flex;
+		align-items: center;
+		column-gap: 6px;
+	}
+
+	.photo__tag-icon {
+		display: inline-flex;
+	}
+
+	.photo__tag-icon svg {
+		width: 1em;
+		height: 1em;
+	}
+
 	.photo__captured {
 		margin: 0 0 0.75rem;
 		color: var(--color-foreground);

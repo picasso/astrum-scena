@@ -36,10 +36,10 @@ export type ModuleCollections = {
 // Loader bases are relative to the site root, which Astro resolves them against. The enabled modules
 // come from the site's lock, so enabling one is an edit of site.yaml and
 // `astrum-scena config resolve`. The albums and photos have a text per locale of the lock's
-// `content.locales`.
+// `content.locales`, and an album's category is one of its `content.taxonomy.categories`.
 export function defineCoreCollections(): CoreCollections & ModuleCollections {
 	const modules = enabledModules({ modules: loadSiteSection(siteRoot, 'modules') })
-	const { locales } = loadSiteSection(siteRoot, 'content')
+	const { locales, taxonomy } = loadSiteSection(siteRoot, 'content')
 	const moduleEntries = Object.entries(moduleCollections(modules)).map(([name, collection]) => [
 		name,
 		defineCollection({
@@ -53,7 +53,7 @@ export function defineCoreCollections(): CoreCollections & ModuleCollections {
 	return {
 		albums: defineCollection({
 			loader: glob({ ...COLLECTION_SOURCES.albums }),
-			schema: albumSchemaFor(locales),
+			schema: albumSchemaFor(locales, taxonomy.categories),
 		}),
 		articles: defineCollection({
 			loader: localizedDocumentLoader(COLLECTION_SOURCES.articles),

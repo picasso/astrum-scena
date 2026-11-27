@@ -16,6 +16,7 @@ export const GLOBAL_CSS = path.join(CORE_SRC, 'styles', 'global.css')
 
 export const SITE_ROOT_MODULE = 'virtual:astrum-scena/site-root'
 export const OVERRIDES_MODULE = 'virtual:astrum-scena/overrides'
+export const LUCIDE_ICONS_MODULE = 'virtual:astrum-scena/lucide-icons'
 
 // the components a site replaces points with, keyed by point; the core's components read it and fall
 // back to their own part for a point that is not there

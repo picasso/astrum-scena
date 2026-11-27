@@ -486,3 +486,11 @@ legacy-аудиты, авторский голос, CSS-бюджет и заме
 - source_spec: `_bmad-output/implementation-artifacts/spec-6-10a-localized-data-shapes.md`
   summary: `categories[].label`, `places[].name`, `tags[].label` и `copy.description` слайда `featured` принимают пустую строку в активной локали, и сборка выводит пустой чип или имя места; у подписей `site.yaml` и в `idBase` пустое запрещено; оценка — low.
   evidence: ревью 6.10a (blind #8); так было и до 6.10a (`localizedTextSchema` — `z.string()` без `min(1)`); исправление — `required: true` у этих полей в `lib/content/schemas.ts` с проверкой демо и реального сайта.
+- source_spec: `_bmad-output/implementation-artifacts/spec-6-11a-enumerations-from-config.md`
+  summary: 6.11b — негеографическое измерение и набор демо: `content.taxonomy.dimensions.<id>` с меткой по локалям, плоский словарь `src/content/config/<id>.yaml` (`schemaVersion: 1`, `{id, label}`), ссылки фото `dimensions: { <id>: [ids] }` с проверкой `check content`, метки на странице фото (эталоны страницы фото переснимаются); демо — свои категории, виды мест и тегов и измерение `events` (критерии 6.11 №2–3).
+  evidence: решение владельца 2026-11-25 при планировании 6.11: спек на всю историю ~2100 токенов; перечни категорий и видов независимы от измерения и поставляются отдельным PR, форма измерения выбрана владельцем (вариант с выводом на странице фото).
+  closed_by: spec-6-11b-non-geographic-dimension.md
+- source_spec: `_bmad-output/implementation-artifacts/spec-6-11b-non-geographic-dimension.md`
+  summary: Критерий 6.11 №4 — вывод на реальном конфиге исходного сайта не меняется — проверен только тестами умолчаний: исходный сайт ещё на старой раскладке без `site.yaml`, пробной сборки в 6.11a и 6.11b не было.
+  evidence: решение владельца 2026-11-26 при закрытии 6.11: проверка на реальном сайте — при его переводе на ядро.
+  deferred_to: Story 9.3 — пробная сборка сайта на ядре: таксономия из умолчаний, без `dimensions`, вывод страниц и хеш изображений прежние.

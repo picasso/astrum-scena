@@ -29,6 +29,59 @@ The callout icons in `src/lib/blocks/callout/icons.ts` are original (MIT), excep
 `image`, which are based on Typicons by Stephen Hutchings (`home-outline`, `image-outline`), CC BY-SA
 4.0.
 
+The icon of a taxonomy dimension (`site.yaml` `content.taxonomy.dimensions.<id>.icon`) is not shipped
+in `src/`: the core reads it at build time from its `lucide-static` dependency and embeds the SVG in
+the photo page of the site, so the site's output carries it under the Lucide licence below.
+
+## Lucide
+
+The dimension icons are the SVG files of `lucide-static` (Lucide, <https://lucide.dev>,
+<https://github.com/lucide-icons/lucide>), embedded with their licence comment, unchanged except for the
+line breaks. Lucide is licensed under the ISC License; the icons Lucide derived from Feather by Cole
+Bemis, which the `LICENSE` file of `lucide-static` lists, are also under the MIT License of Feather.
+
+```text
+ISC License
+
+Copyright (c) 2026 Lucide Icons and Contributors
+
+Permission to use, copy, modify, and/or distribute this software for any
+purpose with or without fee is hereby granted, provided that the above
+copyright notice and this permission notice appear in all copies.
+
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+```
+
+```text
+The MIT License (MIT)
+
+Copyright (c) 2013-present Cole Bemis
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```
+
 ## Typicons
 
 Based on Typicons by Stephen Hutchings, CC BY-SA 4.0.

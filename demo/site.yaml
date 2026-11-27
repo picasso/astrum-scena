@@ -18,6 +18,30 @@ content:
         - en
         - ru
     referenceLocale: en
+    # the demo's own taxonomy, so every enumeration of the core is read from the config; `events` is a
+    # dimension without a hierarchy, its values in src/content/config/events.yaml, and `projects` one
+    # without an icon
+    taxonomy:
+        categories:
+            - journeys
+            - studies
+        placeKinds:
+            - land
+            - shore
+        tagKinds:
+            - mood
+            - form
+        dimensions:
+            events:
+                label:
+                    en: Events
+                    ru: События
+                icon: calendar-days
+            # a dimension without an icon: its chips carry the label alone
+            projects:
+                label:
+                    en: Projects
+                    ru: Проекты
 privacy:
     controller:
         name:
